@@ -4,4 +4,4 @@ version = "0.0.1"
 authors = ["timvisee <timvisee@gmail.com>"]
 
 [dependencies]
-gtk = { version = "0.1.2", features = ["v3_20"] }
+gtk = { version = "0.1.2", features = ["v3_14"] }
