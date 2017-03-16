@@ -1,35 +1,26 @@
 extern crate gtk;
+extern crate pokoebox_player;
+
+use pokoebox_player::gui::gui::Gui;
 
 use gtk::prelude::*;
 
 fn main() {
-    // Initialize GTK and make sure it's ok
-    if gtk::init().is_err() {
-        println!("Failed to initialize GTK.");
-        return;
-    }
+    // Set up the gui
+    let mut gui = Gui::new().unwrap();
+    gui.start();
 
-    // Create a window
-    let window = gtk::Window::new(gtk::WindowType::Toplevel);
-    window.set_title("PokoeBox Player");
-    window.set_border_width(0);
-    window.set_position(gtk::WindowPosition::Center);
-    window.set_default_size(640, 480);
+    // Show the gui
+    gui.show_master_frame();
 
-    // Connect the delete event
-    window.connect_delete_event(|_, _| {
-        // Close the application
-        gtk::main_quit();
-        Inhibit(false)
-    });
 
-//    let info = gtk::InfoBar::new();
-//    info.add_button("Some button", 0);
-//    window.add(&info);
+
+
+
 
     // Create the main grid
     let main_grid = gtk::Grid::new();
-    window.add(&main_grid);
+//    window.add(&main_grid);
 
     // Create a header
     let header = gtk::Box::new(gtk::Orientation::Horizontal, 10);
@@ -61,6 +52,6 @@ fn main() {
     main_container.add(&button3);
 
     // Show the application and run GTKs main loop
-    window.show_all();
+//    window.show_all();
     gtk::main();
 }
