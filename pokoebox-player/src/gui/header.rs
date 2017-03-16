@@ -41,6 +41,10 @@ impl Header {
         // Create a home button
         let home_button = gtk::Button::new_with_label("Home");
         buttons_left.add(&home_button);
+
+        // Create a temperature label
+        let temp_label = gtk::Label::new("Temp: 56°C");
+        container.pack_end(&temp_label, false, false, 0);
     }
 
     /// Get the GTK widget for this header.
