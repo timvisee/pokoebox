@@ -2,15 +2,22 @@ use super::gtk;
 
 use error::Error;
 
-use super::master_frame::MasterFrame;
 use super::master_container::MasterContainer;
+use super::master_frame::MasterFrame;
+use super::master_ui::MasterUi;
 
 /// Main gui object, which manages the graphical interface side of the application.
 ///
 /// Creating a new instance will automatically initialize GTK.
 pub struct Gui {
     /// Master frame holding the gui.
-    master_frame: Option<MasterFrame>
+    master_frame: Option<MasterFrame>,
+
+    /// Master container
+    master_container: Option<MasterContainer>,
+
+    /// Master UI
+    master_ui: Option<MasterUi>
 }
 
 impl Gui {
@@ -30,7 +37,9 @@ impl Gui {
 
         // Build the object and return it
         Ok(Gui {
-            master_frame: None
+            master_frame: None,
+            master_container: None,
+            master_ui: None
         })
     }
 
@@ -50,15 +59,19 @@ impl Gui {
             return;
         }
 
-        // Create a master frame and container
+        // Create a master frame, container and ui
         let master_frame = MasterFrame::new();
         let master_container = MasterContainer::new();
+        let master_ui = MasterUi::new();
 
-        // Put the master container in the frame
+        // Put the master container in the frame, and the master UI in the container
         master_frame.set_container(&master_container);
+        master_container.set_ui(&master_ui);
 
-        // Store the master frame
+        // Store the master frame, container and ui
         self.master_frame = Some(master_frame);
+        self.master_container = Some(master_container);
+        self.master_ui = Some(master_ui);
     }
 
     /// Get the master frame instance.

@@ -47,7 +47,7 @@ impl MasterFrame {
     pub fn set_container(&self, container: &MasterContainer) {
         // TODO: Should we remove the current child(ren) to replace them?
 
-        self.window.add(container.gtk_widget());
+        self.window.add(container.gtk_grid());
     }
 
     /// Show the master frame and all it's widgets.
