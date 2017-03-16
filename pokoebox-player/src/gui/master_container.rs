@@ -43,7 +43,7 @@ impl MasterContainer {
         // TODO: Should we remove all current children?
 
         // Add the master UI components
-        self.container.attach(master_ui.header(), 0, 0, 1, 1);
-        self.container.attach(master_ui.page_container(), 0, 1, 1, 1);
+        self.container.attach(master_ui.header().gtk_widget(), 0, 0, 1, 1);
+        self.container.attach(master_ui.page_container().gtk_widget(), 0, 1, 1, 1);
     }
 }
