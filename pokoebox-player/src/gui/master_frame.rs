@@ -29,7 +29,7 @@ impl MasterFrame {
         window.set_title("PokoeBox Player");
         window.set_border_width(0);
         window.set_position(gtk::WindowPosition::Center);
-        window.set_default_size(640, 480);
+        window.set_default_size(1024, 600);
 
         // Connect the window delete event
         window.connect_delete_event(|_, _| {
