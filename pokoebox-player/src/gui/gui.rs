@@ -1,6 +1,8 @@
 extern crate gtk;
 
-/// Main gui manager object, which manages the graphical interface side of the project.
+use error::Error;
+
+/// Main gui object, which manages the graphical interface side of the application.
 ///
 /// Creating a new instance will automatically initialize GTK.
 pub struct Gui { }
@@ -9,13 +11,15 @@ impl Gui {
 
     /// Constructor.
     ///
+    /// Constructing the object will initialize the GTK toolkit.
     ///
-    pub fn new() -> Result<Self, ()> {
-        // Initialize GTK and make sure it's ok
-        if gtk::init().is_err() {
-            // TODO: Return a proper error here.
-            println!("Failed to initialize GTK.");
-            return Err(());
+    /// # Errors
+    ///
+    /// Returns an error if GTK failed to initialize, blocking further GTK usage.
+    pub fn new() -> Result<Self, Error> {
+        // Initialize GTK, handle errors
+        if gtk::init().is_err() || true {
+            return Err(Error::new("Failed to initialize GTK"));
         }
 
         // Build the object and return it
