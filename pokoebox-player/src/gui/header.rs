@@ -45,6 +45,10 @@ impl Header {
         // Create a temperature label
         let temp_label = gtk::Label::new("Temp: 56°C");
         container.pack_end(&temp_label, false, false, 0);
+
+        // Create a volume button
+        let volume = gtk::VolumeButton::new();
+        container.pack_end(&volume, false, false, 20);
     }
 
     /// Get the GTK widget for this header.
