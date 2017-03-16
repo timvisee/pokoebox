@@ -5,6 +5,7 @@ use error::Error;
 use super::master_container::MasterContainer;
 use super::master_frame::MasterFrame;
 use super::master_ui::MasterUi;
+use super::page::Page;
 
 /// Main gui object, which manages the graphical interface side of the application.
 ///
@@ -62,11 +63,15 @@ impl Gui {
         // Create a master frame, container and ui
         let master_frame = MasterFrame::new();
         let master_container = MasterContainer::new();
-        let master_ui = MasterUi::new();
+        let mut master_ui = MasterUi::new();
 
         // Put the master container in the frame, and the master UI in the container
         master_frame.set_container(&master_container);
         master_container.set_ui(&master_ui);
+
+        // Create and add a home page (test)
+        let page = Page::new("Home");
+        master_ui.mut_page_container().add_page(page);
 
         // Store the master frame, container and ui
         self.master_frame = Some(master_frame);

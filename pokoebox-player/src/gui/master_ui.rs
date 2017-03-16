@@ -36,4 +36,9 @@ impl MasterUi {
     pub fn page_container(&self) -> &PageContainer {
         &self.page_container
     }
+
+    /// Get the GTK page container widget.
+    pub fn mut_page_container(&mut self) -> &mut PageContainer {
+        &mut self.page_container
+    }
 }
