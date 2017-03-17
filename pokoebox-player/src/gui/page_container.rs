@@ -1,12 +1,14 @@
+use std::boxed;
+
 use super::gtk;
 use super::gtk::*;
 
-use super::page::Page;
+use super::page_builder::PageBuilder;
 
 /// Container holding and managing the application pages.
 pub struct PageContainer {
     container: gtk::Notebook,
-    pages: Vec<Page>
+    pages: Vec<boxed::Box<PageBuilder>>
 }
 
 impl PageContainer {
@@ -37,12 +39,12 @@ impl PageContainer {
 
     /// Add the given page to the page container.
     /// The page to add must be passed to the `page` parameter.
-    pub fn add_page(&mut self, page: Page) {
-        // Add the page
+    pub fn add_page(&mut self, page: boxed::Box<PageBuilder>) {
+        // Add the pages GTK widget to the page container
         self.container.add(page.gtk_widget());
 
         // Set the name of the page
-        self.container.set_tab_label_text(page.gtk_widget(), page.name());
+        self.container.set_tab_label_text(page.gtk_widget(), page.page_name());
         self.container.set_tab_reorderable(page.gtk_widget(), true);
 
         // Add the page to the list of pages
