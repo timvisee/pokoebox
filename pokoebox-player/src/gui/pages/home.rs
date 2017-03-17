@@ -1,8 +1,8 @@
 use super::gtk;
 use super::gtk::*;
 
-use gui::page_builder::PageBuilder;
-use gui::page_builder::PageBuilderHelper;
+use gui::page::Page;
+use gui::page::Helper;
 
 /// Name of the page.
 const PAGE_NAME: &'static str = "Home Page";
@@ -18,7 +18,7 @@ impl Home {
     pub fn new() -> Self {
         // Create the page instance
         let page = Home {
-            container: PageBuilderHelper::create_page_container()
+            container: Helper::create_page_container()
         };
 
         // Build the ui
@@ -28,7 +28,7 @@ impl Home {
     }
 }
 
-impl PageBuilder for Home {
+impl Page for Home {
 
     fn page_name(&self) -> &'static str {
         &PAGE_NAME
