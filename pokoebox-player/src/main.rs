@@ -15,18 +15,10 @@ fn main() {
     // Show the gui
     gui.show_master_frame();
 
-    // Rpi test
-    let cupi = CuPi::new().unwrap();
-    let mut pin = cupi.pin_sys(36).unwrap();
-    pin.export().unwrap();
-    let mut pinout = pin.output().unwrap();
 
-    loop {
-        pinout.high().unwrap();
-        delay_ms(300);
-        pinout.low().unwrap();
-        delay_ms(300);
-    }
+
+
+
 
     // Create the main grid
     let main_grid = gtk::Grid::new();
