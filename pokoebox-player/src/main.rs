@@ -1,13 +1,12 @@
-extern crate sysfs_gpio;
+extern crate cupi;
 extern crate gtk;
 extern crate pokoebox_player;
 
 use pokoebox_player::gui::gui::Gui;
 
 use gtk::prelude::*;
-use sysfs_gpio::{Direction, Pin};
-use std::thread::sleep;
-use std::time::Duration;
+
+use cupi::{CuPi, delay_ms, DigitalWrite, DigitalLogic};
 
 fn main() {
     // Set up the gui
@@ -17,19 +16,19 @@ fn main() {
     // Show the gui
     gui.show_master_frame();
 
+    // Rpi test
+    let cupi = CuPi::new().unwrap();
+    let mut pinout = cupi.pin(0).unwrap().output().digital_write(1).unwrap();
+//    let mut pin = cupi.pin_sys(36).unwrap();
+//    pin.export().unwrap();
+//    let mut pinout = pin.output().unwrap();
 
-
-    let my_led = Pin::new(16); // number depends on chip, etc.
-    my_led.with_exported(|| {
-        loop {
-            my_led.set_value(0).unwrap();
-            sleep(Duration::from_millis(200));
-            my_led.set_value(1).unwrap();
-            sleep(Duration::from_millis(200));
-        }
-    }).unwrap();
-
-
+    loop {
+        let mut pinout = cupi.pin(0).unwrap().output().digital_write(1).unwrap();
+        delay_ms(300);
+        let mut pinout = cupi.pin(0).unwrap().output().digital_write(0).unwrap();
+        delay_ms(300);
+    }
 
     // Create the main grid
     let main_grid = gtk::Grid::new();
