@@ -7,6 +7,7 @@ use super::master_container::MasterContainer;
 use super::master_frame::MasterFrame;
 use super::master_ui::MasterUi;
 use super::pages::home::Home;
+use super::pages::test::Test;
 
 /// Main gui object, which manages the graphical interface side of the application.
 ///
@@ -73,6 +74,10 @@ impl Gui {
         // Add the home page
         let home = Home::new();
         master_ui.mut_page_container().add_page(boxed::Box::new(home));
+
+        // Add the test page
+        let test = Test::new();
+        master_ui.mut_page_container().add_page(boxed::Box::new(test));
 
         // Store the master frame, container and ui
         self.master_frame = Some(master_frame);
