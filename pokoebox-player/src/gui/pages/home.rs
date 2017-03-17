@@ -6,6 +6,8 @@ use gui::page::Helper;
 
 /// Name of the page.
 const PAGE_NAME: &'static str = "Home Page";
+const BUTTON_SPACING: u32 = 16;
+const BUTTON_GRID_SIZE: (i32, i32) = (450, 260);
 
 /// Home page.
 pub struct Home {
@@ -41,11 +43,11 @@ impl Page for Home {
 
         // Create a button grid
         let buttons = gtk::Grid::new();
-        buttons.set_row_spacing(8);
-        buttons.set_column_spacing(8);
+        buttons.set_row_spacing(BUTTON_SPACING);
+        buttons.set_column_spacing(BUTTON_SPACING);
         buttons.set_row_homogeneous(true);
         buttons.set_column_homogeneous(true);
-        buttons.set_size_request(350, 200);
+        buttons.set_size_request(BUTTON_GRID_SIZE.0, BUTTON_GRID_SIZE.1);
         self.container.add(&buttons);
 
         // Add some buttons
