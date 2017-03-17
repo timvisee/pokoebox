@@ -21,7 +21,7 @@ impl Home {
             container: Helper::create_page_container()
         };
 
-        // Build the ui
+        // Build the page ui
         page.build_page();
 
         page
@@ -49,18 +49,18 @@ impl Page for Home {
         self.container.add(&buttons);
 
         // Add some buttons
-        let button1 = gtk::Button::new_with_label("Play");
-        buttons.attach(&button1, 0, 0, 1, 1);
-        let button2 = gtk::Button::new_with_label("Source");
-        buttons.attach(&button2, 1, 0, 1, 1);
-        let button3 = gtk::Button::new_with_label("Spotify");
-        buttons.attach(&button3, 2, 0, 1, 1);
-        let button4 = gtk::Button::new_with_label("Connect");
-        buttons.attach(&button4, 0, 1, 1, 1);
-        let button5 = gtk::Button::new_with_label("Devices");
-        buttons.attach(&button5, 1, 1, 1, 1);
-        let button6 = gtk::Button::new_with_label("Settings");
-        buttons.attach(&button6, 2, 1, 1, 1);
+        let button_play = gtk::Button::new_with_label("Play");
+        buttons.attach(&button_play, 0, 0, 1, 1);
+        let button_b = gtk::Button::new_with_label("Button B");
+        buttons.attach(&button_b, 1, 0, 1, 1);
+        let button_c = gtk::Button::new_with_label("Button C");
+        buttons.attach(&button_c, 2, 0, 1, 1);
+        let button_d = gtk::Button::new_with_label("Button D");
+        buttons.attach(&button_d, 0, 1, 1, 1);
+        let button_e = gtk::Button::new_with_label("Button E");
+        buttons.attach(&button_e, 1, 1, 1, 1);
+        let button_settings = gtk::Button::new_with_label("Settings");
+        buttons.attach(&button_settings, 2, 1, 1, 1);
     }
 
     fn gtk_widget(&self) -> &gtk::Grid {

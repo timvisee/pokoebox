@@ -9,6 +9,7 @@ const PAGE_NAME: &'static str = "Test Page";
 
 /// Test page.
 pub struct Test {
+    /// Page container
     container: gtk::Grid
 }
 
