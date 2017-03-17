@@ -5,3 +5,4 @@ authors = ["timvisee <timvisee@gmail.com>"]
 
 [dependencies]
 gtk = { version = "0.1.2", features = ["v3_14"] }
+sysfs_gpio = "0.5.0"
