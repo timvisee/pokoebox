@@ -7,18 +7,15 @@ This is still a work in progress. The README will be updated anytime soon.
 * Linux operating system.
 
 Required libraries:
-* `libgtk-3-dev`:
+* `libgtk-3-dev`
     * Apt: `sudo apt install libgtk-3-dev`
-
-Compile feature specific requirements:
-* `rpi` feature:
-    * `at-spi2-core`:
-        * Apt: `sudo apt install at-spi2-core`
+* `at-spi2-core` (only with `rpi` feature)
+    * Apt: `sudo apt install at-spi2-core`
 
 ## Build
 ### Compile features
 The following compile time features are available:
-* `rpi`: Compile with Raspberry Pi features.
+* `rpi`: Compile with Raspberry Pi features, with support for GPIO and custom external peripherals.
 
 Example: `cargo run --features "rpi"`
 
