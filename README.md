@@ -1,12 +1,27 @@
-# pokoebox
+# PokoeBox
 A custom speaker project.
 
 This is still a work in progress. The README will be updated anytime soon.
 
-# Requirements
-* `libgtk-3-dev`:
-    * Ubuntu/debian: `sudo apt install libgtk-3-dev`
+## Requirements
+* Linux operating system.
 
-# License
+Required libraries:
+* `libgtk-3-dev`:
+    * Apt: `sudo apt install libgtk-3-dev`
+
+Compile feature specific requirements:
+* `rpi` feature:
+    * `at-spi2-core`:
+        * Apt: `sudo apt install at-spi2-core`
+
+## Build
+### Compile features
+The following compile time features are available:
+* `rpi`: Compile with Raspberry Pi features.
+
+Example: `cargo run --features "rpi"`
+
+## License
 This project is released under the GNU GPL-3.0 license.
 Check out the [LICENSE](LICENSE) file for more information.
