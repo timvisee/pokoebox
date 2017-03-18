@@ -7,28 +7,34 @@ use pokoebox_player::gui::gui::Gui;
 use gtk::prelude::*;
 
 use cupi::{CuPi, delay_ms, DigitalWrite, DigitalLogic};
+use cupi::board;
 
 fn main() {
+    // Print the board we're using
+    println!("Board: {:?}", board());
+
+    // Set up CuPi
+    let cupi = CuPi::new().unwrap();
+
+    // Register an output pin
+    let mut pinout = cupi.pin(0).unwrap().output();
+
+    loop {
+        println!("Pin 0: ON");
+        pinout.high().unwrap();
+        delay_ms(200);
+
+        println!("Pin 0: OFF");
+        pinout.low().unwrap();
+        delay_ms(200);
+    }
+
     // Set up the gui
     let mut gui = Gui::new().unwrap();
     gui.start();
 
     // Show the gui
     gui.show_master_frame();
-
-    // Rpi test
-    let cupi = CuPi::new().unwrap();
-    let mut pinout = cupi.pin(0).unwrap().output().digital_write(1).unwrap();
-//    let mut pin = cupi.pin_sys(36).unwrap();
-//    pin.export().unwrap();
-//    let mut pinout = pin.output().unwrap();
-
-    loop {
-        let mut pinout = cupi.pin(0).unwrap().output().digital_write(1).unwrap();
-        delay_ms(300);
-        let mut pinout = cupi.pin(0).unwrap().output().digital_write(0).unwrap();
-        delay_ms(300);
-    }
 
     // Create the main grid
     let main_grid = gtk::Grid::new();
