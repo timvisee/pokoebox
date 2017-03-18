@@ -1,3 +1,4 @@
+#[cfg(feature = "rpi")]
 extern crate cupi;
 extern crate gtk;
 extern crate pokoebox_player;
@@ -6,27 +7,32 @@ use pokoebox_player::gui::gui::Gui;
 
 use gtk::prelude::*;
 
+#[cfg(feature = "rpi")]
 use cupi::{CuPi, delay_ms, DigitalWrite, DigitalLogic};
+#[cfg(feature = "rpi")]
 use cupi::board;
 
 fn main() {
-    // Print the board we're using
-    println!("Board: {:?}", board());
+    #[cfg(feature = "rpi")]
+    {
+        // Print the board we're using
+        println!("Board: {:?}", board());
 
-    // Set up CuPi
-    let cupi = CuPi::new().unwrap();
+        // Set up CuPi
+        let cupi = CuPi::new().unwrap();
 
-    // Register an output pin
-    let mut pinout = cupi.pin(0).unwrap().output();
+        // Register an output pin
+        let mut pinout = cupi.pin(0).unwrap().output();
 
-    loop {
-        println!("Pin 0: ON");
-        pinout.high().unwrap();
-        delay_ms(200);
+        loop {
+            println!("Pin 0: ON");
+            pinout.high().unwrap();
+            delay_ms(200);
 
-        println!("Pin 0: OFF");
-        pinout.low().unwrap();
-        delay_ms(200);
+            println!("Pin 0: OFF");
+            pinout.low().unwrap();
+            delay_ms(200);
+        }
     }
 
     // Set up the gui

@@ -5,4 +5,11 @@ authors = ["timvisee <timvisee@gmail.com>"]
 
 [dependencies]
 gtk = { version = "0.1.2", features = ["v3_14"] }
-cupi = "0.1.0"
+cupi = { version = "0.1.0", optional = true }
+
+[features]
+default = []
+
+# Raspberry Pi features, such as GPIO usage and support for external devices.
+# Will compile, but won't run if not running on a Raspberry Pi board.
+rpi = ["cupi"]
