@@ -24,16 +24,20 @@ impl GpioPin {
         // Define input and output variables
         let mut input: Option<PinInput> = None;
         let mut output: Option<PinOutput> = None;
+        let output_logic = config.output_default();
 
         // Create the pin
         match config.io_mode().unwrap() {
             &IoMode::Input => input = Some(options.input()),
             &IoMode::Output => {
-                // Create the output pin instance
-                output = Some(options.output());
+                // Get the CuPi pin output instance
+                let pin_output = options.output();
 
                 // Write the default state
-                output.write(config.output_default().into_cupi());
+                pin_output.write(config.output_default().into_cupi());
+
+                // Create the output pin instance
+                output = Some(pin_output);
             },
         }
 
@@ -42,7 +46,7 @@ impl GpioPin {
             config: config,
             input: input,
             output: output,
-            output_logic: config.output_default()
+            output_logic: output_logic
         })
     }
 
@@ -71,11 +75,21 @@ impl GpioPin {
     /// If this is an input pin, the value is read from the physical pin.
     /// If this is an output pin, the current output value is read.
     pub fn read(&self) -> GpioPinLogic {
-        if self.is_input() {
-            GpioPinLogic::from_cupi(self.input.as_ref().unwrap().read())
-        } else {
-            self.output_logic.clone()
+        // Return the stored output value if this is an output pin
+        if !self.is_input() {
+            return self.output_logic.clone();
         }
+
+        // Read the physical value
+        let mut phys_logic = GpioPinLogic::from_cupi(self.input.as_ref().unwrap().read());
+
+        // Invert the physical logic if configured
+        if self.config.inverted() {
+            phys_logic = phys_logic.into_inverted();
+        }
+
+        // Return the value
+        phys_logic
     }
 
     /// Read the value from the pin as boolean.
@@ -93,8 +107,14 @@ impl GpioPin {
             return;
         }
 
-        // Write the value
-        self.output.as_ref().unwrap().write(logic.as_cupi());
+        // Get the physical value to write, and invert it if configured
+        let mut phys_logic = logic.clone();
+        if self.config.inverted() {
+            phys_logic = phys_logic.into_inverted();
+        }
+
+        // Write the physical value
+        self.output.as_ref().unwrap().write(phys_logic.into_cupi());
 
         // Update the stored logical output value
         self.output_logic = logic;

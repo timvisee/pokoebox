@@ -17,7 +17,13 @@ pub struct GpioPinConfig {
     io_mode: Option<IoMode>,
 
     /// The default output state, for an output pin
-    output_default: GpioPinLogic
+    output_default: GpioPinLogic,
+
+    /// True if this pin's logic is inverted, false if not and it's normal.
+    /// Setting this to true will invert all logic internally. If inversion is enabled, and a pin
+    /// is set to `High` using the provided API, the physical pin logic will be `Low`, and the other
+    /// way around.
+    inverted: bool
 }
 
 impl GpioPinConfig {
@@ -28,7 +34,8 @@ impl GpioPinConfig {
             pin: None,
             pull_mode: PullMode::None,
             io_mode: None,
-            output_default: GpioPinLogic::Low
+            output_default: GpioPinLogic::Low,
+            inverted: false,
         }
     }
 
@@ -38,7 +45,8 @@ impl GpioPinConfig {
             pin: Some(pin),
             pull_mode: PullMode::None,
             io_mode: None,
-            output_default: GpioPinLogic::Low
+            output_default: GpioPinLogic::Low,
+            inverted: false,
         }
     }
 
@@ -48,7 +56,8 @@ impl GpioPinConfig {
             pin: Some(pin),
             pull_mode: PullMode::None,
             io_mode: Some(io_mode),
-            output_default: GpioPinLogic::Low
+            output_default: GpioPinLogic::Low,
+            inverted: false,
         }
     }
 
@@ -58,7 +67,8 @@ impl GpioPinConfig {
             pin: Some(pin),
             pull_mode: pull_mode,
             io_mode: Some(io_mode),
-            output_default: GpioPinLogic::Low
+            output_default: GpioPinLogic::Low,
+            inverted: false,
         }
     }
 
@@ -115,6 +125,30 @@ impl GpioPinConfig {
     /// This state is ignored when this pin is an input pin.
     pub fn set_output_default(&mut self, output_default: GpioPinLogic) {
         self.output_default = output_default;
+    }
+
+    /// Invert the current inversion state.
+    ///
+    /// * `false`: The normal (default) state.
+    /// * `true`: The inverted state.
+    pub fn invert(&mut self) {
+        self.inverted = !self.inverted
+    }
+
+    /// Get the inverted state for this pin.
+    ///
+    /// * `false`: The normal (default) state.
+    /// * `true`: The inverted state.
+    pub fn inverted(&self) -> bool {
+        self.inverted
+    }
+
+    /// Set the inverted state of this pin.
+    ///
+    /// * `false`: The normal (default) state.
+    /// * `true`: The inverted state.
+    pub fn set_inverted(&mut self, inverted: bool) {
+        self.inverted = inverted;
     }
 
     /// Create a CuPi pin options instance based on the current configuration.

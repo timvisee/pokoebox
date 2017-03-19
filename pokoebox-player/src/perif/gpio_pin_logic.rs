@@ -63,7 +63,7 @@ impl GpioPinLogic {
     }
 
     /// Convert to an inverted logical value.
-    pub fn invert(self) -> Self {
+    pub fn into_inverted(self) -> Self {
         self.as_inverted()
     }
 }
