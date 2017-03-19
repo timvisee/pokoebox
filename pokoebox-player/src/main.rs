@@ -15,24 +15,42 @@ use cupi::board;
 fn main() {
     #[cfg(feature = "rpi")]
     {
+        use self::pokoebox_player::perif::gpio_pin::GpioPin;
+        use self::pokoebox_player::perif::gpio_pin_config::{GpioPinConfig, PullMode, IoMode};
+        use self::pokoebox_player::perif::gpio_pin_logic::GpioPinLogic;
+
         // Print the board we're using
         println!("Board: {:?}", board());
 
         // Set up CuPi
         let cupi = CuPi::new().unwrap();
 
-        // Register an output pin
-        let mut pinout = cupi.pin(0).unwrap().output();
+        // Create a pin configuration
+        let pin_config = GpioPinConfig::new_with_pin_and_io(0, IoMode::Output);
+        let mut pinout = GpioPin::from(&cupi, pin_config).unwrap();
 
         loop {
             println!("Pin 0: ON");
-            pinout.high().unwrap();
+            pinout.write_bool(true);
             delay_ms(200);
 
             println!("Pin 0: OFF");
-            pinout.low().unwrap();
+            pinout.write_bool(false);
             delay_ms(200);
         }
+
+//        // Register an output pin
+//        let mut pinout = cupi.pin(0).unwrap().output();
+//
+//        loop {
+//            println!("Pin 0: ON");
+//            pinout.high().unwrap();
+//            delay_ms(200);
+//
+//            println!("Pin 0: OFF");
+//            pinout.low().unwrap();
+//            delay_ms(200);
+//        }
     }
 
     // Set up the gui

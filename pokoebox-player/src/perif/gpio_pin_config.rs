@@ -210,6 +210,9 @@ pub enum PullMode {
 
 /// Input/output mode of the pin.
 pub enum IoMode {
+    /// Input mode, to make the pin read inputs
     Input,
+
+    /// Output mode, to make the pin write outputs
     Output
 }
