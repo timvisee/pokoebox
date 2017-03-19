@@ -8,7 +8,7 @@ use pokoebox_player::gui::gui::Gui;
 use gtk::prelude::*;
 
 #[cfg(feature = "rpi")]
-use cupi::{CuPi, delay_ms, DigitalWrite, DigitalLogic};
+use cupi::{CuPi, delay_ms, DigitalWrite};
 #[cfg(feature = "rpi")]
 use cupi::board;
 
