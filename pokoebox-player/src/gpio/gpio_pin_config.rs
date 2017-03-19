@@ -2,6 +2,7 @@
 
 use error::Error;
 use super::cupi::{CuPi, PinOptions};
+use super::gpio_pin::GpioPin;
 use super::gpio_pin_logic::GpioPinLogic;
 
 /// GPIO pin configuration.
@@ -193,6 +194,11 @@ impl GpioPinConfig {
         }
 
         Ok(options)
+    }
+
+    /// Convert this configuration into a pin instance.
+    pub fn into_pin(self, cupi: &CuPi) -> Result<GpioPin, Error> {
+        GpioPin::from(cupi, self)
     }
 }
 

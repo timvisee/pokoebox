@@ -27,7 +27,7 @@ fn main() {
 
         // Create a pin configuration
         let pin_config = GpioPinConfig::new_with_pin_and_io(0, IoMode::Output);
-        let mut pinout = GpioPin::from(&cupi, pin_config).unwrap();
+        let mut pinout = pin_config.into_pin(&cupi).unwrap();
 
         loop {
             println!("Pin 0: ON");
