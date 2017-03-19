@@ -15,7 +15,6 @@ use cupi::board;
 fn main() {
     #[cfg(feature = "rpi")]
     {
-        use self::pokoebox_player::gpio::pin::Pin;
         use self::pokoebox_player::gpio::pin_config::{PinConfig, PullMode, IoMode};
         use self::pokoebox_player::gpio::logic::Logic;
 
@@ -26,17 +25,28 @@ fn main() {
         let cupi = CuPi::new().unwrap();
 
         // Create a pin configuration
-        let pin_config = PinConfig::new_with_pin_and_io(0, IoMode::Output);
-        let mut pinout = pin_config.into_pin(&cupi).unwrap();
+//        let pin_config = PinConfig::new_with_pin_and_io(0, IoMode::Output);
+        let pin_config = PinConfig::new_with_pin_and_io(0, IoMode::Input);
+        pin_config.set_pull_mode(PullMode::PullDown);
+
+        // Create the pint
+        let mut pin = pin_config.into_pin(&cupi).unwrap();
+
+//        loop {
+//            println!("Pin 0: ON");
+//            pin.high();
+//            delay_ms(200);
+//
+//            println!("Pin 0: OFF");
+//            pin.low();
+//            delay_ms(200);
+//        }
 
         loop {
-            println!("Pin 0: ON");
-            pinout.high();
-            delay_ms(200);
-
-            println!("Pin 0: OFF");
-            pinout.low();
-            delay_ms(200);
+            match pin.read() {
+                Logic::High => println!("Pin 0 is HIGH"),
+                Logic::Low => println!("Pin 0 is LOW"),
+            }
         }
     }
 
