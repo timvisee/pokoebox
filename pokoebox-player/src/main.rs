@@ -8,16 +8,16 @@ use pokoebox_player::gui::gui::Gui;
 use gtk::prelude::*;
 
 #[cfg(feature = "rpi")]
-use cupi::{CuPi, delay_ms, DigitalWrite};
+use cupi::{CuPi, delay_ms};
 #[cfg(feature = "rpi")]
 use cupi::board;
 
 fn main() {
     #[cfg(feature = "rpi")]
     {
-        use self::pokoebox_player::gpio::gpio_pin::GpioPin;
-        use self::pokoebox_player::gpio::gpio_pin_config::{GpioPinConfig, PullMode, IoMode};
-        use self::pokoebox_player::gpio::gpio_pin_logic::GpioPinLogic;
+        use self::pokoebox_player::gpio::pin::Pin;
+        use self::pokoebox_player::gpio::pin_config::{PinConfig, PullMode, IoMode};
+        use self::pokoebox_player::gpio::logic::Logic;
 
         // Print the board we're using
         println!("Board: {:?}", board());
@@ -26,7 +26,7 @@ fn main() {
         let cupi = CuPi::new().unwrap();
 
         // Create a pin configuration
-        let pin_config = GpioPinConfig::new_with_pin_and_io(0, IoMode::Output);
+        let pin_config = PinConfig::new_with_pin_and_io(0, IoMode::Output);
         let mut pinout = pin_config.into_pin(&cupi).unwrap();
 
         loop {

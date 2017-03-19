@@ -2,12 +2,12 @@
 
 use error::Error;
 use super::cupi::{CuPi, PinOptions};
-use super::gpio_pin::GpioPin;
-use super::gpio_pin_logic::GpioPinLogic;
+use super::pin::Pin;
+use super::logic::Logic;
 
 /// GPIO pin configuration.
 /// The pin number and io mode are required. The pull mode defaults to `None`.
-pub struct GpioPinConfig {
+pub struct PinConfig {
     /// The actual pin number.
     pin: Option<usize>,
 
@@ -18,7 +18,7 @@ pub struct GpioPinConfig {
     io_mode: Option<IoMode>,
 
     /// The default output state, for an output pin
-    output_default: GpioPinLogic,
+    output_default: Logic,
 
     /// True if this pin's logic is inverted, false if not and it's normal.
     /// Setting this to true will invert all logic internally. If inversion is enabled, and a pin
@@ -27,48 +27,48 @@ pub struct GpioPinConfig {
     inverted: bool
 }
 
-impl GpioPinConfig {
+impl PinConfig {
 
     /// Construct a new configuration.
     pub fn new() -> Self {
-        GpioPinConfig {
+        PinConfig {
             pin: None,
             pull_mode: PullMode::None,
             io_mode: None,
-            output_default: GpioPinLogic::Low,
+            output_default: Logic::Low,
             inverted: false,
         }
     }
 
     /// Construct a new configuration with the given `pin` number.
     pub fn new_with_pin(pin: usize) -> Self {
-        GpioPinConfig {
+        PinConfig {
             pin: Some(pin),
             pull_mode: PullMode::None,
             io_mode: None,
-            output_default: GpioPinLogic::Low,
+            output_default: Logic::Low,
             inverted: false,
         }
     }
 
     /// Construct a new configuration with the given `pin` number and `io_mode` mode.
     pub fn new_with_pin_and_io(pin: usize, io_mode: IoMode) -> Self {
-        GpioPinConfig {
+        PinConfig {
             pin: Some(pin),
             pull_mode: PullMode::None,
             io_mode: Some(io_mode),
-            output_default: GpioPinLogic::Low,
+            output_default: Logic::Low,
             inverted: false,
         }
     }
 
     /// Construct a new configuration with the given properties.
     pub fn from(pin: usize, pull_mode: PullMode, io_mode: IoMode) -> Self {
-        GpioPinConfig {
+        PinConfig {
             pin: Some(pin),
             pull_mode: pull_mode,
             io_mode: Some(io_mode),
-            output_default: GpioPinLogic::Low,
+            output_default: Logic::Low,
             inverted: false,
         }
     }
@@ -107,24 +107,24 @@ impl GpioPinConfig {
     /// Set the default output state to `High`.
     /// Alias for `set_output_default(GpioPinLogic::High);`
     pub fn high(&mut self) {
-        self.set_output_default(GpioPinLogic::High);
+        self.set_output_default(Logic::High);
     }
 
     /// Set the default output state to `Low`.
     /// Alias for `set_output_default(GpioPinLogic::Low);`
     pub fn low(&mut self) {
-        self.set_output_default(GpioPinLogic::Low);
+        self.set_output_default(Logic::Low);
     }
 
     /// Get the default logical output state, if this pin is an output pin.
     /// This state is ignored when this pin is an input pin.
-    pub fn output_default(&self) -> GpioPinLogic {
+    pub fn output_default(&self) -> Logic {
         self.output_default.clone()
     }
 
     /// Set the default logical output state, if this pin is an output pin.
     /// This state is ignored when this pin is an input pin.
-    pub fn set_output_default(&mut self, output_default: GpioPinLogic) {
+    pub fn set_output_default(&mut self, output_default: Logic) {
         self.output_default = output_default;
     }
 
@@ -197,8 +197,8 @@ impl GpioPinConfig {
     }
 
     /// Convert this configuration into a pin instance.
-    pub fn into_pin(self, cupi: &CuPi) -> Result<GpioPin, Error> {
-        GpioPin::from(cupi, self)
+    pub fn into_pin(self, cupi: &CuPi) -> Result<Pin, Error> {
+        Pin::from(cupi, self)
     }
 }
 

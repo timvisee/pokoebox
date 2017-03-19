@@ -2,22 +2,22 @@
 
 use error::Error;
 use super::cupi::{CuPi, PinInput, PinOutput};
-use super::gpio_pin_logic::GpioPinLogic;
-use super::gpio_pin_config::{GpioPinConfig, IoMode};
+use super::logic::Logic;
+use super::pin_config::{PinConfig, IoMode};
 
 /// A GPIO pin instance.
 /// This allows you to use a GPIO pin as input or output depending on the configuration.
-pub struct GpioPin {
-    config: GpioPinConfig,
+pub struct Pin {
+    config: PinConfig,
     input: Option<PinInput>,
     output: Option<PinOutput>,
-    output_logic: GpioPinLogic
+    output_logic: Logic
 }
 
-impl GpioPin {
+impl Pin {
 
     /// Construct a new GPIO pin with the given configuration.
-    pub fn from(cupi: &CuPi, config: GpioPinConfig) -> Result<Self, Error> {
+    pub fn from(cupi: &CuPi, config: PinConfig) -> Result<Self, Error> {
         // Create the CuPi pin options struct
         let options = config.as_cupi_pin_options(cupi)?;
 
@@ -42,7 +42,7 @@ impl GpioPin {
         }
 
         // Construct a new pin object
-        Ok(GpioPin {
+        Ok(Pin {
             config: config,
             input: input,
             output: output,
@@ -74,14 +74,14 @@ impl GpioPin {
     /// Read the value from the pin.
     /// If this is an input pin, the value is read from the physical pin.
     /// If this is an output pin, the current output value is read.
-    pub fn read(&self) -> GpioPinLogic {
+    pub fn read(&self) -> Logic {
         // Return the stored output value if this is an output pin
         if !self.is_input() {
             return self.output_logic.clone();
         }
 
         // Read the physical value
-        let mut phys_logic = GpioPinLogic::from_cupi(self.input.as_ref().unwrap().read());
+        let mut phys_logic = Logic::from_cupi(self.input.as_ref().unwrap().read());
 
         // Invert the physical logic if configured
         if self.config.inverted() {
@@ -101,7 +101,7 @@ impl GpioPin {
 
     /// Write a logical GPIO value to the pin.
     /// This only has any effect if this is an output pin. Nothing happens when this is an input pin.
-    pub fn write(&mut self, logic: GpioPinLogic) {
+    pub fn write(&mut self, logic: Logic) {
         // Make sure this is an output pin
         if self.is_input() {
             return;
@@ -123,7 +123,7 @@ impl GpioPin {
     /// Write a boolean value to the pin.
     /// This only has any effect if this is an output pin. Nothing happens when this is an input pin.
     pub fn write_bool(&mut self, logic: bool) {
-        self.write(GpioPinLogic::from_bool(logic));
+        self.write(Logic::from_bool(logic));
     }
 
     /// Invert the output signal of the pin.
@@ -138,12 +138,12 @@ impl GpioPin {
     /// Write the `High` state.
     /// This only has any effect if this is an output pin. Nothing happens when this is an input pin.
     pub fn high(&mut self) {
-        self.write(GpioPinLogic::High);
+        self.write(Logic::High);
     }
 
     /// Write the `Low` state.
     /// This only has any effect if this is an output pin. Nothing happens when this is an input pin.
     pub fn low(&mut self) {
-        self.write(GpioPinLogic::Low);
+        self.write(Logic::Low);
     }
 }

@@ -1,38 +1,38 @@
 #![cfg(feature = "rpi")]
 
-use super::cupi::Logic;
+use super::cupi;
 
 /// GPIO pin logic.
 #[derive(Clone)]
-pub enum GpioPinLogic {
+pub enum Logic {
     High,
     Low
 }
 
-impl GpioPinLogic {
+impl Logic {
 
     /// Get the logic from the given boolean value.
     pub fn from_bool(logic: bool) -> Self {
         if logic {
-            GpioPinLogic::High
+            Logic::High
         } else {
-            GpioPinLogic::Low
+            Logic::Low
         }
     }
 
     /// Get the logic from the given CuPi logic.
-    pub fn from_cupi(logic: Logic) -> Self {
+    pub fn from_cupi(logic: cupi::Logic) -> Self {
         match logic {
-            Logic::High => GpioPinLogic::High,
-            Logic::Low => GpioPinLogic::Low
+            cupi::Logic::High => Logic::High,
+            cupi::Logic::Low => Logic::Low
         }
     }
 
     /// Get the boolean representation for this logic value.
     pub fn as_bool(&self) -> bool {
         match *self {
-            GpioPinLogic::High => true,
-            GpioPinLogic::Low => false
+            Logic::High => true,
+            Logic::Low => false
         }
     }
 
@@ -42,23 +42,23 @@ impl GpioPinLogic {
     }
 
     /// Get the CuPi logic value.
-    pub fn as_cupi(&self) -> Logic {
+    pub fn as_cupi(&self) -> cupi::Logic {
         match *self {
-            GpioPinLogic::High => Logic::High,
-            GpioPinLogic::Low => Logic::Low
+            Logic::High => cupi::Logic::High,
+            Logic::Low => cupi::Logic::Low
         }
     }
 
     /// Convert to a CuPi logic value.
-    pub fn into_cupi(self) -> Logic {
+    pub fn into_cupi(self) -> cupi::Logic {
         self.as_cupi()
     }
 
     /// Get the inverted logical value.
     pub fn as_inverted(&self) -> Self {
         match *self {
-            GpioPinLogic::High => GpioPinLogic::Low,
-            GpioPinLogic::Low => GpioPinLogic::High,
+            Logic::High => Logic::Low,
+            Logic::Low => Logic::High,
         }
     }
 
