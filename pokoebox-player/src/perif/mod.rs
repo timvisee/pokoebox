@@ -11,5 +11,7 @@ pub mod gpio_perif_outputs;
 pub mod gpio_pin;
 #[cfg(feature = "rpi")]
 pub mod gpio_pin_config;
+#[cfg(feature = "rpi")]
+pub mod gpio_pin_logic;
 pub mod perif;
 pub mod perif_manager;
