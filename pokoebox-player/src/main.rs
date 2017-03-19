@@ -31,26 +31,13 @@ fn main() {
 
         loop {
             println!("Pin 0: ON");
-            pinout.write_bool(true);
+            pinout.high();
             delay_ms(200);
 
             println!("Pin 0: OFF");
-            pinout.write_bool(false);
+            pinout.low();
             delay_ms(200);
         }
-
-//        // Register an output pin
-//        let mut pinout = cupi.pin(0).unwrap().output();
-//
-//        loop {
-//            println!("Pin 0: ON");
-//            pinout.high().unwrap();
-//            delay_ms(200);
-//
-//            println!("Pin 0: OFF");
-//            pinout.low().unwrap();
-//            delay_ms(200);
-//        }
     }
 
     // Set up the gui

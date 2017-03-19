@@ -134,4 +134,16 @@ impl GpioPin {
         let inverted = self.output_logic.as_inverted();
         self.write(inverted);
     }
+
+    /// Write the `High` state.
+    /// This only has any effect if this is an output pin. Nothing happens when this is an input pin.
+    pub fn high(&mut self) {
+        self.write(GpioPinLogic::High);
+    }
+
+    /// Write the `Low` state.
+    /// This only has any effect if this is an output pin. Nothing happens when this is an input pin.
+    pub fn low(&mut self) {
+        self.write(GpioPinLogic::Low);
+    }
 }
