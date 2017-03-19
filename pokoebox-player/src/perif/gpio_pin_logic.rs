@@ -3,6 +3,7 @@
 use super::cupi::Logic;
 
 /// GPIO pin logic.
+#[derive(Clone)]
 pub enum GpioPinLogic {
     High,
     Low
@@ -27,12 +28,17 @@ impl GpioPinLogic {
         }
     }
 
-    /// Get the boolean representation for this value.
+    /// Get the boolean representation for this logic value.
     pub fn as_bool(&self) -> bool {
         match *self {
             GpioPinLogic::High => true,
             GpioPinLogic::Low => false
         }
+    }
+
+    /// Convert to a boolean representation for this logic value.
+    pub fn into_bool(self) -> bool {
+        self.as_bool()
     }
 
     /// Get the CuPi logic value.
@@ -44,7 +50,20 @@ impl GpioPinLogic {
     }
 
     /// Convert to a CuPi logic value.
-    pub fn to_cupi(self) -> Logic {
+    pub fn into_cupi(self) -> Logic {
         self.as_cupi()
+    }
+
+    /// Get the inverted logical value.
+    pub fn as_inverted(&self) -> Self {
+        match *self {
+            GpioPinLogic::High => GpioPinLogic::Low,
+            GpioPinLogic::Low => GpioPinLogic::High,
+        }
+    }
+
+    /// Convert to an inverted logical value.
+    pub fn invert(self) -> Self {
+        self.as_inverted()
     }
 }
