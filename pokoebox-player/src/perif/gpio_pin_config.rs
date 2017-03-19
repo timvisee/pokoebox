@@ -2,6 +2,7 @@
 
 use error::Error;
 use super::cupi::{CuPi, PinOptions};
+use super::gpio_pin_logic::GpioPinLogic;
 
 /// GPIO pin configuration.
 /// The pin number and io mode are required. The pull mode defaults to `None`.
@@ -14,6 +15,9 @@ pub struct GpioPinConfig {
 
     /// Input/output mode of the pin.
     io_mode: Option<IoMode>,
+
+    /// The default output state, for an output pin
+    output_default: GpioPinLogic
 }
 
 impl GpioPinConfig {
@@ -24,6 +28,7 @@ impl GpioPinConfig {
             pin: None,
             pull_mode: PullMode::None,
             io_mode: None,
+            output_default: GpioPinLogic::Low
         }
     }
 
@@ -33,6 +38,7 @@ impl GpioPinConfig {
             pin: Some(pin),
             pull_mode: PullMode::None,
             io_mode: None,
+            output_default: GpioPinLogic::Low
         }
     }
 
@@ -42,6 +48,7 @@ impl GpioPinConfig {
             pin: Some(pin),
             pull_mode: PullMode::None,
             io_mode: Some(io_mode),
+            output_default: GpioPinLogic::Low
         }
     }
 
@@ -51,6 +58,7 @@ impl GpioPinConfig {
             pin: Some(pin),
             pull_mode: pull_mode,
             io_mode: Some(io_mode),
+            output_default: GpioPinLogic::Low
         }
     }
 
@@ -83,6 +91,30 @@ impl GpioPinConfig {
     /// Set the input/output mode for this pin.
     pub fn set_io_mode(&mut self, io_mode: Option<IoMode>) {
         self.io_mode = io_mode;
+    }
+
+    /// Set the default output state to `High`.
+    /// Alias for `set_output_default(GpioPinLogic::High);`
+    pub fn high(&mut self) {
+        self.set_output_default(GpioPinLogic::High);
+    }
+
+    /// Set the default output state to `Low`.
+    /// Alias for `set_output_default(GpioPinLogic::Low);`
+    pub fn low(&mut self) {
+        self.set_output_default(GpioPinLogic::Low);
+    }
+
+    /// Get the default logical output state, if this pin is an output pin.
+    /// This state is ignored when this pin is an input pin.
+    pub fn output_default(&self) -> GpioPinLogic {
+        self.output_default.clone()
+    }
+
+    /// Set the default logical output state, if this pin is an output pin.
+    /// This state is ignored when this pin is an input pin.
+    pub fn set_output_default(&mut self, output_default: GpioPinLogic) {
+        self.output_default = output_default;
     }
 
     /// Create a CuPi pin options instance based on the current configuration.

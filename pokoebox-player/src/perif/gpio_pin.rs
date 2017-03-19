@@ -28,7 +28,13 @@ impl GpioPin {
         // Create the pin
         match config.io_mode().unwrap() {
             &IoMode::Input => input = Some(options.input()),
-            &IoMode::Output => output = Some(options.output()),
+            &IoMode::Output => {
+                // Create the output pin instance
+                output = Some(options.output());
+
+                // Write the default state
+                output.write(config.output_default().into_cupi());
+            },
         }
 
         // Construct a new pin object
@@ -36,7 +42,7 @@ impl GpioPin {
             config: config,
             input: input,
             output: output,
-            output_logic: GpioPinLogic::Low
+            output_logic: config.output_default()
         })
     }
 
