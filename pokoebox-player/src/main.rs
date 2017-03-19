@@ -26,7 +26,7 @@ fn main() {
 
         // Create a pin configuration
 //        let pin_config = PinConfig::new_with_pin_and_io(0, IoMode::Output);
-        let pin_config = PinConfig::new_with_pin_and_io(0, IoMode::Input);
+        let mut pin_config = PinConfig::new_with_pin_and_io(0, IoMode::Input);
         pin_config.set_pull_mode(PullMode::PullDown);
 
         // Create the pint
