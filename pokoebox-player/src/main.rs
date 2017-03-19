@@ -47,6 +47,7 @@ fn main() {
                 Logic::High => println!("Pin 0 is HIGH"),
                 Logic::Low => println!("Pin 0 is LOW"),
             }
+            delay_ms(200);
         }
     }
 
