@@ -18,12 +18,17 @@ pub struct GpioButton {
 impl GpioButton {
 
     /// Construct a new GPIO button.
-    // TODO: Also supply the GPIO pin that is used.
-    pub fn new(name: &'static str) -> Self {
-        GpioButton {
+    pub fn new(name: &'static str, input_pin: PinInput) -> Self {
+        // Create the struct
+        let mut gpio_button = GpioButton {
             name: name,
             inputs: HashMap::new()
-        }
+        };
+
+        // Add the input
+        gpio_button.inputs.insert(INPUT_PIN_KEY_BUTTON, input_pin);
+
+        gpio_button
     }
 
     /// Get the input pin for the button.
