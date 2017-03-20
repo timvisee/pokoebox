@@ -1,15 +1,16 @@
 #[cfg(feature = "rpi")]
 extern crate cupi;
 
-pub mod input;
+pub mod sig;
 #[cfg(feature = "rpi")]
-pub mod input_gpio;
-pub mod input_toggle;
-pub mod io;
-pub mod io_gpio;
-pub mod output;
+pub mod sig_gpio;
+pub mod sig_in;
 #[cfg(feature = "rpi")]
-pub mod output_gpio;
+pub mod sig_in_gpio;
+pub mod sig_in_toggle;
+pub mod sig_out;
 #[cfg(feature = "rpi")]
-pub mod output_gpio_light;
-pub mod output_light;
+pub mod sig_out_gpio;
+#[cfg(feature = "rpi")]
+pub mod sig_out_gpio_light;
+pub mod sig_out_light;

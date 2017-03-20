@@ -1,4 +1,4 @@
-use super::super::signal::traits::input::Input;
+use super::super::signal::traits::sig_in::SigIn;
 use super::with_io::WithIo;
 
 /// Defines that the peripheral has input signals.
@@ -6,5 +6,5 @@ use super::with_io::WithIo;
 pub trait WithInputs: WithIo {
 
     /// Get a vector of inputs this peripheral provides.
-    fn inputs(&self) -> &Vec<Box<Input>>;
+    fn inputs(&self) -> &Vec<Box<SigIn>>;
 }

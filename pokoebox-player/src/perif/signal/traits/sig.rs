@@ -1,7 +1,7 @@
 use super::super::io_id::IoId;
 
 /// An input or output signal for a peripheral.
-pub trait Io {
+pub trait Sig {
 
     /// Get the ID of this input/output.
     fn id(&self) -> &IoId;

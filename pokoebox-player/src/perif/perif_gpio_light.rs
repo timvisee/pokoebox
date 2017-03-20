@@ -1,14 +1,14 @@
 use error::Error;
 use super::traits::with_io::WithIo;
 use super::traits::with_outputs::WithOutputs;
-use super::signal::traits::output::Output;
+use super::signal::traits::sig_out::SigOut;
 use super::perif::Perif;
 
 /// Light peripheral implementation.
 /// This can be used to toggle a light such as a LED.
 pub struct PerifGpioLight {
     name: &'static str,
-    outputs: Vec<Box<Output>>,
+    outputs: Vec<Box<SigOut>>,
 }
 
 impl PerifGpioLight {
@@ -42,7 +42,7 @@ impl WithIo for PerifGpioLight {}
 
 /// This peripheral has outputs.
 impl WithOutputs for PerifGpioLight {
-    fn outputs(&self) -> &Vec<Box<Output>> {
+    fn outputs(&self) -> &Vec<Box<SigOut>> {
         &self.outputs
     }
 }

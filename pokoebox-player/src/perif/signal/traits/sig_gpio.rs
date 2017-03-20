@@ -6,10 +6,10 @@ use error::Error;
 use gpio::pin::Pin;
 use gpio::pin_config::PinConfig;
 use super::cupi::CuPi;
-use super::io::Io;
+use super::sig::Sig;
 
 /// An input or output signal for a peripheral that uses GPIO features.
-pub trait IoGpio: Io {
+pub trait SigGpio: Sig {
 
     /// Get a list of GPIO pin configurations. This includes input and output pins.
     fn gpio_pin_configs(&self) -> &HashMap<&'static str, PinConfig>;

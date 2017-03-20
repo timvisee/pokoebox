@@ -7,12 +7,12 @@ use gpio::pin::Pin;
 use gpio::pin_config::{PinConfig, IoMode};
 use super::cupi::CuPi;
 use super::io_id::IoId;
-use super::traits::io::Io;
-use super::traits::io_gpio::IoGpio;
-use super::traits::output::Output;
-use super::traits::output_gpio::OutputGpio;
-use super::traits::output_gpio_light::OutputGpioLight;
-use super::traits::output_light::OutputLight;
+use super::traits::sig::Sig;
+use super::traits::sig_gpio::SigGpio;
+use super::traits::sig_out::SigOut;
+use super::traits::sig_out_gpio::SigOutGpio;
+use super::traits::sig_out_gpio_light::SigOutGpioLight;
+use super::traits::sig_out_light::SigOutLight;
 
 /// Key for the GPIO pin of the light
 pub const GPIO_PIN_KEY_LIGHT: &'static str = "light";
@@ -53,7 +53,7 @@ impl OutputGpioLightImpl {
     }
 }
 
-impl Io for OutputGpioLightImpl {
+impl Sig for OutputGpioLightImpl {
     fn id(&self) -> &IoId {
         &self.id
     }
@@ -63,7 +63,7 @@ impl Io for OutputGpioLightImpl {
     }
 }
 
-impl IoGpio for OutputGpioLightImpl {
+impl SigGpio for OutputGpioLightImpl {
     fn gpio_pin_configs(&self) -> &HashMap<&'static str, PinConfig> {
         &self.pin_configs
     }
@@ -85,11 +85,11 @@ impl IoGpio for OutputGpioLightImpl {
     }
 }
 
-impl Output for OutputGpioLightImpl {}
+impl SigOut for OutputGpioLightImpl {}
 
-impl OutputGpio for OutputGpioLightImpl {}
+impl SigOutGpio for OutputGpioLightImpl {}
 
-impl OutputLight for OutputGpioLightImpl {
+impl SigOutLight for OutputGpioLightImpl {
     fn set_state(&mut self, state: bool) -> Result<(), Error> {
         // Get the light pin
         let result = self.gpio_pin_mut(GPIO_PIN_KEY_LIGHT);
@@ -104,4 +104,4 @@ impl OutputLight for OutputGpioLightImpl {
     }
 }
 
-impl OutputGpioLight for OutputGpioLightImpl {}
+impl SigOutGpioLight for OutputGpioLightImpl {}
