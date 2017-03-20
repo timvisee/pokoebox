@@ -21,15 +21,12 @@ pub const SIG_LIGHT_NAME: &'static str = "Light";
 /// This can be used to toggle a light such as a LED.
 pub struct PerifGpioLight {
     name: &'static str,
-    outputs: Vec<Box<SigOut>>,
+    sig_light: OutputGpioLight
 }
 
 impl PerifGpioLight {
     /// Construct a new GPIO light peripheral.
     pub fn new(name: &'static str, pin: usize, cupi: &CuPi) -> Result<Self, Error> {
-        // Create a vector of output signals
-        let mut outputs: Vec<Box<SigOut>> = Vec::new();
-
         // Create a GPIO light signal instance, and add it to the outputs
         let sig_light = OutputGpioLight::new(
             SigId::new(SIG_LIGHT_ID),
@@ -37,11 +34,10 @@ impl PerifGpioLight {
             pin,
             cupi
         )?;
-        outputs.push(Box::new(sig_light));
 
         Ok(PerifGpioLight {
             name: name,
-            outputs: outputs
+            sig_light: sig_light
         })
     }
 
@@ -57,8 +53,10 @@ impl PerifGpioLight {
 
 /// This peripheral has outputs.
 impl WithOutputs for PerifGpioLight {
-    fn outputs(&self) -> &Vec<Box<SigOut>> {
-        &self.outputs
+    fn list_outputs(&self) -> Vec<&SigOut> {
+        vec![
+            &self.sig_light
+        ]
     }
 }
 

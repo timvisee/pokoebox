@@ -7,15 +7,16 @@ use super::super::signal::traits::sig_in::SigIn;
 /// This may be combined with `WithOutputs`.
 pub trait WithInputs: WithSig {
 
-    /// Get a vector of inputs this peripheral provides.
-    fn inputs(&self) -> &Vec<Box<SigIn>>;
+    /// Create a vector and list all input signals in it for this peripheral.
+    fn list_inputs(&self) -> Vec<&SigIn>;
 
-    /// Get the input signal with the given ID.
-    fn input(&self, id: SigId) -> Result<&SigIn, Error> {
+    /// Create a vector and list all input signals in it for this peripheral. Return the signal with
+    /// the given `id`. An error is returned if no signal is found with the given ID.
+    fn find_input(&self, id: SigId) -> Result<&SigIn, Error> {
         // Loop through the inputs
-        for input in self.inputs().as_slice() {
+        for input in self.list_inputs().as_slice() {
             if input.id() == &id {
-                return Ok(input.as_ref());
+                return Ok(*input);
             }
         }
 

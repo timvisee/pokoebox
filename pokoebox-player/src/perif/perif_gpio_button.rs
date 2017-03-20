@@ -21,15 +21,12 @@ pub const SIG_BUTTON_NAME: &'static str = "Button";
 /// This can be used to bind actions to a button press.
 pub struct PerifGpioButton {
     name: &'static str,
-    inputs: Vec<Box<SigIn>>,
+    sig_button: InputGpioToggle,
 }
 
 impl PerifGpioButton {
     /// Construct a new GPIO button peripheral.
     pub fn new(name: &'static str, pin: usize, cupi: &CuPi) -> Result<Self, Error> {
-        // Create a vector of output signals
-        let mut inputs: Vec<Box<SigIn>> = Vec::new();
-
         // Create a GPIO button signal instance, and add it to the inputs
         let sig_button = InputGpioToggle::new(
             SigId::new(SIG_BUTTON_ID),
@@ -37,11 +34,10 @@ impl PerifGpioButton {
             pin,
             cupi
         )?;
-        inputs.push(Box::new(sig_button));
 
         Ok(PerifGpioButton {
             name: name,
-            inputs: inputs
+            sig_button: sig_button
         })
     }
 
@@ -57,8 +53,10 @@ impl PerifGpioButton {
 
 /// This peripheral has inputs.
 impl WithInputs for PerifGpioButton {
-    fn inputs(&self) -> &Vec<Box<SigIn>> {
-        &self.inputs
+    fn list_inputs(&self) -> Vec<&SigIn> {
+        vec![
+            &self.sig_button
+        ]
     }
 }
 
