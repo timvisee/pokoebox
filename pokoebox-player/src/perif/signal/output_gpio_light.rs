@@ -6,7 +6,7 @@ use error::Error;
 use gpio::pin::Pin;
 use gpio::pin_config::{PinConfig, IoMode};
 use super::cupi::CuPi;
-use super::io_id::IoId;
+use super::sig_id::SigId;
 use super::traits::sig::Sig;
 use super::traits::sig_gpio::SigGpio;
 use super::traits::sig_out::SigOut;
@@ -18,17 +18,17 @@ use super::traits::sig_out_light::SigOutLight;
 pub const GPIO_PIN_KEY_LIGHT: &'static str = "light";
 
 /// Output signal for a peripheral to control a light.
-pub struct OutputGpioLightImpl {
-    id: IoId,
+pub struct OutputGpioLight {
+    id: SigId,
     name: &'static str,
     pin_configs: HashMap<&'static str, PinConfig>,
     pins: HashMap<&'static str, Pin>
 }
 
-impl OutputGpioLightImpl {
+impl OutputGpioLight {
     /// Create a new instance.
     /// The GPIO pin of the light must be passed to the `pin` parameter.
-    pub fn new(id: IoId, name: &'static str, pin: usize, cupi: &CuPi) -> Result<Self, Error> {
+    pub fn new(id: SigId, name: &'static str, pin: usize, cupi: &CuPi) -> Result<Self, Error> {
         // Create a hash map of pin configurations
         let mut pin_configs = HashMap::new();
 
@@ -39,7 +39,7 @@ impl OutputGpioLightImpl {
         );
 
         // Construct the object
-        let mut obj = OutputGpioLightImpl {
+        let mut obj = OutputGpioLight {
             id: id,
             name: name,
             pin_configs: pin_configs,
@@ -53,8 +53,8 @@ impl OutputGpioLightImpl {
     }
 }
 
-impl Sig for OutputGpioLightImpl {
-    fn id(&self) -> &IoId {
+impl Sig for OutputGpioLight {
+    fn id(&self) -> &SigId {
         &self.id
     }
 
@@ -63,7 +63,7 @@ impl Sig for OutputGpioLightImpl {
     }
 }
 
-impl SigGpio for OutputGpioLightImpl {
+impl SigGpio for OutputGpioLight {
     fn gpio_pin_configs(&self) -> &HashMap<&'static str, PinConfig> {
         &self.pin_configs
     }
@@ -85,11 +85,11 @@ impl SigGpio for OutputGpioLightImpl {
     }
 }
 
-impl SigOut for OutputGpioLightImpl {}
+impl SigOut for OutputGpioLight {}
 
-impl SigOutGpio for OutputGpioLightImpl {}
+impl SigOutGpio for OutputGpioLight {}
 
-impl SigOutLight for OutputGpioLightImpl {
+impl SigOutLight for OutputGpioLight {
     fn set_state(&mut self, state: bool) -> Result<(), Error> {
         // Get the light pin
         let result = self.gpio_pin_mut(GPIO_PIN_KEY_LIGHT);
@@ -104,4 +104,4 @@ impl SigOutLight for OutputGpioLightImpl {
     }
 }
 
-impl SigOutGpioLight for OutputGpioLightImpl {}
+impl SigOutGpioLight for OutputGpioLight {}

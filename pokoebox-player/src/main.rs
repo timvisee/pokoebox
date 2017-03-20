@@ -15,8 +15,7 @@ use cupi::board;
 fn main() {
     #[cfg(feature = "rpi")]
     {
-        use self::pokoebox_player::gpio::pin_config::{PinConfig, PullMode, IoMode};
-        use self::pokoebox_player::gpio::logic::Logic;
+        use self::pokoebox_player::gpio::pin_config::{PinConfig, IoMode};
 
         // Print the board we're using
         println!("Board: {:?}", board());

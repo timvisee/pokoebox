@@ -1,14 +1,13 @@
 /// An unique ID for an input or output signal of a peripheral.
-#[derive(Eq, Clone)]
-pub struct IoId {
+#[derive(Eq, Clone, Debug)]
+pub struct SigId {
     id: &'static str
 }
 
-impl IoId {
-
+impl SigId {
     /// Construct a new ID.
     pub fn new(id: &'static str) -> Self {
-        IoId {
+        SigId {
             id: id
         }
     }
@@ -19,7 +18,7 @@ impl IoId {
     }
 }
 
-impl PartialEq for IoId {
+impl PartialEq for SigId {
     fn eq(&self, other: &Self) -> bool {
         self.id == other.id
     }
