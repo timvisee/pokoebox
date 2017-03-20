@@ -22,4 +22,9 @@ impl PerifManager {
 
         Ok(())
     }
+
+    /// Get a list of peripherals which as being managed.
+    pub fn perifs(&self) -> &Vec<Box<Perif>> {
+        &self.perifs
+    }
 }

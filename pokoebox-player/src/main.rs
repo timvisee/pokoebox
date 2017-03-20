@@ -13,6 +13,7 @@ use pokoebox_player::gui::gui::Gui;
 use pokoebox_player::perif::perif_manager::PerifManager;
 use pokoebox_player::perif::perif_gpio_button::PerifGpioButton;
 use pokoebox_player::perif::perif_gpio_light::PerifGpioLight;
+use pokoebox_player::perif::perif_type::PerifType;
 
 fn main() {
     #[cfg(feature = "rpi")]
@@ -28,8 +29,16 @@ fn main() {
         let light = PerifGpioLight::new("My light!", 0, &cupi).unwrap();
 
         // Add the peripherals to the manager
-        perifs.add_perif(Box::new(button));
-        perifs.add_perif(Box::new(light));
+        perifs.add_perif(Box::new(button)).unwrap();
+        perifs.add_perif(Box::new(light)).unwrap();
+
+        for perif in perifs.perifs() {
+            match perif.perif_type() {
+                PerifType::GpioLight => { println!("LIGHT"); },
+                PerifType::GpioButton => { println!("BUTTON"); },
+                _ => { println!("NOPE"); }
+            }
+        }
     }
 
     #[cfg(feature = "rpi")]
