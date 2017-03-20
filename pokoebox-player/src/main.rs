@@ -11,7 +11,9 @@ use gtk::prelude::*;
 
 use pokoebox_player::gui::gui::Gui;
 use pokoebox_player::perif::perif_manager::PerifManager;
+#[cfg(feature = "rpi")]
 use pokoebox_player::perif::perif_gpio_button::PerifGpioButton;
+#[cfg(feature = "rpi")]
 use pokoebox_player::perif::perif_gpio_light::PerifGpioLight;
 use pokoebox_player::perif::perif_type::PerifType;
 
@@ -25,8 +27,8 @@ fn main() {
         let mut perifs = PerifManager::new();
 
         // Create a new button and light peripheral
-        let button = PerifGpioButton::new_wrapped("My button!", 2, &cupi).unwrap();
-        let light = PerifGpioLight::new_wrapped("My light!", 0, &cupi).unwrap();
+        let button = PerifGpioButton::new_wrapped("My button!", 0, &cupi).unwrap();
+        let light = PerifGpioLight::new_wrapped("My light!", 3, &cupi).unwrap();
 
         // Add the peripherals to the manager
         perifs.add_perif(button).unwrap();
@@ -40,7 +42,7 @@ fn main() {
                     PerifType::GpioLight(ref mut perif) => {
                         perif.toggle();
                     },
-                    PerifType::GpioButton(ref mut perif) => {
+                    PerifType::GpioButton(ref perif) => {
                         if perif.is_pressed().unwrap() {
                             println!("Button pressed!");
                         } else {
