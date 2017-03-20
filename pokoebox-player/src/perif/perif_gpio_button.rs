@@ -9,6 +9,7 @@ use super::traits::with_sig::WithSig;
 use super::signal::input_gpio_toggle::InputGpioToggle;
 use super::signal::sig_id::SigId;
 use super::signal::traits::sig_in::SigIn;
+use super::signal::traits::sig_in_toggle::SigInToggle;
 use super::perif::Perif;
 
 /// Signal ID of the button.
@@ -48,6 +49,11 @@ impl PerifGpioButton {
 
         // Wrap and return
         Ok(PerifType::GpioButton(perif))
+    }
+
+    /// Check whether the button is pressed.
+    pub fn is_pressed(&self) -> Result<bool, Error> {
+        self.sig_button.state()
     }
 }
 

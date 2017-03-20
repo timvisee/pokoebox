@@ -8,6 +8,7 @@ use super::traits::with_sig::WithSig;
 use super::traits::with_outputs::WithOutputs;
 use super::signal::sig_id::SigId;
 use super::signal::traits::sig_out::SigOut;
+use super::signal::traits::sig_out_light::SigOutLight;
 use super::signal::output_gpio_light::OutputGpioLight;
 use super::perif::Perif;
 
@@ -48,6 +49,21 @@ impl PerifGpioLight {
 
         // Wrap and return
         Ok(PerifType::GpioLight(perif))
+    }
+
+    /// Get the current state of the light.
+    pub fn state(&self) -> Result<bool, Error> {
+        self.sig_light.state()
+    }
+
+    /// Set the state of the light.
+    pub fn set_state(&mut self, state: bool) -> Result<(), Error> {
+        self.sig_light.set_state(state)
+    }
+
+    /// Toggle the light.
+    pub fn toggle(&mut self) -> Result<(), Error> {
+        self.sig_light.toggle()
     }
 }
 

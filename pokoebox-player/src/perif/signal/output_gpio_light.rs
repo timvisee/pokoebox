@@ -51,6 +51,30 @@ impl OutputGpioLight {
 
         Ok(obj)
     }
+
+    /// Find the GPIO pin for the light.
+    fn find_light_pin(&self) -> Result<&Pin, Error> {
+        // Get the light pin
+        let result = self.gpio_pin(GPIO_PIN_KEY_LIGHT);
+        if result.is_none() {
+            return Err(Error::new("Unable to get light pin"));
+        }
+
+        // Unwrap the pin, and set the state
+        Ok(result.unwrap())
+    }
+
+    /// Find the GPIO pin for the light, mutable.
+    fn find_light_pin_mut(&mut self) -> Result<&mut Pin, Error> {
+        // Get the light pin
+        let result = self.gpio_pin_mut(GPIO_PIN_KEY_LIGHT);
+        if result.is_none() {
+            return Err(Error::new("Unable to get light pin"));
+        }
+
+        // Unwrap the pin, and set the state
+        Ok(result.unwrap())
+    }
 }
 
 impl Sig for OutputGpioLight {
@@ -90,16 +114,17 @@ impl SigOut for OutputGpioLight {}
 impl SigOutGpio for OutputGpioLight {}
 
 impl SigOutLight for OutputGpioLight {
+    fn state(&self) -> Result<bool, Error> {
+        Ok(self.find_light_pin()?.read_bool())
+    }
+
     fn set_state(&mut self, state: bool) -> Result<(), Error> {
-        // Get the light pin
-        let result = self.gpio_pin_mut(GPIO_PIN_KEY_LIGHT);
-        if result.is_none() {
-            return Err(Error::new("Unable to get light pin"));
-        }
+        self.find_light_pin_mut()?.write_bool(state);
+        Ok(())
+    }
 
-        // Unwrap the pin, and set the state
-        result.unwrap().write_bool(state);
-
+    fn toggle(&mut self) -> Result<(), Error> {
+        self.find_light_pin_mut()?.write_inverse();
         Ok(())
     }
 }

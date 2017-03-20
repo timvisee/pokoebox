@@ -28,4 +28,9 @@ impl PerifManager {
     pub fn perifs(&self) -> &Vec<PerifType> {
         &self.perifs
     }
+
+    /// Get a list of peripherals which as being managed, mutable.
+    pub fn perifs_mut(&mut self) -> &mut Vec<PerifType> {
+        &mut self.perifs
+    }
 }

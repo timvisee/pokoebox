@@ -56,6 +56,17 @@ impl InputGpioToggle {
 
         Ok(obj)
     }
+
+    /// Find the button signal pin.
+    fn find_button_pin(&self) -> Result<&Pin, Error> {
+        // Get the button pin
+        let result = self.gpio_pin(GPIO_PIN_KEY_BUTTON);
+        if result.is_none() {
+            return Err(Error::new("Unable to get button pin"));
+        }
+
+        Ok(result.unwrap())
+    }
 }
 
 impl Sig for InputGpioToggle {
@@ -96,14 +107,7 @@ impl SigInGpio for InputGpioToggle {}
 
 impl SigInToggle for InputGpioToggle {
     fn state(&self) -> Result<bool, Error> {
-        // Get the button pin
-        let result = self.gpio_pin(GPIO_PIN_KEY_BUTTON);
-        if result.is_none() {
-            return Err(Error::new("Unable to get button pin"));
-        }
-
-        // Read the pin state, and return it
-        Ok(result.unwrap().read_bool())
+        Ok(self.find_button_pin()?.read_bool())
     }
 }
 

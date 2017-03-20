@@ -34,10 +34,18 @@ fn main() {
 
         // Loop to invoke some actions as a test
         loop {
-            for perif in perifs.perifs() {
+            for perif in perifs.perifs_mut() {
                 match *perif {
-                    PerifType::GpioLight(ref perif) => println!("Light!"),
-                    PerifType::GpioButton(ref perif) => println!("Button!")
+                    PerifType::GpioLight(ref mut perif) => {
+                        perif.toggle();
+                    },
+                    PerifType::GpioButton(ref mut perif) => {
+                        if perif.is_pressed().unwrap() {
+                            println!("Button pressed!");
+                        } else {
+                            println!("Button not pressed!");
+                        }
+                    }
                 }
             }
         }
