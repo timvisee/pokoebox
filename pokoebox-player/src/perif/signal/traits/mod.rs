@@ -7,6 +7,8 @@ pub mod sig_gpio;
 pub mod sig_in;
 #[cfg(feature = "rpi")]
 pub mod sig_in_gpio;
+#[cfg(feature = "rpi")]
+pub mod sig_in_gpio_toggle;
 pub mod sig_in_toggle;
 pub mod sig_out;
 #[cfg(feature = "rpi")]
