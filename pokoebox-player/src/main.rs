@@ -25,30 +25,30 @@ fn main() {
         let cupi = CuPi::new().unwrap();
 
         // Create a pin configuration
-//        let pin_config = PinConfig::new_with_pin_and_io(0, IoMode::Output);
-        let mut pin_config = PinConfig::new_with_pin_and_io(0, IoMode::Input);
-        pin_config.set_pull_mode(PullMode::PullDown);
+        let pin_config = PinConfig::new_with_pin_and_io(0, IoMode::Output);
+//        let mut pin_config = PinConfig::new_with_pin_and_io(0, IoMode::Input);
+//        pin_config.set_pull_mode(PullMode::PullUp);
 
         // Create the pint
         let mut pin = pin_config.into_pin(&cupi).unwrap();
 
-//        loop {
-//            println!("Pin 0: ON");
-//            pin.high();
-//            delay_ms(200);
-//
-//            println!("Pin 0: OFF");
-//            pin.low();
-//            delay_ms(200);
-//        }
-
         loop {
-            match pin.read() {
-                Logic::High => println!("Pin 0 is HIGH"),
-                Logic::Low => println!("Pin 0 is LOW"),
-            }
+            println!("Pin 0: ON");
+            pin.high();
+            delay_ms(200);
+
+            println!("Pin 0: OFF");
+            pin.low();
             delay_ms(200);
         }
+
+//        loop {
+//            match pin.read() {
+//                Logic::High => println!("Pin 0 is HIGH"),
+//                Logic::Low => println!("Pin 0 is LOW"),
+//            }
+//            delay_ms(200);
+//        }
     }
 
     // Set up the gui

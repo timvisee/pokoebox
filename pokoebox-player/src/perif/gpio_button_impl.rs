@@ -3,24 +3,24 @@
 use error::Error;
 use std::collections::HashMap;
 use super::cupi::PinInput;
-use super::gpio_perif_inputs::GpioPerifInputs;
+use super::gpio_perif::GpioPerifInputs;
 use super::perif::Perif;
 
 /// Input pin key for the button pin.
 pub const INPUT_PIN_KEY_BUTTON: &'static str = "button";
 
 /// Trait for a GPIO connected button.
-pub struct GpioButton {
+pub struct GpioButtonImpl {
     name: &'static str,
     inputs: HashMap<&'static str, PinInput>
 }
 
-impl GpioButton {
+impl GpioButtonImpl {
 
     /// Construct a new GPIO button.
     pub fn new(name: &'static str, input_pin: PinInput) -> Self {
         // Create the struct
-        let mut gpio_button = GpioButton {
+        let mut gpio_button = GpioButtonImpl {
             name: name,
             inputs: HashMap::new()
         };
@@ -37,14 +37,14 @@ impl GpioButton {
     }
 }
 
-impl GpioPerifInputs for GpioButton {
+impl GpioPerifInputs for GpioButtonImpl {
 
     fn input_pins(&self) -> &HashMap<&'static str, PinInput> {
         &self.inputs
     }
 }
 
-impl Perif for GpioButton {
+impl Perif for GpioButtonImpl {
 
     fn name(&self) -> &'static str {
         &self.name
