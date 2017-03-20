@@ -16,6 +16,7 @@ use pokoebox_player::perif::perif_gpio_button::PerifGpioButton;
 #[cfg(feature = "rpi")]
 use pokoebox_player::perif::perif_gpio_light::PerifGpioLight;
 use pokoebox_player::perif::perif_type::PerifType;
+use pokoebox_player::perif::traits::button::Button;
 
 fn main() {
     #[cfg(feature = "rpi")]

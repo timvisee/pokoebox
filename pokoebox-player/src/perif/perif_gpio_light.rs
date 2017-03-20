@@ -4,13 +4,13 @@ use super::cupi::CuPi;
 
 use error::Error;
 use super::perif_type::PerifType;
+use super::traits::perif::Perif;
 use super::traits::with_sig::WithSig;
 use super::traits::with_outputs::WithOutputs;
 use super::signal::sig_id::SigId;
 use super::signal::traits::sig_out::SigOut;
 use super::signal::traits::sig_out_light::SigOutLight;
 use super::signal::output_gpio_light::OutputGpioLight;
-use super::perif::Perif;
 
 /// Signal ID of the light.
 pub const SIG_LIGHT_ID: &'static str = "light";

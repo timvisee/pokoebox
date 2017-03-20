@@ -4,13 +4,14 @@ use super::cupi::CuPi;
 
 use error::Error;
 use super::perif_type::PerifType;
+use super::traits::button::Button;
+use super::traits::perif::Perif;
 use super::traits::with_inputs::WithInputs;
 use super::traits::with_sig::WithSig;
 use super::signal::input_gpio_toggle::InputGpioToggle;
 use super::signal::sig_id::SigId;
 use super::signal::traits::sig_in::SigIn;
 use super::signal::traits::sig_in_toggle::SigInToggle;
-use super::perif::Perif;
 
 /// Signal ID of the button.
 pub const SIG_BUTTON_ID: &'static str = "button";
@@ -50,9 +51,12 @@ impl PerifGpioButton {
         // Wrap and return
         Ok(PerifType::GpioButton(perif))
     }
+}
 
+/// This is a button.
+impl Button for PerifGpioButton {
     /// Check whether the button is pressed.
-    pub fn is_pressed(&self) -> Result<bool, Error> {
+    fn is_pressed(&self) -> Result<bool, Error> {
         self.sig_button.state()
     }
 }
