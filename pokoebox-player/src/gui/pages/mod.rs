@@ -1,5 +1,5 @@
 extern crate gtk;
 
-pub mod home;
+pub mod launchpad;
 pub mod test;
 pub mod volume;

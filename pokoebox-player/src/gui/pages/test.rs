@@ -5,7 +5,7 @@ use gui::page::Page;
 use gui::page::Helper;
 
 /// Name of the page.
-const PAGE_NAME: &'static str = "Test Page";
+const PAGE_NAME: &'static str = "Test";
 
 /// Test page.
 pub struct Test {

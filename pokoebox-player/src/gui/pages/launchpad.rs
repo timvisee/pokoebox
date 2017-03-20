@@ -5,7 +5,7 @@ use gui::page::Page;
 use gui::page::Helper;
 
 /// Name of the page.
-const PAGE_NAME: &'static str = "Home Page";
+const PAGE_NAME: &'static str = "Launchpad";
 const BUTTON_SPACING: u32 = 16;
 const BUTTON_GRID_SIZE: (i32, i32) = (450, 260);
 

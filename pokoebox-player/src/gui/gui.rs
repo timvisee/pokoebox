@@ -6,7 +6,7 @@ use error::Error;
 use super::master_container::MasterContainer;
 use super::master_frame::MasterFrame;
 use super::master_ui::MasterUi;
-use super::pages::home::Home;
+use super::pages::launchpad::Home;
 use super::pages::test::Test;
 use super::pages::volume::Volume;
 
