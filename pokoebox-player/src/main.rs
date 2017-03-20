@@ -9,7 +9,9 @@ use cupi::{CuPi, delay_ms};
 use cupi::board;
 use gtk::prelude::*;
 
+use pokoebox_player::app::App;
 use pokoebox_player::gui::gui::Gui;
+use pokoebox_player::manifest;
 use pokoebox_player::perif::perif_manager::PerifManager;
 #[cfg(feature = "rpi")]
 use pokoebox_player::perif::perif_gpio_button::PerifGpioButton;
@@ -19,6 +21,13 @@ use pokoebox_player::perif::perif_type::PerifType;
 use pokoebox_player::perif::traits::button::Button;
 
 fn main() {
+    // Show an initial message
+    println!("Starting {} v{}...", manifest::APP_NAME, manifest::APP_VERSION_NAME);
+    println!("Developed by {}.", manifest::APP_ABOUT);
+
+    // Create a new app instance
+    let app = App::new();
+
     #[cfg(feature = "rpi")]
     {
         // Set up CuPi
