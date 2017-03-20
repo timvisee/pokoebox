@@ -46,4 +46,9 @@ impl App {
     pub fn perif_manager(&self) -> &PerifManager {
         &self.perif_manager
     }
+
+    /// Run the main loop of the application.
+    pub fn main_loop(&self) {
+        self.gui.main_loop();
+    }
 }

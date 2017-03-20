@@ -114,4 +114,9 @@ impl Gui {
             master_frame.unwrap().show();
         }
     }
+
+    /// Run the main loop of the GUI.
+    pub fn main_loop(&self) {
+        gtk::main();
+    }
 }

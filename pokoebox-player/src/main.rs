@@ -1,6 +1,5 @@
 #[cfg(feature = "rpi")]
 extern crate cupi;
-extern crate gtk;
 #[macro_use]
 extern crate log;
 extern crate pokoebox_player;
@@ -9,22 +8,10 @@ extern crate pokoebox_player;
 use cupi::{CuPi, delay_ms};
 #[cfg(feature = "rpi")]
 use cupi::board;
-use gtk::prelude::*;
 
 use pokoebox_player::app::App;
-use pokoebox_player::gui::gui::Gui;
 use pokoebox_player::logger::Logger;
 use pokoebox_player::manifest;
-#[cfg(feature = "rpi")]
-use pokoebox_player::perif::perif_manager::PerifManager;
-#[cfg(feature = "rpi")]
-use pokoebox_player::perif::perif_gpio_button::PerifGpioButton;
-#[cfg(feature = "rpi")]
-use pokoebox_player::perif::perif_gpio_light::PerifGpioLight;
-#[cfg(feature = "rpi")]
-use pokoebox_player::perif::perif_type::PerifType;
-#[cfg(feature = "rpi")]
-use pokoebox_player::perif::traits::button::Button;
 
 fn main() {
     // Initialize the application logger
@@ -35,10 +22,22 @@ fn main() {
     info!("Developed by {}.", manifest::APP_ABOUT);
 
     // Create a new app instance
-    let _ = App::new().expect("Failed to start application.");
+    let mut app = App::new().expect("Failed to initialize application.");
+
+    // Start the application
+    app.start().expect("Failed to start application.");
+
+    // Start the main loop of the application
+    app.main_loop();
 
     #[cfg(feature = "rpi")]
     {
+        use pokoebox_player::perif::perif_manager::PerifManager;
+        use pokoebox_player::perif::perif_gpio_button::PerifGpioButton;
+        use pokoebox_player::perif::perif_gpio_light::PerifGpioLight;
+        use pokoebox_player::perif::perif_type::PerifType;
+        use pokoebox_player::perif::traits::button::Button;
+
         // Set up CuPi
         let cupi = CuPi::new().unwrap();
 
@@ -74,10 +73,7 @@ fn main() {
             println!("Waiting 500ms...");
             delay_ms(500);
         }
-    }
 
-    #[cfg(feature = "rpi")]
-    {
         use self::pokoebox_player::gpio::pin_config::{PinConfig, IoMode};
 
         // Print the board we're using
@@ -112,48 +108,4 @@ fn main() {
 //            delay_ms(200);
 //        }
     }
-
-    // Set up the gui
-    let mut gui = Gui::new().unwrap();
-    gui.start();
-
-    // Show the gui
-    gui.show_master_frame();
-
-    // Create the main grid
-    let main_grid = gtk::Grid::new();
-//    window.add(&main_grid);
-
-    // Create a header
-    let header = gtk::Box::new(gtk::Orientation::Horizontal, 10);
-    main_grid.attach(&header, 0, 0, 1, 1);
-
-    // Create a button box for in the header
-    let button_box = gtk::ButtonBox::new(gtk::Orientation::Horizontal);
-    header.pack_start(&button_box, false, false, 0);
-
-    // Add a few buttons
-    let button = gtk::Button::new_with_label("A");
-    let button2 = gtk::Button::new_with_label("B");
-    button_box.add(&button);
-    button_box.add(&button2);
-
-    // Add a close button to the end of the header
-    let close_button = gtk::Button::new_with_label("X");
-    header.pack_end(&close_button, false, false, 0);
-
-    // Create the main container
-    let main_container = gtk::Viewport::new(None, None);
-    main_container.set_border_width(10);
-    main_container.set_hexpand(true);
-    main_container.set_vexpand(true);
-    main_grid.attach(&main_container, 0, 1, 1, 1);
-
-    // Create a center button
-    let button3 = gtk::Button::new_with_label("Button 3!");
-    main_container.add(&button3);
-
-    // Show the application and run GTKs main loop
-//    window.show_all();
-    gtk::main();
 }
