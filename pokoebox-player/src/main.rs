@@ -25,18 +25,20 @@ fn main() {
         let mut perifs = PerifManager::new();
 
         // Create a new button and light peripheral
-        let button = PerifGpioButton::new("My button!", 2, &cupi).unwrap();
-        let light = PerifGpioLight::new("My light!", 0, &cupi).unwrap();
+        let button = PerifGpioButton::new_wrapped("My button!", 2, &cupi).unwrap();
+        let light = PerifGpioLight::new_wrapped("My light!", 0, &cupi).unwrap();
 
         // Add the peripherals to the manager
-        perifs.add_perif(Box::new(button)).unwrap();
-        perifs.add_perif(Box::new(light)).unwrap();
+        perifs.add_perif(button).unwrap();
+        perifs.add_perif(light).unwrap();
 
-        for perif in perifs.perifs() {
-            match perif.perif_type() {
-                PerifType::GpioLight => { println!("LIGHT"); },
-                PerifType::GpioButton => { println!("BUTTON"); },
-                _ => { println!("NOPE"); }
+        // Loop to invoke some actions as a test
+        loop {
+            for perif in perifs.perifs() {
+                match *perif {
+                    PerifType::GpioLight(ref perif) => println!("Light!"),
+                    PerifType::GpioButton(ref perif) => println!("Button!")
+                }
             }
         }
     }

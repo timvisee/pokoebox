@@ -3,22 +3,19 @@
 use super::cupi::CuPi;
 
 use error::Error;
+use super::perif_type::PerifType;
 use super::traits::with_inputs::WithInputs;
 use super::traits::with_sig::WithSig;
 use super::signal::input_gpio_toggle::InputGpioToggle;
 use super::signal::sig_id::SigId;
 use super::signal::traits::sig_in::SigIn;
 use super::perif::Perif;
-use super::perif_type::PerifType;
 
 /// Signal ID of the button.
 pub const SIG_BUTTON_ID: &'static str = "button";
 
 /// Name of the button signal.
 pub const SIG_BUTTON_NAME: &'static str = "Button";
-
-/// Peripheral type.
-pub const PERIF_TYPE: PerifType = PerifType::GpioButton;
 
 /// Button peripheral implementation.
 /// This can be used to bind actions to a button press.
@@ -28,7 +25,7 @@ pub struct PerifGpioButton {
 }
 
 impl PerifGpioButton {
-    /// Construct a new GPIO light peripheral.
+    /// Construct a new GPIO button peripheral.
     pub fn new(name: &'static str, pin: usize, cupi: &CuPi) -> Result<Self, Error> {
         // Create a vector of output signals
         let mut inputs: Vec<Box<SigIn>> = Vec::new();
@@ -47,6 +44,15 @@ impl PerifGpioButton {
             inputs: inputs
         })
     }
+
+    /// Construct a new wrapped GPIO button peripheral.
+    pub fn new_wrapped(name: &'static str, pin: usize, cupi: &CuPi) -> Result<PerifType, Error> {
+        // Create a new peripheral instance
+        let perif = Self::new(name, pin, cupi)?;
+
+        // Wrap and return
+        Ok(PerifType::GpioButton(perif))
+    }
 }
 
 /// This peripheral has inputs.
@@ -62,9 +68,5 @@ impl WithSig for PerifGpioButton {}
 impl Perif for PerifGpioButton {
     fn name(&self) -> &'static str {
         &self.name
-    }
-
-    fn perif_type(&self) -> PerifType {
-        PERIF_TYPE
     }
 }

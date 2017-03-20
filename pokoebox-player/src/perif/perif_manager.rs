@@ -1,9 +1,10 @@
 use error::Error;
-use super::perif::Perif;
+use super::perif_type::PerifType;
 
 /// The manager for external peripherals.
 pub struct PerifManager {
-    perifs: Vec<Box<Perif>>
+    /// List of peripherals which are managed.
+    perifs: Vec<PerifType>
 }
 
 impl PerifManager {
@@ -16,7 +17,7 @@ impl PerifManager {
     }
 
     /// Add the given peripheral.
-    pub fn add_perif(&mut self, perif: Box<Perif>) -> Result<(), Error> {
+    pub fn add_perif(&mut self, perif: PerifType) -> Result<(), Error> {
         // Add the peripheral to the list
         self.perifs.push(perif);
 
@@ -24,7 +25,7 @@ impl PerifManager {
     }
 
     /// Get a list of peripherals which as being managed.
-    pub fn perifs(&self) -> &Vec<Box<Perif>> {
+    pub fn perifs(&self) -> &Vec<PerifType> {
         &self.perifs
     }
 }
