@@ -1,6 +1,8 @@
 #[cfg(feature = "rpi")]
 extern crate cupi;
 extern crate gtk;
+#[macro_use]
+extern crate log;
 extern crate pokoebox_player;
 
 #[cfg(feature = "rpi")]
@@ -11,22 +13,29 @@ use gtk::prelude::*;
 
 use pokoebox_player::app::App;
 use pokoebox_player::gui::gui::Gui;
+use pokoebox_player::logger::Logger;
 use pokoebox_player::manifest;
+#[cfg(feature = "rpi")]
 use pokoebox_player::perif::perif_manager::PerifManager;
 #[cfg(feature = "rpi")]
 use pokoebox_player::perif::perif_gpio_button::PerifGpioButton;
 #[cfg(feature = "rpi")]
 use pokoebox_player::perif::perif_gpio_light::PerifGpioLight;
+#[cfg(feature = "rpi")]
 use pokoebox_player::perif::perif_type::PerifType;
+#[cfg(feature = "rpi")]
 use pokoebox_player::perif::traits::button::Button;
 
 fn main() {
+    // Initialize the application logger
+    Logger::init().expect("Failed to initialize logger.");
+
     // Show an initial message
-    println!("Starting {} v{}...", manifest::APP_NAME, manifest::APP_VERSION_NAME);
-    println!("Developed by {}.", manifest::APP_ABOUT);
+    info!("Starting {} v{}...", manifest::APP_NAME, manifest::APP_VERSION_NAME);
+    info!("Developed by {}.", manifest::APP_ABOUT);
 
     // Create a new app instance
-    let app = App::new();
+    let _ = App::new().expect("Failed to start application.");
 
     #[cfg(feature = "rpi")]
     {

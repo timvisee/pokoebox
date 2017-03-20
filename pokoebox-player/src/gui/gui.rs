@@ -35,9 +35,11 @@ impl Gui {
     /// Returns an error if GTK failed to initialize, blocking further GTK usage.
     pub fn new() -> Result<Self, Error> {
         // Initialize GTK, handle errors
+        debug!("Initializing GTK...");
         if gtk::init().is_err() {
             return Err(Error::new("Failed to initialize GTK"));
         }
+        debug!("Successfully initialized GTK.");
 
         // Build the object and return it
         Ok(Gui {
@@ -50,8 +52,10 @@ impl Gui {
     /// Start the gui.
     /// This sets up the master frame, and shows it.
     pub fn start(&mut self) {
+        debug!("Starting GUI...");
         self.setup();
         self.show_master_frame();
+        debug!("Successfully started GUI.");
     }
 
     /// Set up the main gui interface.

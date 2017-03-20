@@ -4,6 +4,7 @@ version = "0.0.1"
 dependencies = [
  "cupi 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "gtk 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "log 0.3.7 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -240,6 +241,11 @@ version = "0.2.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "log"
+version = "0.3.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
 name = "mmap"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -361,6 +367,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum gtk-sys 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)" = "7445eb281879ac472e5f5816058d53eaceff2bab7b78a095a4044f4c0cccc754"
 "checksum libc 0.1.12 (registry+https://github.com/rust-lang/crates.io-index)" = "e32a70cf75e5846d53a673923498228bbec6a8624708a9ea5645f075d6276122"
 "checksum libc 0.2.21 (registry+https://github.com/rust-lang/crates.io-index)" = "88ee81885f9f04bff991e306fea7c1c60a5f0f9e409e99f6b40e3311a3363135"
+"checksum log 0.3.7 (registry+https://github.com/rust-lang/crates.io-index)" = "5141eca02775a762cc6cd564d8d2c50f67c0ea3a372cbf1c51592b3e029e10ad"
 "checksum mmap 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "0bc85448a6006dd2ba26a385a564a8a0f1f2c7e78c70f1a70b2e0f4af286b823"
 "checksum nix 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)" = "7a7bb1da2be7da3cbffda73fc681d509ffd9e665af478d2bee1907cee0bc64b2"
 "checksum pango 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)" = "21d777a87f13107b96be840dec1c34e0fe1a7b5630dd90c74b4eec923c439187"
