@@ -34,13 +34,13 @@ impl Header {
 
     /// Build and add container controls to the container
     fn build_container_controls(container: &gtk::Box) {
-        // Create a left button box
-        let buttons_left = gtk::ButtonBox::new(gtk::Orientation::Horizontal);
-        container.pack_start(&buttons_left, false, false, 0);
-
         // Create a home button
-        let home_button = gtk::Button::new_with_label("Home");
-        buttons_left.add(&home_button);
+        let home_button = gtk::Button::new();
+        let home_image = gtk::Image::new_from_icon_name("go-home", IconSize::LargeToolbar.into());
+        home_button.add(&home_image);
+        home_button.set_relief(ReliefStyle::None);
+        home_button.set_focus_on_click(false);
+        container.pack_start(&home_button, false, false, 0);
 
         // Create a temperature label
         let temp_label = gtk::Label::new("Temp: 56°C");

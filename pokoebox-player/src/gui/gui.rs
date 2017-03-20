@@ -106,12 +106,10 @@ impl Gui {
     /// Show the master frame and all it's inner widgets, if it's not already visible.
     /// If there's no master frame, nothing happens.
     pub fn show_master_frame(&self) {
-        // Get the master frame
-        let master_frame = self.master_frame();
-
-        // Show it
-        if master_frame.is_some() {
-            master_frame.unwrap().show();
+        // Show the master frame if any instance exists
+        if let Some(master_frame) = self.master_frame() {
+            info!("Showing master GUI frame...");
+            master_frame.show();
         }
     }
 
