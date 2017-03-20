@@ -34,6 +34,7 @@ fn main() {
 
         // Loop to invoke some actions as a test
         loop {
+            // Loop through all peripherals
             for perif in perifs.perifs_mut() {
                 match *perif {
                     PerifType::GpioLight(ref mut perif) => {
@@ -48,6 +49,9 @@ fn main() {
                     }
                 }
             }
+
+            println!("Waiting 500ms...");
+            delay_ms(500);
         }
     }
 
