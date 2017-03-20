@@ -3,16 +3,35 @@ extern crate cupi;
 extern crate gtk;
 extern crate pokoebox_player;
 
-use pokoebox_player::gui::gui::Gui;
-
-use gtk::prelude::*;
-
 #[cfg(feature = "rpi")]
 use cupi::{CuPi, delay_ms};
 #[cfg(feature = "rpi")]
 use cupi::board;
+use gtk::prelude::*;
+
+use pokoebox_player::gui::gui::Gui;
+use pokoebox_player::perif::perif_manager::PerifManager;
+use pokoebox_player::perif::perif_gpio_button::PerifGpioButton;
+use pokoebox_player::perif::perif_gpio_light::PerifGpioLight;
 
 fn main() {
+    #[cfg(feature = "rpi")]
+    {
+        // Set up CuPi
+        let cupi = CuPi::new().unwrap();
+
+        // Create a new peripheral manager
+        let mut perifs = PerifManager::new();
+
+        // Create a new button and light peripheral
+        let button = PerifGpioButton::new("My button!", 2, &cupi).unwrap();
+        let light = PerifGpioLight::new("My light!", 0, &cupi).unwrap();
+
+        // Add the peripherals to the manager
+        perifs.add_perif(Box::new(button));
+        perifs.add_perif(Box::new(light));
+    }
+
     #[cfg(feature = "rpi")]
     {
         use self::pokoebox_player::gpio::pin_config::{PinConfig, IoMode};
