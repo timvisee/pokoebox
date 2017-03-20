@@ -40,6 +40,8 @@ impl Page for Volume {
         let slider = gtk::Scale::new_with_range(gtk::Orientation::Vertical, 0f64, 100f64, 0.1f64);
         slider.add_mark(50f64, PositionType::Right, "M");
         slider.set_vexpand(true);
+        slider.set_value_pos(PositionType::Right);
+        slider.set_inverted(true);
         self.container.add(&slider);
     }
 

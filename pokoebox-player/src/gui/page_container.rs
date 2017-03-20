@@ -2,8 +2,12 @@ use std::boxed;
 
 use super::gtk;
 use super::gtk::*;
+use super::gtk::prelude::*;
 
 use super::page::Page;
+
+/// The margin of the tab/page label
+const TAB_LABEL_MARGIN: i32 = 8;
 
 /// Container holding and managing the application pages.
 pub struct PageContainer {
@@ -43,9 +47,16 @@ impl PageContainer {
         // Add the pages GTK widget to the page container
         self.container.add(page.gtk_widget());
 
-        // Set the name of the page
-        self.container.set_tab_label_text(page.gtk_widget(), page.page_name());
+        // Configure the tab
         self.container.set_tab_reorderable(page.gtk_widget(), true);
+
+        // Create a tab label
+        let label = gtk::Label::new(page.page_name());
+        label.set_margin_left(TAB_LABEL_MARGIN);
+        label.set_margin_right(TAB_LABEL_MARGIN);
+        label.set_margin_top(TAB_LABEL_MARGIN);
+        label.set_margin_bottom(TAB_LABEL_MARGIN);
+        self.container.set_tab_label(page.gtk_widget(), Some(&label));
 
         // Add the page to the list of pages
         self.pages.push(page);
