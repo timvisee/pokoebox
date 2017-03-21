@@ -3,9 +3,9 @@
 use std::collections::HashMap;
 
 use error::Error;
+use gpio::gpio_manager::GpioManager;
 use gpio::pin::Pin;
 use gpio::pin_config::PinConfig;
-use super::cupi::CuPi;
 use super::sig::Sig;
 
 /// An input or output signal for a peripheral that uses GPIO features.
@@ -20,7 +20,7 @@ pub trait SigGpio: Sig {
     /// Setup all the pins from the pin configurations.
     /// All pin configurations will be consumed, and this leaves the list of configurations empty.
     /// This uses the pin configurations from the `Self.gpio_pin_configs();` method.
-    fn setup_pins(&mut self, cupi: &CuPi) -> Result<(), Error> {
+    fn setup_pins(&mut self, gpio_manager: &GpioManager) -> Result<(), Error> {
         // Create a list of pins to add later on
         let mut pins = HashMap::new();
 
@@ -34,7 +34,7 @@ pub trait SigGpio: Sig {
             // Iterate through the list of pin configurations
             for (key, config) in configs.drain() {
                 // Convert the configuration into a pin
-                let pin = config.into_pin(&cupi);
+                let pin = config.into_pin(gpio_manager.cupi());
 
                 // If an error, set the result and break this loop
                 if pin.is_err() {

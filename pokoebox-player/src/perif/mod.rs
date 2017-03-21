@@ -1,7 +1,4 @@
 #[cfg(feature = "rpi")]
-extern crate cupi;
-
-#[cfg(feature = "rpi")]
 pub mod perif_gpio_button;
 #[cfg(feature = "rpi")]
 pub mod perif_gpio_light;

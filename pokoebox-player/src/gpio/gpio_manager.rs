@@ -12,6 +12,8 @@ pub struct GpioManager {
 impl GpioManager {
     /// Constructor.
     pub fn new() -> Result<Self, Error> {
+        debug!("Initializing GPIO manager...");
+
         // Initialize CuPi
         let cupi = CuPi::new();
         if cupi.is_err() {
@@ -19,9 +21,13 @@ impl GpioManager {
         }
 
         // Construct and return
-        GpioManager {
-            cupi: cupi
-        }
+        let manager = Ok(GpioManager {
+            cupi: cupi.unwrap()
+        });
+
+        debug!("Successfully initialized GPIO manager.");
+
+        manager
     }
 
     /// Get the CuPi instance.

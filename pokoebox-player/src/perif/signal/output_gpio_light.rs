@@ -3,9 +3,9 @@
 use std::collections::HashMap;
 
 use error::Error;
+use gpio::gpio_manager::GpioManager;
 use gpio::pin::Pin;
 use gpio::pin_config::{PinConfig, IoMode};
-use super::cupi::CuPi;
 use super::sig_id::SigId;
 use super::traits::sig::Sig;
 use super::traits::sig_gpio::SigGpio;
@@ -28,7 +28,7 @@ pub struct OutputGpioLight {
 impl OutputGpioLight {
     /// Create a new instance.
     /// The GPIO pin of the light must be passed to the `pin` parameter.
-    pub fn new(id: SigId, name: &'static str, pin: usize, cupi: &CuPi) -> Result<Self, Error> {
+    pub fn new(id: SigId, name: &'static str, pin: usize, gpio_manager: &GpioManager) -> Result<Self, Error> {
         // Create a hash map of pin configurations
         let mut pin_configs = HashMap::new();
 
@@ -47,7 +47,7 @@ impl OutputGpioLight {
         };
 
         // Setup the pins
-        obj.setup_pins(cupi)?;
+        obj.setup_pins(gpio_manager)?;
 
         Ok(obj)
     }

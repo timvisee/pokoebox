@@ -1,8 +1,7 @@
 #![cfg(feature = "rpi")]
 
-use super::cupi::CuPi;
-
 use error::Error;
+use gpio::gpio_manager::GpioManager;
 use super::perif_type::PerifType;
 use super::traits::perif::Perif;
 use super::traits::with_sig::WithSig;
@@ -27,13 +26,13 @@ pub struct PerifGpioLight {
 
 impl PerifGpioLight {
     /// Construct a new GPIO light peripheral.
-    pub fn new(name: &'static str, pin: usize, cupi: &CuPi) -> Result<Self, Error> {
+    pub fn new(name: &'static str, pin: usize, gpio_manager: &GpioManager) -> Result<Self, Error> {
         // Create a GPIO light signal instance, and add it to the outputs
         let sig_light = OutputGpioLight::new(
             SigId::new(SIG_LIGHT_ID),
             SIG_LIGHT_NAME,
             pin,
-            cupi
+            gpio_manager
         )?;
 
         Ok(PerifGpioLight {
@@ -43,9 +42,9 @@ impl PerifGpioLight {
     }
 
     /// Create a new wrapped GPIO light peripheral.
-    pub fn new_wrapped(name: &'static str, pin: usize, cupi: &CuPi) -> Result<PerifType, Error> {
+    pub fn new_wrapped(name: &'static str, pin: usize, gpio_manager: &GpioManager) -> Result<PerifType, Error> {
         // Create a new peripheral instance
-        let perif = Self::new(name, pin, cupi)?;
+        let perif = Self::new(name, pin, gpio_manager)?;
 
         // Wrap and return
         Ok(PerifType::GpioLight(perif))

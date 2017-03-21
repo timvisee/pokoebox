@@ -1,6 +1,3 @@
-#[cfg(feature = "rpi")]
-extern crate cupi;
-
 pub mod sig;
 #[cfg(feature = "rpi")]
 pub mod sig_gpio;

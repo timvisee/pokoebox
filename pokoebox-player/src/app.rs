@@ -33,7 +33,7 @@ impl App {
             gui: Gui::new()?,
             action_manager: ActionManager::new(),
             perif_manager: PerifManager::new(),
-            gpio_manager: GpioManager::new(),
+            gpio_manager: GpioManager::new()?,
         };
 
         debug!("Application core initialized.");
