@@ -1,12 +1,17 @@
 #![cfg(feature = "rpi")]
 
+extern crate mio;
+
 use super::cupi::CuPi;
+use mio::{Poll, Events, Token, Ready, PollOpt, timer};
+use super::cupi::sys::Edge;
 
 use error::Error;
 
 /// GPIO manager.
 pub struct GpioManager {
-    cupi: CuPi
+    cupi: CuPi,
+    poll: Poll,
 }
 
 impl GpioManager {
@@ -20,9 +25,16 @@ impl GpioManager {
             return Err(Error::new("Failed to initialize CuPi for GPIO."));
         }
 
+        // Initialize a poll
+        let poll = Poll::new();
+        if poll.is_err() {
+            return Err(Error::new("Failed to initialize polling object for GPIO."));
+        }
+
         // Construct and return
         let manager = Ok(GpioManager {
-            cupi: cupi.unwrap()
+            cupi: cupi.unwrap(),
+            poll: poll.unwrap(),
         });
 
         debug!("Successfully initialized GPIO manager.");
@@ -33,5 +45,15 @@ impl GpioManager {
     /// Get the CuPi instance.
     pub fn cupi(&self) -> &CuPi {
         &self.cupi
+    }
+
+    /// Get the polling object.
+    pub fn poll(&self) -> &Poll {
+        &self.poll
+    }
+
+    /// Get a mutable polling object.
+    pub fn poll_mut(&mut self) -> &mut Poll {
+        &mut self.poll
     }
 }
