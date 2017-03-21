@@ -2,7 +2,6 @@ use std::boxed;
 
 use super::gtk;
 use super::gtk::*;
-use super::gtk::prelude::*;
 
 use super::page::Page;
 
