@@ -1,3 +1,4 @@
+use action::action_id::ActionId;
 use action::action_manager::ActionManager;
 use error::Error;
 use gui::gui::Gui;
@@ -39,6 +40,10 @@ impl App {
 
         // Load the normal actions
         self.action_manager.load_normal_actions();
+
+        // TODO: Remove this testing code
+        // Run the test action
+        self.action_manager.invoke_action(ActionId::new("test-action")).unwrap();
 
         // TODO: Start the peripheral manager here!
 

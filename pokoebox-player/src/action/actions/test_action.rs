@@ -1,3 +1,4 @@
+use error::Error;
 use super::{Action, ActionId};
 
 /// Unique ID of this action.
@@ -23,5 +24,12 @@ impl Action for TestAction {
 
     fn name(&self) -> &'static str {
         ACTION_NAME
+    }
+
+    fn invoke(&self) -> Result<bool, Error> {
+        // Show a status message
+        info!("Test action invoked!");
+
+        Ok(true)
     }
 }
