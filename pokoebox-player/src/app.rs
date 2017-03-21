@@ -1,6 +1,8 @@
 use action::action_id::ActionId;
 use action::action_manager::ActionManager;
 use error::Error;
+#[cfg(feature = "rpi")]
+use gpio::gpio_manager::GpioManager;
 use gui::gui::Gui;
 use perif::perif_manager::PerifManager;
 
@@ -14,10 +16,30 @@ pub struct App {
 
     /// Peripherals manager.
     perif_manager: PerifManager,
+
+    /// GPIO manager.
+    #[cfg(feature = "rpi")]
+    gpio_manager: GpioManager
 }
 
 impl App {
     /// Create a new app instance.
+    #[cfg(feature = "rpi")]
+    pub fn new() -> Result<Self, Error> {
+        debug!("Initializing application core...");
+
+        // Create the application instance
+        let app = App {
+            gui: Gui::new()?,
+            action_manager: ActionManager::new(),
+            perif_manager: PerifManager::new(),
+            gpio_manager: GpioManager::new(),
+        };
+
+        debug!("Application core initialized.");
+        Ok(app)
+    }
+    #[cfg(not(feature = "rpi"))]
     pub fn new() -> Result<Self, Error> {
         debug!("Initializing application core...");
 
@@ -58,6 +80,12 @@ impl App {
     /// Get the peripherals manager.
     pub fn perif_manager(&self) -> &PerifManager {
         &self.perif_manager
+    }
+
+    /// Get the GPIO manager.
+    #[cfg(feature = "rpi")]
+    pub fn gpio_manager(&self) -> &GpioManager {
+        &self.gpio_manager
     }
 
     /// Run the main loop of the application.
