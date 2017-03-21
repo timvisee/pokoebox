@@ -9,11 +9,16 @@ pub const ACTION_NAME: &'static str = "Test action";
 /// Test action.
 pub struct TestAction;
 
-impl TestAction {}
+impl TestAction {
+    /// Constructor.
+    pub fn new() -> Self {
+        TestAction
+    }
+}
 
 impl Action for TestAction {
     fn id(&self) -> ActionId {
-        ACTION_ID
+        ActionId::new(ACTION_ID)
     }
 
     fn name(&self) -> &'static str {

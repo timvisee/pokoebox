@@ -1,3 +1,4 @@
+use action::action_manager::ActionManager;
 use error::Error;
 use gui::gui::Gui;
 use perif::perif_manager::PerifManager;
@@ -6,6 +7,9 @@ use perif::perif_manager::PerifManager;
 pub struct App {
     /// Gui.
     gui: Gui,
+
+    /// Action manager
+    action_manager: ActionManager,
 
     /// Peripherals manager.
     perif_manager: PerifManager,
@@ -19,7 +23,8 @@ impl App {
         // Create the application instance
         let app = App {
             gui: Gui::new()?,
-            perif_manager: PerifManager::new()
+            action_manager: ActionManager::new(),
+            perif_manager: PerifManager::new(),
         };
 
         debug!("Application core initialized.");
@@ -31,6 +36,9 @@ impl App {
     pub fn start(&mut self) -> Result<(), Error> {
         // Start the GUI
         self.gui.start();
+
+        // Load the normal actions
+        self.action_manager.load_normal_actions();
 
         // TODO: Start the peripheral manager here!
 

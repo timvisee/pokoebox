@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use super::action::Action;
 use super::action_id::ActionId;
+use super::actions::test_action::TestAction;
 
 /// A struct to manage all available actions.
 pub struct ActionManager {
@@ -17,8 +18,19 @@ impl ActionManager {
         }
     }
 
+    /// Load a fixed list of 'normal' actions.
+    /// Some actions require extra metadata and/or parameters, those must be loaded manually.
+    pub fn load_normal_actions(&mut self) {
+        info!("Loading normal actions...");
+
+        self.add_action(Box::new(TestAction::new()));
+
+        info!("{} actions loaded.", self.actions.len());
+    }
+
     /// Add the given action to the manager.
     pub fn add_action(&mut self, action: Box<Action>) {
+        debug!("Adding action with ID '{}'...", action.as_ref().id());
         self.actions.insert(action.as_ref().id(), action);
     }
 

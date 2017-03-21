@@ -1,3 +1,6 @@
+use std::fmt;
+use std::fmt::{Display, Formatter};
+
 /// Action ID.
 #[derive(Eq, PartialEq, Copy, Clone, Hash)]
 pub struct ActionId {
@@ -15,5 +18,12 @@ impl ActionId {
     /// Get the action ID as a string.
     pub fn id(&self) -> &'static str {
         self.id
+    }
+}
+
+/// Make the action ID displayable.
+impl Display for ActionId {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        write!(f, "{}", self.id)
     }
 }
