@@ -29,7 +29,12 @@ pub struct OutputGpioLight {
 impl OutputGpioLight {
     /// Create a new instance.
     /// The GPIO pin of the light must be passed to the `pin` parameter.
-    pub fn new(id: SigId, name: &'static str, pin: usize, gpio_manager: &GpioManager) -> Result<Self> {
+    pub fn new(
+        id: SigId, 
+        name: &'static str,
+        pin: usize,
+        gpio_manager: &GpioManager
+    ) -> Result<Self> {
         // Create a hash map of pin configurations
         let mut pin_configs = HashMap::new();
 
@@ -93,7 +98,9 @@ impl SigGpio for OutputGpioLight {
         &self.pin_configs
     }
 
-    fn gpio_pin_configs_mut(&mut self) -> &mut HashMap<&'static str, PinConfig> {
+    fn gpio_pin_configs_mut(&mut self)
+        -> &mut HashMap<&'static str, PinConfig>
+    {
         &mut self.pin_configs
     }
 

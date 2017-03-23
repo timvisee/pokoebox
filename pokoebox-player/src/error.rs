@@ -11,11 +11,11 @@ pub struct Error {
 impl Error {
 
     /// Create a new application error instance.
-    /// A brief description of the error must be passed to the `description` parameter.
+    /// A brief description of the error must be passed to the `description`
+    /// parameter.
     pub fn new(description: &'static str) -> Self {
         Error {
-            description: description
-        }
+            description: description }
     }
 }
 

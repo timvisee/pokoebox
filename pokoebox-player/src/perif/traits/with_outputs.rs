@@ -11,8 +11,9 @@ pub trait WithOutputs: WithSig {
     /// Create a vector and list all output signals in it for this peripheral.
     fn list_outputs(&self) -> Vec<&SigOut>;
 
-    /// Create a vector and list all output signals in it for this peripheral. Return the signal with
-    /// the given `id`. An error is returned if no signal is found with the given ID.
+    /// Create a vector and list all output signals in it for this peripheral.
+    /// Return the signal with the given `id`. An error is returned if no
+    /// signal is found with the given ID.
     fn find_output(&self, id: SigId) -> Result<&SigOut> {
         // Loop through the outputs
         for output in self.list_outputs().as_slice() {

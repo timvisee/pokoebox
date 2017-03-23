@@ -55,7 +55,8 @@ impl App {
     }
 
     /// Start the application.
-    /// This will create things like the GUI, and starts initialization of all peripherals.
+    /// This will create things like the GUI,
+    /// and starts initialization of all peripherals.
     pub fn start(&mut self) -> Result<()> {
         // Start the GUI
         self.gui.start();
@@ -65,7 +66,9 @@ impl App {
 
         // TODO: Remove this testing code
         // Run the test action
-        self.action_manager.invoke_action(ActionId::new("test-action")).unwrap();
+        self.action_manager.invoke_action(
+            ActionId::new("test-action")
+        ).unwrap();
 
         // TODO: Start the peripheral manager here!
 

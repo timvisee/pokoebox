@@ -3,8 +3,8 @@ use super::gtk::*;
 
 use super::master_container::MasterContainer;
 
-/// The master frame, which creates a window or frame depending on the use case, to show the
-/// master container in.
+/// The master frame, which creates a window or frame depending on the use
+/// case, to show the master container in.
 pub struct MasterFrame {
     /// Frame window.
     window: gtk::Window

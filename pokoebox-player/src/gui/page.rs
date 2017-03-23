@@ -2,7 +2,8 @@ use super::gtk;
 use super::gtk::*;
 
 /// Page trait.
-/// This trait is used for a page implementation. It builds and manages the page.
+/// This trait is used for a page implementation.
+/// It builds and manages the page.
 pub trait Page {
 
     /// Get the name of the page.
@@ -20,7 +21,8 @@ pub struct Helper { }
 
 impl Helper {
 
-    /// Create a new GTK page container, that may be used to build a new page upon.
+    /// Create a new GTK page container,
+    /// that may be used to build a new page upon.
     /// The container is partially configured to show the page on.
     pub fn create_page_container() -> gtk::Grid {
         // Create the page container

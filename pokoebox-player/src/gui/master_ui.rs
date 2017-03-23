@@ -1,7 +1,8 @@
 use super::header::Header;
 use super::page_container::PageContainer;
 
-/// The actual UI inside the master container, with a header and page container to show the application's UI in.
+/// The actual UI inside the master container,
+/// with a header and page container to show the application's UI in.
 pub struct MasterUi {
     header: Header,
     page_container: PageContainer

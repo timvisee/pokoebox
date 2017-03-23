@@ -27,7 +27,11 @@ pub struct PerifGpioButton {
 
 impl PerifGpioButton {
     /// Construct a new GPIO button peripheral.
-    pub fn new(name: &'static str, pin: usize, gpio_manager: &GpioManager) -> Result<Self> {
+    pub fn new(
+        name: &'static str,
+        pin: usize,
+        gpio_manager: &GpioManager,
+    ) -> Result<Self> {
         // Create a GPIO button signal instance, and add it to the inputs
         let sig_button = InputGpioToggle::new(
             SigId::new(SIG_BUTTON_ID),
@@ -43,7 +47,11 @@ impl PerifGpioButton {
     }
 
     /// Construct a new wrapped GPIO button peripheral.
-    pub fn new_wrapped(name: &'static str, pin: usize, gpio_manager: &GpioManager) -> Result<PerifType> {
+    pub fn new_wrapped(
+        name: &'static str,
+        pin: usize,
+        gpio_manager: &GpioManager
+    ) -> Result<PerifType> {
         // Create a new peripheral instance
         let perif = Self::new(name, pin, gpio_manager)?;
 

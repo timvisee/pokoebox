@@ -29,12 +29,19 @@ pub struct InputGpioToggle {
 impl InputGpioToggle {
     /// Create a new instance.
     /// The GPIO pin of the button must be passed to the `pin` parameter.
-    pub fn new(id: SigId, name: &'static str, pin: usize, gpio_manager: &GpioManager) -> Result<Self> {
+    pub fn new(
+        id: SigId,
+        name: &'static str,
+        pin: usize,
+        gpio_manager: &GpioManager
+    ) -> Result<Self> {
         // Create a hash map of pin configurations
         let mut pin_configs = HashMap::new();
 
         // Create a pin configuration
-        let mut pin_config = PinConfig::new_with_pin_and_io(pin, IoMode::Input);
+        let mut pin_config = PinConfig::new_with_pin_and_io(
+            pin, IoMode::Input
+        );
         pin_config.set_pull_mode(PullMode::PullUp);
         pin_config.set_inverted(true);
 
@@ -85,7 +92,9 @@ impl SigGpio for InputGpioToggle {
         &self.pin_configs
     }
 
-    fn gpio_pin_configs_mut(&mut self) -> &mut HashMap<&'static str, PinConfig> {
+    fn gpio_pin_configs_mut(&mut self)
+        -> &mut HashMap<&'static str, PinConfig>
+    {
         &mut self.pin_configs
     }
 

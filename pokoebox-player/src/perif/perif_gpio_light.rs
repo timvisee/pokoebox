@@ -26,7 +26,11 @@ pub struct PerifGpioLight {
 
 impl PerifGpioLight {
     /// Construct a new GPIO light peripheral.
-    pub fn new(name: &'static str, pin: usize, gpio_manager: &GpioManager) -> Result<Self> {
+    pub fn new(
+        name: &'static str,
+        pin: usize,
+        gpio_manager: &GpioManager
+    ) -> Result<Self> {
         // Create a GPIO light signal instance, and add it to the outputs
         let sig_light = OutputGpioLight::new(
             SigId::new(SIG_LIGHT_ID),
@@ -42,7 +46,11 @@ impl PerifGpioLight {
     }
 
     /// Create a new wrapped GPIO light peripheral.
-    pub fn new_wrapped(name: &'static str, pin: usize, gpio_manager: &GpioManager) -> Result<PerifType> {
+    pub fn new_wrapped(
+        name: &'static str,
+        pin: usize,
+        gpio_manager: &GpioManager
+    ) -> Result<PerifType> {
         // Create a new peripheral instance
         let perif = Self::new(name, pin, gpio_manager)?;
 

@@ -11,15 +11,20 @@ use super::sig::Sig;
 /// An input or output signal for a peripheral that uses GPIO features.
 pub trait SigGpio: Sig {
 
-    /// Get a list of GPIO pin configurations. This includes input and output pins.
+    /// Get a list of GPIO pin configurations.
+    /// This includes input and output pins.
     fn gpio_pin_configs(&self) -> &HashMap<&'static str, PinConfig>;
 
-    /// Get a list of GPIO pin configurations, mutable. This includes input and output pins.
-    fn gpio_pin_configs_mut(&mut self) -> &mut HashMap<&'static str, PinConfig>;
+    /// Get a list of GPIO pin configurations, mutable.
+    /// This includes input and output pins.
+    fn gpio_pin_configs_mut(&mut self)
+       -> &mut HashMap<&'static str, PinConfig>;
 
     /// Setup all the pins from the pin configurations.
-    /// All pin configurations will be consumed, and this leaves the list of configurations empty.
-    /// This uses the pin configurations from the `Self.gpio_pin_configs();` method.
+    /// All pin configurations will be consumed, and this leaves the list
+    /// of configurations empty.
+    /// This uses the pin configurations from the `Self.gpio_pin_configs();`
+    /// method.
     fn setup_pins(&mut self, gpio_manager: &GpioManager) -> Result<()> {
         // Create a list of pins to add later on
         let mut pins = HashMap::new();
@@ -55,10 +60,12 @@ pub trait SigGpio: Sig {
         result
     }
 
-    /// Get a list of GPIO pin references. This includes both input and output pins.
+    /// Get a list of GPIO pin references.
+    /// This includes both input and output pins.
     fn gpio_pins(&self) -> &HashMap<&'static str, Pin>;
 
-    /// Get a list of GPIO pin references. This includes both input and output pins.
+    /// Get a list of GPIO pin references.
+    /// This includes both input and output pins.
     fn gpio_pins_mut(&mut self) -> &mut HashMap<&'static str, Pin>;
 
     /// Get the GPIO pin with the given key.

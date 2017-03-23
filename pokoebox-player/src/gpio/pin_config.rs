@@ -22,9 +22,9 @@ pub struct PinConfig {
     output_default: Logic,
 
     /// True if this pin's logic is inverted, false if not and it's normal.
-    /// Setting this to true will invert all logic internally. If inversion is enabled, and a pin
-    /// is set to `High` using the provided API, the physical pin logic will be `Low`, and the other
-    /// way around.
+    /// Setting this to true will invert all logic internally.
+    /// If inversion is enabled, and a pin is set to `High` using the provided
+    /// API, the physical pin logic will be `Low`, and the other way around.
     inverted: bool
 }
 
@@ -52,7 +52,8 @@ impl PinConfig {
         }
     }
 
-    /// Construct a new configuration with the given `pin` number and `io_mode` mode.
+    /// Construct a new configuration with the given `pin` number and `io_mode`
+    /// mode.
     pub fn new_with_pin_and_io(pin: usize, io_mode: IoMode) -> Self {
         PinConfig {
             pin: Some(pin),
@@ -159,8 +160,8 @@ impl PinConfig {
     ///
     /// * If the pin hasn't been configured.
     /// * If the io mode hasn't been configured.
-    /// * If the CuPi pin failed to create, because the pin is invalid, in use or when you don't have
-    ///   the required permissions.
+    /// * If the CuPi pin failed to create, because the pin is invalid,
+    ///   in use or when you don't have the required permissions.
     // TODO: Maybe just create a new CuPi instance each time?
     pub fn as_cupi_pin_options(&self, cupi: &CuPi) -> Result<PinOptions> {
         // A pin must have been configured
@@ -170,7 +171,9 @@ impl PinConfig {
 
         // An input/output mode must have been configured
         if self.io_mode.is_none() {
-            return Err(Error::new("Can't create GPIO pin, no io mode configured"));
+            return Err(
+                Error::new("Can't create GPIO pin, no io mode configured")
+            );
         }
 
         // Create the pin options configuration
