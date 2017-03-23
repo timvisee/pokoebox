@@ -3,6 +3,7 @@ use std::boxed;
 use super::gtk;
 
 use error::Error;
+use result::Result;
 use super::master_container::MasterContainer;
 use super::master_frame::MasterFrame;
 use super::master_ui::MasterUi;
@@ -10,7 +11,8 @@ use super::pages::launchpad::Home;
 use super::pages::test::Test;
 use super::pages::volume::Volume;
 
-/// Main gui object, which manages the graphical interface side of the application.
+/// Main gui object, which manages the graphical interface side of the
+/// application.
 ///
 /// Creating a new instance will automatically initialize GTK.
 pub struct Gui {
@@ -32,8 +34,9 @@ impl Gui {
     ///
     /// # Errors
     ///
-    /// Returns an error if GTK failed to initialize, blocking further GTK usage.
-    pub fn new() -> Result<Self, Error> {
+    /// Returns an error if GTK failed to initialize,
+    /// blocking further GTK usage.
+    pub fn new() -> Result<Self> {
         // Initialize GTK, handle errors
         debug!("Initializing GTK...");
         if gtk::init().is_err() {
@@ -103,7 +106,8 @@ impl Gui {
         }
     }
 
-    /// Show the master frame and all it's inner widgets, if it's not already visible.
+    /// Show the master frame and all it's inner widgets,
+    /// if it's not already visible.
     /// If there's no master frame, nothing happens.
     pub fn show_master_frame(&self) {
         // Show the master frame if any instance exists

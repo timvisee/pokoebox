@@ -1,6 +1,8 @@
 extern crate log;
 
-use self::log::{LogRecord, LogLevel, LogLevelFilter, LogMetadata, SetLoggerError};
+use self::log::{
+    LogRecord, LogLevel, LogLevelFilter, LogMetadata, SetLoggerError
+};
 
 /// Application logger.
 pub struct Logger;

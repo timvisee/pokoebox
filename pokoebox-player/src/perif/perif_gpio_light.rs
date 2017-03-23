@@ -1,7 +1,7 @@
 #![cfg(feature = "rpi")]
 
-use error::Error;
 use gpio::gpio_manager::GpioManager;
+use result::Result;
 use super::perif_type::PerifType;
 use super::traits::perif::Perif;
 use super::traits::with_sig::WithSig;
@@ -26,7 +26,11 @@ pub struct PerifGpioLight {
 
 impl PerifGpioLight {
     /// Construct a new GPIO light peripheral.
-    pub fn new(name: &'static str, pin: usize, gpio_manager: &GpioManager) -> Result<Self, Error> {
+    pub fn new(
+        name: &'static str,
+        pin: usize,
+        gpio_manager: &GpioManager
+    ) -> Result<Self> {
         // Create a GPIO light signal instance, and add it to the outputs
         let sig_light = OutputGpioLight::new(
             SigId::new(SIG_LIGHT_ID),
@@ -42,7 +46,11 @@ impl PerifGpioLight {
     }
 
     /// Create a new wrapped GPIO light peripheral.
-    pub fn new_wrapped(name: &'static str, pin: usize, gpio_manager: &GpioManager) -> Result<PerifType, Error> {
+    pub fn new_wrapped(
+        name: &'static str,
+        pin: usize,
+        gpio_manager: &GpioManager
+    ) -> Result<PerifType> {
         // Create a new peripheral instance
         let perif = Self::new(name, pin, gpio_manager)?;
 
@@ -51,17 +59,17 @@ impl PerifGpioLight {
     }
 
     /// Get the current state of the light.
-    pub fn state(&self) -> Result<bool, Error> {
+    pub fn state(&self) -> Result<bool> {
         self.sig_light.state()
     }
 
     /// Set the state of the light.
-    pub fn set_state(&mut self, state: bool) -> Result<(), Error> {
+    pub fn set_state(&mut self, state: bool) -> Result<()> {
         self.sig_light.set_state(state)
     }
 
     /// Toggle the light.
-    pub fn toggle(&mut self) -> Result<(), Error> {
+    pub fn toggle(&mut self) -> Result<()> {
         self.sig_light.toggle()
     }
 }

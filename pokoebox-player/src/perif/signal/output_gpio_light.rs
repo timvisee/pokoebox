@@ -6,6 +6,7 @@ use error::Error;
 use gpio::gpio_manager::GpioManager;
 use gpio::pin::Pin;
 use gpio::pin_config::{PinConfig, IoMode};
+use result::Result;
 use super::sig_id::SigId;
 use super::traits::sig::Sig;
 use super::traits::sig_gpio::SigGpio;
@@ -28,7 +29,12 @@ pub struct OutputGpioLight {
 impl OutputGpioLight {
     /// Create a new instance.
     /// The GPIO pin of the light must be passed to the `pin` parameter.
-    pub fn new(id: SigId, name: &'static str, pin: usize, gpio_manager: &GpioManager) -> Result<Self, Error> {
+    pub fn new(
+        id: SigId, 
+        name: &'static str,
+        pin: usize,
+        gpio_manager: &GpioManager
+    ) -> Result<Self> {
         // Create a hash map of pin configurations
         let mut pin_configs = HashMap::new();
 
@@ -53,7 +59,7 @@ impl OutputGpioLight {
     }
 
     /// Find the GPIO pin for the light.
-    fn find_light_pin(&self) -> Result<&Pin, Error> {
+    fn find_light_pin(&self) -> Result<&Pin> {
         // Get the light pin
         let result = self.gpio_pin(GPIO_PIN_KEY_LIGHT);
         if result.is_none() {
@@ -65,7 +71,7 @@ impl OutputGpioLight {
     }
 
     /// Find the GPIO pin for the light, mutable.
-    fn find_light_pin_mut(&mut self) -> Result<&mut Pin, Error> {
+    fn find_light_pin_mut(&mut self) -> Result<&mut Pin> {
         // Get the light pin
         let result = self.gpio_pin_mut(GPIO_PIN_KEY_LIGHT);
         if result.is_none() {
@@ -92,7 +98,9 @@ impl SigGpio for OutputGpioLight {
         &self.pin_configs
     }
 
-    fn gpio_pin_configs_mut(&mut self) -> &mut HashMap<&'static str, PinConfig> {
+    fn gpio_pin_configs_mut(&mut self)
+        -> &mut HashMap<&'static str, PinConfig>
+    {
         &mut self.pin_configs
     }
 
@@ -114,16 +122,16 @@ impl SigOut for OutputGpioLight {}
 impl SigOutGpio for OutputGpioLight {}
 
 impl SigOutLight for OutputGpioLight {
-    fn state(&self) -> Result<bool, Error> {
+    fn state(&self) -> Result<bool> {
         Ok(self.find_light_pin()?.read_bool())
     }
 
-    fn set_state(&mut self, state: bool) -> Result<(), Error> {
+    fn set_state(&mut self, state: bool) -> Result<()> {
         self.find_light_pin_mut()?.write_bool(state);
         Ok(())
     }
 
-    fn toggle(&mut self) -> Result<(), Error> {
+    fn toggle(&mut self) -> Result<()> {
         self.find_light_pin_mut()?.write_inverse();
         Ok(())
     }

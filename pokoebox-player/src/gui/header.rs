@@ -36,7 +36,10 @@ impl Header {
     fn build_container_controls(container: &gtk::Box) {
         // Create a home button
         let home_button = gtk::Button::new();
-        let home_image = gtk::Image::new_from_icon_name("go-home", IconSize::LargeToolbar.into());
+        let home_image = gtk::Image::new_from_icon_name(
+            "go-home",
+            IconSize::LargeToolbar.into()
+        );
         home_button.add(&home_image);
         home_button.set_relief(ReliefStyle::None);
         home_button.set_focus_on_click(false);

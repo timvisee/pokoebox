@@ -37,7 +37,10 @@ impl Page for Volume {
 
     fn build_page(&self) {
         // Add a volume slider
-        let slider = gtk::Scale::new_with_range(gtk::Orientation::Vertical, 0f64, 100f64, 0.1f64);
+        let slider = gtk::Scale::new_with_range(
+            gtk::Orientation::Vertical,
+            0f64, 100f64, 0.1f64
+        );
         slider.add_mark(50f64, PositionType::Right, "M");
         slider.set_vexpand(true);
         slider.set_value_pos(PositionType::Right);

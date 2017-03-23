@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use error::Error;
+use result::Result;
 use super::action::Action;
 use super::action_id::ActionId;
 use super::actions::test_action::TestAction;
@@ -20,7 +20,8 @@ impl ActionManager {
     }
 
     /// Load a fixed list of 'normal' actions.
-    /// Some actions require extra metadata and/or parameters, those must be loaded manually.
+    /// Some actions require extra metadata and/or parameters,
+    /// those must be loaded manually.
     pub fn load_normal_actions(&mut self) {
         info!("Loading normal actions...");
 
@@ -50,11 +51,11 @@ impl ActionManager {
     }
 
     /// Invoke the action with the given ID.
-    /// A boolean is returned on success which defines whether the action has been consumed.
-    /// `true` if the action has been consumed, `false` if not.
+    /// A boolean is returned on success which defines whether the action has
+    /// been consumed. `true` if the action has been consumed, `false` if not.
     /// If no action is available with the given ID, `false` is returned.
     /// An error is returned if the actions fails.
-    pub fn invoke_action(&self, id: ActionId) -> Result<bool, Error> {
+    pub fn invoke_action(&self, id: ActionId) -> Result<bool> {
         if let Some(action) = self.action_ref(id) {
             action.invoke()
         } else {

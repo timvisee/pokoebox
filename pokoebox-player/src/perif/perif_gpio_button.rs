@@ -1,7 +1,7 @@
 #![cfg(feature = "rpi")]
 
-use error::Error;
 use gpio::gpio_manager::GpioManager;
+use result::Result;
 use super::perif_type::PerifType;
 use super::traits::button::Button;
 use super::traits::perif::Perif;
@@ -27,7 +27,11 @@ pub struct PerifGpioButton {
 
 impl PerifGpioButton {
     /// Construct a new GPIO button peripheral.
-    pub fn new(name: &'static str, pin: usize, gpio_manager: &GpioManager) -> Result<Self, Error> {
+    pub fn new(
+        name: &'static str,
+        pin: usize,
+        gpio_manager: &GpioManager,
+    ) -> Result<Self> {
         // Create a GPIO button signal instance, and add it to the inputs
         let sig_button = InputGpioToggle::new(
             SigId::new(SIG_BUTTON_ID),
@@ -43,7 +47,11 @@ impl PerifGpioButton {
     }
 
     /// Construct a new wrapped GPIO button peripheral.
-    pub fn new_wrapped(name: &'static str, pin: usize, gpio_manager: &GpioManager) -> Result<PerifType, Error> {
+    pub fn new_wrapped(
+        name: &'static str,
+        pin: usize,
+        gpio_manager: &GpioManager
+    ) -> Result<PerifType> {
         // Create a new peripheral instance
         let perif = Self::new(name, pin, gpio_manager)?;
 
@@ -55,7 +63,7 @@ impl PerifGpioButton {
 /// This is a button.
 impl Button for PerifGpioButton {
     /// Check whether the button is pressed.
-    fn is_pressed(&self) -> Result<bool, Error> {
+    fn is_pressed(&self) -> Result<bool> {
         self.sig_button.state()
     }
 }

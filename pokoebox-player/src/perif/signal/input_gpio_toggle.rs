@@ -6,6 +6,7 @@ use error::Error;
 use gpio::gpio_manager::GpioManager;
 use gpio::pin::Pin;
 use gpio::pin_config::{PinConfig, PullMode, IoMode};
+use result::Result;
 use super::sig_id::SigId;
 use super::traits::sig::Sig;
 use super::traits::sig_gpio::SigGpio;
@@ -28,12 +29,19 @@ pub struct InputGpioToggle {
 impl InputGpioToggle {
     /// Create a new instance.
     /// The GPIO pin of the button must be passed to the `pin` parameter.
-    pub fn new(id: SigId, name: &'static str, pin: usize, gpio_manager: &GpioManager) -> Result<Self, Error> {
+    pub fn new(
+        id: SigId,
+        name: &'static str,
+        pin: usize,
+        gpio_manager: &GpioManager
+    ) -> Result<Self> {
         // Create a hash map of pin configurations
         let mut pin_configs = HashMap::new();
 
         // Create a pin configuration
-        let mut pin_config = PinConfig::new_with_pin_and_io(pin, IoMode::Input);
+        let mut pin_config = PinConfig::new_with_pin_and_io(
+            pin, IoMode::Input
+        );
         pin_config.set_pull_mode(PullMode::PullUp);
         pin_config.set_inverted(true);
 
@@ -58,7 +66,7 @@ impl InputGpioToggle {
     }
 
     /// Find the button signal pin.
-    fn find_button_pin(&self) -> Result<&Pin, Error> {
+    fn find_button_pin(&self) -> Result<&Pin> {
         // Get the button pin
         let result = self.gpio_pin(GPIO_PIN_KEY_BUTTON);
         if result.is_none() {
@@ -84,7 +92,9 @@ impl SigGpio for InputGpioToggle {
         &self.pin_configs
     }
 
-    fn gpio_pin_configs_mut(&mut self) -> &mut HashMap<&'static str, PinConfig> {
+    fn gpio_pin_configs_mut(&mut self)
+        -> &mut HashMap<&'static str, PinConfig>
+    {
         &mut self.pin_configs
     }
 
@@ -106,7 +116,7 @@ impl SigIn for InputGpioToggle {}
 impl SigInGpio for InputGpioToggle {}
 
 impl SigInToggle for InputGpioToggle {
-    fn state(&self) -> Result<bool, Error> {
+    fn state(&self) -> Result<bool> {
         Ok(self.find_button_pin()?.read_bool())
     }
 }

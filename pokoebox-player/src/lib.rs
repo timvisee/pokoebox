@@ -10,4 +10,5 @@ pub mod gui;
 pub mod logger;
 pub mod manifest;
 pub mod perif;
+pub mod result;
 pub mod volume;

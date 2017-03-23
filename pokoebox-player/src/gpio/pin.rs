@@ -1,12 +1,13 @@
 #![cfg(feature = "rpi")]
 
-use error::Error;
+use result::Result;
 use super::cupi::{CuPi, PinInput, PinOutput};
 use super::logic::Logic;
 use super::pin_config::{PinConfig, IoMode};
 
 /// A GPIO pin instance.
-/// This allows you to use a GPIO pin as input or output depending on the configuration.
+/// This allows you to use a GPIO pin as input or output depending on the
+/// configuration.
 pub struct Pin {
     config: PinConfig,
     input: Option<PinInput>,
@@ -17,7 +18,7 @@ pub struct Pin {
 impl Pin {
 
     /// Construct a new GPIO pin with the given configuration.
-    pub fn from(cupi: &CuPi, config: PinConfig) -> Result<Self, Error> {
+    pub fn from(cupi: &CuPi, config: PinConfig) -> Result<Self> {
         // Create the CuPi pin options struct
         let options = config.as_cupi_pin_options(cupi)?;
 
@@ -81,7 +82,9 @@ impl Pin {
         }
 
         // Read the physical value
-        let mut phys_logic = Logic::from_cupi(self.input.as_ref().unwrap().read());
+        let mut phys_logic = Logic::from_cupi(
+            self.input.as_ref().unwrap().read()
+        );
 
         // Invert the physical logic if configured
         if self.config.inverted() {
@@ -100,7 +103,8 @@ impl Pin {
     }
 
     /// Write a logical GPIO value to the pin.
-    /// This only has any effect if this is an output pin. Nothing happens when this is an input pin.
+    /// This only has any effect if this is an output pin.
+    /// Nothing happens when this is an input pin.
     pub fn write(&mut self, logic: Logic) {
         // Make sure this is an output pin
         if self.is_input() {
@@ -121,14 +125,17 @@ impl Pin {
     }
 
     /// Write a boolean value to the pin.
-    /// This only has any effect if this is an output pin. Nothing happens when this is an input pin.
+    /// This only has any effect if this is an output pin.
+    /// Nothing happens when this is an input pin.
     pub fn write_bool(&mut self, logic: bool) {
         self.write(Logic::from_bool(logic));
     }
 
     /// Invert the output signal of the pin.
-    /// If the current logical output is `High`, it will change to `Low` and the other way around.
-    /// This only has any effect if this is an output pin. Nothing happens when this is an input pin.
+    /// If the current logical output is `High`,
+    /// it will change to `Low` and the other way around.
+    /// This only has any effect if this is an output pin.
+    /// Nothing happens when this is an input pin.
     pub fn write_inverse(&mut self) {
         // Get the inverted logic, and write it
         let inverted = self.output_logic.as_inverted();
@@ -136,13 +143,15 @@ impl Pin {
     }
 
     /// Write the `High` state.
-    /// This only has any effect if this is an output pin. Nothing happens when this is an input pin.
+    /// This only has any effect if this is an output pin.
+    /// Nothing happens when this is an input pin.
     pub fn high(&mut self) {
         self.write(Logic::High);
     }
 
     /// Write the `Low` state.
-    /// This only has any effect if this is an output pin. Nothing happens when this is an input pin.
+    /// This only has any effect if this is an output pin.
+    /// Nothing happens when this is an input pin.
     pub fn low(&mut self) {
         self.write(Logic::Low);
     }

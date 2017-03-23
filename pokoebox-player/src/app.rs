@@ -1,10 +1,10 @@
 use action::action_id::ActionId;
 use action::action_manager::ActionManager;
-use error::Error;
 #[cfg(feature = "rpi")]
 use gpio::gpio_manager::GpioManager;
 use gui::gui::Gui;
 use perif::perif_manager::PerifManager;
+use result::Result;
 
 /// Base application struct.
 pub struct App {
@@ -25,7 +25,7 @@ pub struct App {
 impl App {
     /// Create a new app instance.
     #[cfg(feature = "rpi")]
-    pub fn new() -> Result<Self, Error> {
+    pub fn new() -> Result<Self> {
         debug!("Initializing application core...");
 
         // Create the application instance
@@ -40,7 +40,7 @@ impl App {
         Ok(app)
     }
     #[cfg(not(feature = "rpi"))]
-    pub fn new() -> Result<Self, Error> {
+    pub fn new() -> Result<Self> {
         debug!("Initializing application core...");
 
         // Create the application instance
@@ -55,8 +55,9 @@ impl App {
     }
 
     /// Start the application.
-    /// This will create things like the GUI, and starts initialization of all peripherals.
-    pub fn start(&mut self) -> Result<(), Error> {
+    /// This will create things like the GUI,
+    /// and starts initialization of all peripherals.
+    pub fn start(&mut self) -> Result<()> {
         // Start the GUI
         self.gui.start();
 
@@ -65,7 +66,9 @@ impl App {
 
         // TODO: Remove this testing code
         // Run the test action
-        self.action_manager.invoke_action(ActionId::new("test-action")).unwrap();
+        self.action_manager.invoke_action(
+            ActionId::new("test-action")
+        ).unwrap();
 
         // TODO: Start the peripheral manager here!
 
