@@ -3,6 +3,7 @@ use std::boxed;
 use super::gtk;
 
 use error::Error;
+use result::Result;
 use super::master_container::MasterContainer;
 use super::master_frame::MasterFrame;
 use super::master_ui::MasterUi;
@@ -33,7 +34,7 @@ impl Gui {
     /// # Errors
     ///
     /// Returns an error if GTK failed to initialize, blocking further GTK usage.
-    pub fn new() -> Result<Self, Error> {
+    pub fn new() -> Result<Self> {
         // Initialize GTK, handle errors
         debug!("Initializing GTK...");
         if gtk::init().is_err() {

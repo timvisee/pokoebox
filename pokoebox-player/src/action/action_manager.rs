@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use error::Error;
+use result::Result;
 use super::action::Action;
 use super::action_id::ActionId;
 use super::actions::test_action::TestAction;
@@ -54,7 +54,7 @@ impl ActionManager {
     /// `true` if the action has been consumed, `false` if not.
     /// If no action is available with the given ID, `false` is returned.
     /// An error is returned if the actions fails.
-    pub fn invoke_action(&self, id: ActionId) -> Result<bool, Error> {
+    pub fn invoke_action(&self, id: ActionId) -> Result<bool> {
         if let Some(action) = self.action_ref(id) {
             action.invoke()
         } else {

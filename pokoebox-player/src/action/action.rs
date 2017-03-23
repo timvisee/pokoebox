@@ -1,4 +1,4 @@
-use error::Error;
+use result::Result;
 use super::action_id::ActionId;
 
 /// Action trait.
@@ -15,5 +15,5 @@ pub trait Action {
     /// A boolean is returned on success which defines whether the action has been consumed.
     /// `true` if the action is consumed, `false` if not.
     /// An error is returned if the action fails.
-    fn invoke(&self) -> Result<bool, Error>;
+    fn invoke(&self) -> Result<bool>;
 }

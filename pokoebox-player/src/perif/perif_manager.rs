@@ -1,4 +1,4 @@
-use error::Error;
+use result::Result;
 use super::perif_type::PerifType;
 
 /// The manager for external peripherals.
@@ -17,7 +17,7 @@ impl PerifManager {
     }
 
     /// Add the given peripheral.
-    pub fn add_perif(&mut self, perif: PerifType) -> Result<(), Error> {
+    pub fn add_perif(&mut self, perif: PerifType) -> Result<()> {
         // Add the peripheral to the list
         self.perifs.push(perif);
 

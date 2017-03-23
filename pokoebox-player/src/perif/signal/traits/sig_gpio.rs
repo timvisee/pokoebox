@@ -2,10 +2,10 @@
 
 use std::collections::HashMap;
 
-use error::Error;
 use gpio::gpio_manager::GpioManager;
 use gpio::pin::Pin;
 use gpio::pin_config::PinConfig;
+use result::Result;
 use super::sig::Sig;
 
 /// An input or output signal for a peripheral that uses GPIO features.
@@ -20,12 +20,12 @@ pub trait SigGpio: Sig {
     /// Setup all the pins from the pin configurations.
     /// All pin configurations will be consumed, and this leaves the list of configurations empty.
     /// This uses the pin configurations from the `Self.gpio_pin_configs();` method.
-    fn setup_pins(&mut self, gpio_manager: &GpioManager) -> Result<(), Error> {
+    fn setup_pins(&mut self, gpio_manager: &GpioManager) -> Result<()> {
         // Create a list of pins to add later on
         let mut pins = HashMap::new();
 
         // Create the result to return
-        let mut result: Result<(), Error> = Ok(());
+        let mut result: Result<()> = Ok(());
 
         {
             // Get the hash map of configurations

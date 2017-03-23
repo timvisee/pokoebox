@@ -1,6 +1,6 @@
 #![cfg(feature = "rpi")]
 
-use error::Error;
+use result::Result;
 use super::cupi::{CuPi, PinInput, PinOutput};
 use super::logic::Logic;
 use super::pin_config::{PinConfig, IoMode};
@@ -17,7 +17,7 @@ pub struct Pin {
 impl Pin {
 
     /// Construct a new GPIO pin with the given configuration.
-    pub fn from(cupi: &CuPi, config: PinConfig) -> Result<Self, Error> {
+    pub fn from(cupi: &CuPi, config: PinConfig) -> Result<Self> {
         // Create the CuPi pin options struct
         let options = config.as_cupi_pin_options(cupi)?;
 

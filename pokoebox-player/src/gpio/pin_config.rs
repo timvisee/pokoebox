@@ -1,6 +1,7 @@
 #![cfg(feature = "rpi")]
 
 use error::Error;
+use result::Result;
 use super::cupi::{CuPi, PinOptions};
 use super::pin::Pin;
 use super::logic::Logic;
@@ -161,7 +162,7 @@ impl PinConfig {
     /// * If the CuPi pin failed to create, because the pin is invalid, in use or when you don't have
     ///   the required permissions.
     // TODO: Maybe just create a new CuPi instance each time?
-    pub fn as_cupi_pin_options(&self, cupi: &CuPi) -> Result<PinOptions, Error> {
+    pub fn as_cupi_pin_options(&self, cupi: &CuPi) -> Result<PinOptions> {
         // A pin must have been configured
         if self.pin.is_none() {
             return Err(Error::new("Can't create GPIO pin, no pin configured"));
@@ -197,7 +198,7 @@ impl PinConfig {
     }
 
     /// Convert this configuration into a pin instance.
-    pub fn into_pin(self, cupi: &CuPi) -> Result<Pin, Error> {
+    pub fn into_pin(self, cupi: &CuPi) -> Result<Pin> {
         Pin::from(cupi, self)
     }
 }

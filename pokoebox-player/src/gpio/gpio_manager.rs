@@ -3,6 +3,7 @@
 use super::cupi::CuPi;
 
 use error::Error;
+use result::Result;
 
 /// GPIO manager.
 pub struct GpioManager {
@@ -11,7 +12,7 @@ pub struct GpioManager {
 
 impl GpioManager {
     /// Constructor.
-    pub fn new() -> Result<Self, Error> {
+    pub fn new() -> Result<Self> {
         debug!("Initializing GPIO manager...");
 
         // Initialize CuPi

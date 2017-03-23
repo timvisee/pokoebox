@@ -1,4 +1,4 @@
-use error::Error;
+use result::Result;
 use super::{Action, ActionId};
 
 /// Unique ID of this action.
@@ -26,7 +26,7 @@ impl Action for TestAction {
         ACTION_NAME
     }
 
-    fn invoke(&self) -> Result<bool, Error> {
+    fn invoke(&self) -> Result<bool> {
         // Show a status message
         info!("Test action invoked!");
 

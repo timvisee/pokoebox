@@ -1,4 +1,5 @@
 use error::Error;
+use result::Result;
 use super::with_sig::WithSig;
 use super::super::signal::sig_id::SigId;
 use super::super::signal::traits::sig_in::SigIn;
@@ -12,7 +13,7 @@ pub trait WithInputs: WithSig {
 
     /// Create a vector and list all input signals in it for this peripheral. Return the signal with
     /// the given `id`. An error is returned if no signal is found with the given ID.
-    fn find_input(&self, id: SigId) -> Result<&SigIn, Error> {
+    fn find_input(&self, id: SigId) -> Result<&SigIn> {
         // Loop through the inputs
         for input in self.list_inputs().as_slice() {
             if input.id() == &id {
