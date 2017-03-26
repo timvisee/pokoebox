@@ -25,8 +25,8 @@ pub trait SigGpio: Sig {
     /// of configurations empty.
     /// This uses the pin configurations from the `Self.gpio_pin_configs();`
     /// method.
-    fn setup_pins(&mut self, gpio_manager: &GpioManager) -> Result<()> {
-        // Create a list of pins to add later on
+    fn setup_pins(&mut self, gpio_manager: &mut GpioManager) -> Result<()> {
+        // Create a list of pins to add
         let mut pins = HashMap::new();
 
         // Create the result to return
@@ -39,7 +39,7 @@ pub trait SigGpio: Sig {
             // Iterate through the list of pin configurations
             for (key, config) in configs.drain() {
                 // Convert the configuration into a pin
-                let pin = config.into_pin(gpio_manager.cupi());
+                let pin = config.into_pin(gpio_manager);
 
                 // If an error, set the result and break this loop
                 if pin.is_err() {
@@ -48,11 +48,11 @@ pub trait SigGpio: Sig {
                 }
 
                 // Add the pin to the hash map
-                pins.insert(key, pin.unwrap());
+                pins.insert(key, pin.unwrap().1);
             }
         }
 
-        // Add the created pins to the map
+        // Add the tokens of the created pins to the map
         for (key, pin) in pins.drain() {
             self.add_gpio_pin(key, pin);
         }

@@ -33,7 +33,7 @@ impl OutputGpioLight {
         id: SigId, 
         name: &'static str,
         pin: usize,
-        gpio_manager: &GpioManager
+        gpio_manager: &mut GpioManager
     ) -> Result<Self> {
         // Create a hash map of pin configurations
         let mut pin_configs = HashMap::new();

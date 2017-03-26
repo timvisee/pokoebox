@@ -2,6 +2,7 @@
 
 use result::Result;
 use super::cupi::{CuPi, PinInput, PinOutput};
+use super::gpio_manager::GpioManager;
 use super::logic::Logic;
 use super::pin_config::{PinConfig, IoMode};
 
@@ -18,9 +19,9 @@ pub struct Pin {
 impl Pin {
 
     /// Construct a new GPIO pin with the given configuration.
-    pub fn from(cupi: &CuPi, config: PinConfig) -> Result<Self> {
+    pub fn from(gpio_manager: &GpioManager, config: PinConfig) -> Result<Self> {
         // Create the CuPi pin options struct
-        let options = config.as_cupi_pin_options(cupi)?;
+        let options = config.as_cupi_pin_options(gpio_manager.cupi())?;
 
         // Define input and output variables
         let mut input: Option<PinInput> = None;

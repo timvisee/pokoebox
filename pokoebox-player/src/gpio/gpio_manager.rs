@@ -2,8 +2,8 @@
 
 extern crate mio;
 
+use self::mio::{Poll, Events, Token, Ready, PollOpt, timer};
 use super::cupi::CuPi;
-use mio::{Poll, Events, Token, Ready, PollOpt, timer};
 use super::cupi::sys::Edge;
 
 use error::Error;
