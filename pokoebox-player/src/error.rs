@@ -5,7 +5,7 @@ use std::fmt::{Display, Formatter};
 /// Main application error structure.
 #[derive(Debug)]
 pub struct Error {
-    description: &'static str
+    description: &'static str,
 }
 
 impl Error {
@@ -15,7 +15,16 @@ impl Error {
     /// parameter.
     pub fn new(description: &'static str) -> Self {
         Error {
-            description: description }
+            description: description,
+        }
+    }
+
+    /// Create a new application error instance, that is wrapped in an result object.
+    /// This method always returns the `Err` type holding the error.
+    /// A brief description of the error must be passed to the `description`
+    /// parameter.
+    pub fn new_err<T>(description: &'static str) -> Result<T, Self> {
+        Err(Self::new(description))
     }
 }
 
