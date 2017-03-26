@@ -3,11 +3,14 @@
 use error::Error;
 use result::Result;
 use super::cupi::{CuPi, PinOptions};
+use super::gpio_manager::GpioManager;
 use super::pin::Pin;
+use super::pin_token::PinToken;
 use super::logic::Logic;
 
 /// GPIO pin configuration.
 /// The pin number and io mode are required. The pull mode defaults to `None`.
+#[derive(PartialEq)]
 pub struct PinConfig {
     /// The actual pin number.
     pin: Option<usize>,
@@ -25,7 +28,7 @@ pub struct PinConfig {
     /// Setting this to true will invert all logic internally.
     /// If inversion is enabled, and a pin is set to `High` using the provided
     /// API, the physical pin logic will be `Low`, and the other way around.
-    inverted: bool
+    inverted: bool,
 }
 
 impl PinConfig {
@@ -201,12 +204,13 @@ impl PinConfig {
     }
 
     /// Convert this configuration into a pin instance.
-    pub fn into_pin(self, cupi: &CuPi) -> Result<Pin> {
-        Pin::from(cupi, self)
+    pub fn into_pin(self, gpio_manager: &mut GpioManager) -> Result<(PinToken, &Pin)> {
+        Pin::from(gpio_manager, self)
     }
 }
 
 /// Pull up/down mode of the pin.
+#[derive(PartialEq, Eq, Copy, Clone)]
 pub enum PullMode {
     /// Do not pull up or down.
     None,
@@ -219,6 +223,7 @@ pub enum PullMode {
 }
 
 /// Input/output mode of the pin.
+#[derive(PartialEq, Eq, Copy, Clone)]
 pub enum IoMode {
     /// Input mode, to make the pin read inputs
     Input,

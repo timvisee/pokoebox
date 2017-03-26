@@ -3,7 +3,7 @@
 use super::cupi;
 
 /// GPIO pin logic.
-#[derive(Clone)]
+#[derive(PartialEq, Eq, Copy, Clone)]
 pub enum Logic {
     High,
     Low
