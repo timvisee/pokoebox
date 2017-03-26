@@ -1,5 +1,7 @@
 #![cfg(feature = "rpi")]
 
+use std::sync::{Arc, RwLock};
+
 use gpio::gpio_manager::GpioManager;
 use result::Result;
 use super::perif_type::PerifType;
@@ -30,7 +32,7 @@ impl PerifGpioButton {
     pub fn new(
         name: &'static str,
         pin: usize,
-        gpio_manager: &GpioManager,
+        gpio_manager: Arc<RwLock<GpioManager>>,
     ) -> Result<Self> {
         // Create a GPIO button signal instance, and add it to the inputs
         let sig_button = InputGpioToggle::new(
@@ -50,7 +52,7 @@ impl PerifGpioButton {
     pub fn new_wrapped(
         name: &'static str,
         pin: usize,
-        gpio_manager: &GpioManager
+        gpio_manager: Arc<RwLock<GpioManager>>,
     ) -> Result<PerifType> {
         // Create a new peripheral instance
         let perif = Self::new(name, pin, gpio_manager)?;
@@ -63,8 +65,8 @@ impl PerifGpioButton {
 /// This is a button.
 impl Button for PerifGpioButton {
     /// Check whether the button is pressed.
-    fn is_pressed(&self) -> Result<bool> {
-        self.sig_button.state()
+    fn is_pressed(&self) -> Option<bool> {
+        self.sig_button.state().ok()
     }
 }
 

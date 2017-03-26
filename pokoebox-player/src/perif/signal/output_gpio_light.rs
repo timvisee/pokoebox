@@ -1,10 +1,13 @@
 #![cfg(feature = "rpi")]
 
 use std::collections::HashMap;
+use std::ops::{Deref, DerefMut};
+use std::sync::{Arc, RwLock, Weak};
 
 use error::Error;
 use gpio::gpio_manager::GpioManager;
 use gpio::pin::Pin;
+use gpio::pin_token::PinToken;
 use gpio::pin_config::{PinConfig, IoMode};
 use result::Result;
 use super::sig_id::SigId;
@@ -23,7 +26,8 @@ pub struct OutputGpioLight {
     id: SigId,
     name: &'static str,
     pin_configs: HashMap<&'static str, PinConfig>,
-    pins: HashMap<&'static str, Pin>
+    pins: HashMap<&'static str, PinToken>,
+    gpio_manager: Weak<RwLock<GpioManager>>,
 }
 
 impl OutputGpioLight {
@@ -33,7 +37,7 @@ impl OutputGpioLight {
         id: SigId, 
         name: &'static str,
         pin: usize,
-        gpio_manager: &GpioManager
+        gpio_manager: Arc<RwLock<GpioManager>>
     ) -> Result<Self> {
         // Create a hash map of pin configurations
         let mut pin_configs = HashMap::new();
@@ -50,6 +54,7 @@ impl OutputGpioLight {
             name: name,
             pin_configs: pin_configs,
             pins: HashMap::new(),
+            gpio_manager: Arc::downgrade(&gpio_manager),
         };
 
         // Setup the pins
@@ -59,27 +64,13 @@ impl OutputGpioLight {
     }
 
     /// Find the GPIO pin for the light.
-    fn find_light_pin(&self) -> Result<&Pin> {
-        // Get the light pin
-        let result = self.gpio_pin(GPIO_PIN_KEY_LIGHT);
-        if result.is_none() {
-            return Err(Error::new("Unable to get light pin"));
-        }
-
-        // Unwrap the pin, and set the state
-        Ok(result.unwrap())
+    fn find_light_pin(&self) -> Option<&Pin> {
+        self.gpio_pin(GPIO_PIN_KEY_LIGHT)
     }
 
     /// Find the GPIO pin for the light, mutable.
-    fn find_light_pin_mut(&mut self) -> Result<&mut Pin> {
-        // Get the light pin
-        let result = self.gpio_pin_mut(GPIO_PIN_KEY_LIGHT);
-        if result.is_none() {
-            return Err(Error::new("Unable to get light pin"));
-        }
-
-        // Unwrap the pin, and set the state
-        Ok(result.unwrap())
+    fn find_light_pin_mut(&self) -> Option<&mut Pin> {
+        self.gpio_pin_mut(GPIO_PIN_KEY_LIGHT)
     }
 }
 
@@ -98,22 +89,16 @@ impl SigGpio for OutputGpioLight {
         &self.pin_configs
     }
 
-    fn gpio_pin_configs_mut(&mut self)
-        -> &mut HashMap<&'static str, PinConfig>
-    {
+    fn gpio_pin_configs_mut(&mut self) -> &mut HashMap<&'static str, PinConfig> {
         &mut self.pin_configs
     }
 
-    fn gpio_pins(&self) -> &HashMap<&'static str, Pin> {
+    fn gpio_pin_tokens(&self) -> &HashMap<&'static str, PinToken> {
         &self.pins
     }
 
-    fn gpio_pins_mut(&mut self) -> &mut HashMap<&'static str, Pin> {
-        &mut self.pins
-    }
-
-    fn add_gpio_pin(&mut self, key: &'static str, pin: Pin) {
-        self.pins.insert(key, pin);
+    fn add_gpio_pin(&mut self, key: &'static str, pin_token: PinToken) {
+        self.pins.insert(key, pin_token);
     }
 }
 
@@ -123,16 +108,30 @@ impl SigOutGpio for OutputGpioLight {}
 
 impl SigOutLight for OutputGpioLight {
     fn state(&self) -> Result<bool> {
-        Ok(self.find_light_pin()?.read_bool())
+        self.find_light_pin().and_then(|pin| Some(pin.read_bool())).ok_or(
+            Error::new("Failed to read light state, unable to find light pin.")
+        )
     }
 
     fn set_state(&mut self, state: bool) -> Result<()> {
-        self.find_light_pin_mut()?.write_bool(state);
+        // Get the light pin
+        let pin = self.find_light_pin_mut().ok_or(
+            Error::new("Failed to toggle light, unable to find light pin.")
+        )?;
+
+        // Write the state
+        pin.write_bool(state);
         Ok(())
     }
 
     fn toggle(&mut self) -> Result<()> {
-        self.find_light_pin_mut()?.write_inverse();
+        // Get the light pin
+        let pin = self.find_light_pin_mut().ok_or(
+            Error::new("Failed to toggle light, unable to find light pin.")
+        )?;
+
+        // Write the inverse
+        pin.write_inverse();
         Ok(())
     }
 }

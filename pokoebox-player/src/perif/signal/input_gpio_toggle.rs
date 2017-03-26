@@ -1,10 +1,13 @@
 #![cfg(feature = "rpi")]
 
 use std::collections::HashMap;
+use std::ops::{Deref, DerefMut};
+use std::sync::{Arc, RwLock, Weak};
 
 use error::Error;
 use gpio::gpio_manager::GpioManager;
 use gpio::pin::Pin;
+use gpio::pin_token::PinToken;
 use gpio::pin_config::{PinConfig, PullMode, IoMode};
 use result::Result;
 use super::sig_id::SigId;
@@ -23,7 +26,8 @@ pub struct InputGpioToggle {
     id: SigId,
     name: &'static str,
     pin_configs: HashMap<&'static str, PinConfig>,
-    pins: HashMap<&'static str, Pin>
+    pins: HashMap<&'static str, PinToken>,
+    gpio_manager: Weak<RwLock<GpioManager>>,
 }
 
 impl InputGpioToggle {
@@ -33,7 +37,7 @@ impl InputGpioToggle {
         id: SigId,
         name: &'static str,
         pin: usize,
-        gpio_manager: &GpioManager
+        gpio_manager: Arc<RwLock<GpioManager>>
     ) -> Result<Self> {
         // Create a hash map of pin configurations
         let mut pin_configs = HashMap::new();
@@ -57,6 +61,7 @@ impl InputGpioToggle {
             name: name,
             pin_configs: pin_configs,
             pins: HashMap::new(),
+            gpio_manager: Arc::downgrade(&gpio_manager),
         };
 
         // Setup the pins
@@ -66,14 +71,8 @@ impl InputGpioToggle {
     }
 
     /// Find the button signal pin.
-    fn find_button_pin(&self) -> Result<&Pin> {
-        // Get the button pin
-        let result = self.gpio_pin(GPIO_PIN_KEY_BUTTON);
-        if result.is_none() {
-            return Err(Error::new("Unable to get button pin"));
-        }
-
-        Ok(result.unwrap())
+    fn find_button_pin(&self) -> Option<&Pin> {
+        self.gpio_pin(GPIO_PIN_KEY_BUTTON)
     }
 }
 
@@ -92,22 +91,16 @@ impl SigGpio for InputGpioToggle {
         &self.pin_configs
     }
 
-    fn gpio_pin_configs_mut(&mut self)
-        -> &mut HashMap<&'static str, PinConfig>
-    {
+    fn gpio_pin_configs_mut(&mut self) -> &mut HashMap<&'static str, PinConfig> {
         &mut self.pin_configs
     }
 
-    fn gpio_pins(&self) -> &HashMap<&'static str, Pin> {
+    fn gpio_pin_tokens(&self) -> &HashMap<&'static str, PinToken> {
         &self.pins
     }
 
-    fn gpio_pins_mut(&mut self) -> &mut HashMap<&'static str, Pin> {
-        &mut self.pins
-    }
-
-    fn add_gpio_pin(&mut self, key: &'static str, pin: Pin) {
-        self.pins.insert(key, pin);
+    fn add_gpio_pin(&mut self, key: &'static str, pin_token: PinToken) {
+        self.pins.insert(key, pin_token);
     }
 }
 
@@ -117,7 +110,9 @@ impl SigInGpio for InputGpioToggle {}
 
 impl SigInToggle for InputGpioToggle {
     fn state(&self) -> Result<bool> {
-        Ok(self.find_button_pin()?.read_bool())
+        self.find_button_pin().and_then(|pin| Some(pin.read_bool())).ok_or(
+            Error::new("Failed to read button state, unable to find button pin.")
+        )
     }
 }
 
