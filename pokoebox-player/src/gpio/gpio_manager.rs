@@ -41,16 +41,6 @@ impl GpioManager {
             return Err(Error::new("Failed to initialize CuPi for GPIO."));
         }
 
-        // Create a new polling thread
-        thread::spawn(|| {
-            loop {
-                println!("WORKER THREAD HERE!");
-
-                // Sleep the worker thread
-                thread::sleep(Duration::new(0, THREAD_POLLER_INTERVAL_NANO));
-            }
-        });
-
         // Construct and return
         let manager = Ok(GpioManager {
             cupi: cupi.unwrap(),
@@ -111,6 +101,11 @@ impl GpioManager {
         self.token_index += 1;
 
         PinToken::new(token)
+    }
+
+    /// Poll the pins for signal changes.
+    pub fn poll_pins(&self) {
+        // TODO: Poll pins here!
     }
 
 //    /// Register a new pin to start polling on.

@@ -223,3 +223,7 @@ impl PartialEq for Pin {
         self.token == other.token
     }
 }
+
+unsafe impl Send for Pin {}
+
+unsafe impl Sync for Pin {}

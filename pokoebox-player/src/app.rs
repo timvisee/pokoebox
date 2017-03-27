@@ -58,9 +58,6 @@ impl App {
     /// This will create things like the GUI,
     /// and starts initialization of all peripherals.
     pub fn start(&mut self) -> Result<()> {
-        // Start the GUI
-        self.gui.start();
-
         // Load the normal actions
         self.action_manager.load_normal_actions();
 
@@ -71,6 +68,9 @@ impl App {
         ).unwrap();
 
         // TODO: Start the peripheral manager here!
+
+        // Start the GUI
+        self.gui.start();
 
         Ok(())
     }
@@ -93,6 +93,12 @@ impl App {
 
     /// Run the main loop of the application.
     pub fn main_loop(&self) {
-        self.gui.main_loop();
+        loop {
+            // Poll the GPIO manager
+            self.gpio_manager.poll_pins();
+
+            // Run the GUIs main loop
+            self.gui.main_loop();
+        }
     }
 }

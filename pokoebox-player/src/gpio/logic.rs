@@ -67,3 +67,7 @@ impl Logic {
         self.as_inverted()
     }
 }
+
+unsafe impl Send for Logic {}
+
+unsafe impl Sync for Logic {}

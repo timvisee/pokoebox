@@ -209,6 +209,10 @@ impl PinConfig {
     }
 }
 
+unsafe impl Send for PinConfig {}
+
+unsafe impl Sync for PinConfig {}
+
 /// Pull up/down mode of the pin.
 #[derive(PartialEq, Eq, Copy, Clone)]
 pub enum PullMode {
@@ -222,6 +226,10 @@ pub enum PullMode {
     PullDown
 }
 
+unsafe impl Send for PullMode {}
+
+unsafe impl Sync for PullMode {}
+
 /// Input/output mode of the pin.
 #[derive(PartialEq, Eq, Copy, Clone)]
 pub enum IoMode {
@@ -231,3 +239,7 @@ pub enum IoMode {
     /// Output mode, to make the pin write outputs
     Output
 }
+
+unsafe impl Send for IoMode {}
+
+unsafe impl Sync for IoMode {}
