@@ -65,8 +65,8 @@ impl PerifGpioButton {
 /// This is a GPIO button.
 impl GpioButton for PerifGpioButton {
     /// Check whether the button is pressed.
-    fn is_pressed(&self, gpio_manager: &GpioManager) -> Option<bool> {
-        self.sig_button.state(gpio_manager).ok()
+    fn is_pressed(&self, gpio_manager: &GpioManager) -> Result<bool> {
+        self.sig_button.state(gpio_manager)
     }
 }
 
