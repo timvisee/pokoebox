@@ -1,5 +1,6 @@
 #![cfg(feature = "rpi")]
 
+use std::collections::HashMap;
 use std::thread;
 use std::time::Duration;
 
@@ -23,7 +24,7 @@ pub struct GpioManager {
     cupi: CuPi,
 
     /// List of pins that are instantiated.
-    pins: Vec<Pin>,
+    pins: HashMap<PinToken, Pin>,
 
     /// Token index, used to create an unique auto incrementing token value.
     token_index: usize
@@ -53,7 +54,7 @@ impl GpioManager {
         // Construct and return
         let manager = Ok(GpioManager {
             cupi: cupi.unwrap(),
-            pins: Vec::new(),
+            pins: HashMap::new(),
             token_index: 0,
         });
 
@@ -81,34 +82,24 @@ impl GpioManager {
     /// Add the given pin to the manager.
     /// A reference to the added pin is returned.
     pub fn add_pin(&mut self, pin: Pin) -> &Pin {
-        self.pins.push(pin);
-        self.pins.last().unwrap()
+        // Store the pin token
+        let token = pin.token();
+
+        // Insert the pin, and return a reference
+        self.pins.insert(token, pin);
+        self.pin(token).unwrap()
     }
 
     /// Get a registered pin by it's pin token.
     /// `None` is returned if the pin couldn't be found.
     pub fn pin(&self, token: PinToken) -> Option<&Pin> {
-        // Loop through the list of pins, and find the correct one
-        for pin in &self.pins {
-            if pin.token() == token {
-                return Some(pin);
-            }
-        }
-
-        None
+        self.pins.get(&token)
     }
 
     /// Get a mutable registered pin by it's pin token.
     /// `None` is returned if the pin couldn't be found.
     pub fn pin_mut(&mut self, token: PinToken) -> Option<&mut Pin> {
-        // Loop through the list of pins, and find the correct one
-        for pin in &mut self.pins {
-            if pin.token() == token {
-                return Some(pin);
-            }
-        }
-
-        None
+        self.pins.get_mut(&token)
     }
 
     /// Generate a new unique pin token, that can be used to identify a new pin.
