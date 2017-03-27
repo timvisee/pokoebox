@@ -1,8 +1,6 @@
 #![cfg(feature = "rpi")]
 
 use std::collections::HashMap;
-use std::ops::{Deref, DerefMut};
-use std::sync::{Arc, RwLock, Weak};
 
 use error::Error;
 use gpio::gpio_manager::GpioManager;
@@ -27,7 +25,6 @@ pub struct OutputGpioLight {
     name: &'static str,
     pin_configs: HashMap<&'static str, PinConfig>,
     pins: HashMap<&'static str, PinToken>,
-    gpio_manager: Weak<RwLock<GpioManager>>,
 }
 
 impl OutputGpioLight {
@@ -37,7 +34,7 @@ impl OutputGpioLight {
         id: SigId, 
         name: &'static str,
         pin: usize,
-        gpio_manager: Arc<RwLock<GpioManager>>
+        gpio_manager: &mut GpioManager
     ) -> Result<Self> {
         // Create a hash map of pin configurations
         let mut pin_configs = HashMap::new();
@@ -54,7 +51,6 @@ impl OutputGpioLight {
             name: name,
             pin_configs: pin_configs,
             pins: HashMap::new(),
-            gpio_manager: Arc::downgrade(&gpio_manager),
         };
 
         // Setup the pins
@@ -97,7 +93,7 @@ impl SigGpio for OutputGpioLight {
         &self.pins
     }
 
-    fn add_gpio_pin(&mut self, key: &'static str, pin_token: PinToken) {
+    fn add_gpio_pin_token(&mut self, key: &'static str, pin_token: PinToken) {
         self.pins.insert(key, pin_token);
     }
 }

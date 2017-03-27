@@ -4,6 +4,7 @@ use std::thread;
 use std::time::Duration;
 
 use super::cupi::CuPi;
+use super::cupi::sys::Edge;
 
 use error::Error;
 use result::Result;

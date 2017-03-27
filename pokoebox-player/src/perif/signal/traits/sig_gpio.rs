@@ -1,8 +1,6 @@
 #![cfg(feature = "rpi")]
 
 use std::collections::HashMap;
-use std::ops::{Deref, DerefMut};
-use std::sync::{Arc, RwLock};
 
 use gpio::gpio_manager::GpioManager;
 use gpio::pin::Pin;
@@ -27,7 +25,7 @@ pub trait SigGpio: Sig {
     /// of configurations empty.
     /// This uses the pin configurations from the `Self.gpio_pin_configs();`
     /// method.
-    fn setup_pins(&mut self, gpio_manager: Arc<RwLock<GpioManager>>) -> Result<()> {
+    fn setup_pins(&mut self, gpio_manager: &mut GpioManager) -> Result<()> {
         // Create a pin tokens list of the pins that are created
         let mut pin_tokens = HashMap::new();
 
@@ -35,9 +33,6 @@ pub trait SigGpio: Sig {
         {
             // Get the hash map of configurations
             let mut configs = self.gpio_pin_configs_mut();
-
-            // Get a write lock on the GPIO manager
-            let mut gpio_manager = gpio_manager.write()?;
 
             // Iterate through the list of pin configurations
             for (key, config) in configs.drain() {
@@ -108,5 +103,5 @@ pub trait SigGpio: Sig {
     }
 
     /// Add the given `pin` with the given `key` to the hash map of pins.
-    fn add_gpio_pin(&mut self, key: &'static str, pin_token: PinToken);
+    fn add_gpio_pin_token(&mut self, key: &'static str, pin_token: PinToken);
 }

@@ -1,7 +1,5 @@
 #![cfg(feature = "rpi")]
 
-use std::sync::{Arc, RwLock};
-
 use gpio::gpio_manager::GpioManager;
 use result::Result;
 use super::perif_type::PerifType;
@@ -31,7 +29,7 @@ impl PerifGpioLight {
     pub fn new(
         name: &'static str,
         pin: usize,
-        gpio_manager: Arc<RwLock<GpioManager>>,
+        gpio_manager: &mut GpioManager
     ) -> Result<Self> {
         // Create a GPIO light signal instance, and add it to the outputs
         let sig_light = OutputGpioLight::new(
@@ -51,7 +49,7 @@ impl PerifGpioLight {
     pub fn new_wrapped(
         name: &'static str,
         pin: usize,
-        gpio_manager: Arc<RwLock<GpioManager>>,
+        gpio_manager: &mut GpioManager
     ) -> Result<PerifType> {
         // Create a new peripheral instance
         let perif = Self::new(name, pin, gpio_manager)?;
