@@ -4,14 +4,12 @@ use std::thread;
 use std::time::Duration;
 
 use super::cupi::CuPi;
-use super::cupi::sys::Edge;
 
 use error::Error;
 use result::Result;
 use super::pin::Pin;
 use super::pin_config::PinConfig;
 use super::pin_token::PinToken;
-use super::event_handler::EventHandler;
 
 /// Number of nanoseconds per second.
 const NANOS_PER_SEC: u32 = 1000000000;

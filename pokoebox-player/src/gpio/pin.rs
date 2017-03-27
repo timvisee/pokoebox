@@ -1,6 +1,6 @@
 #![cfg(feature = "rpi")]
 
-use super::cupi::{CuPi, PinInput, PinOutput};
+use super::cupi::{PinInput, PinOutput};
 
 use result::Result;
 use super::gpio_manager::GpioManager;
@@ -212,7 +212,7 @@ impl Pin {
     /// Setting the trigger mode will enable pin polling to listen for signal changes.
     ///
     /// Set the mode to `None` to disable triggering.
-    pub fn set_trigger_edge(&mut self, trigger_edge: Option<TriggerEdge>, gpio_manager: &mut GpioManager) {
+    pub fn set_trigger_edge(&mut self, trigger_edge: Option<TriggerEdge>) {
         self.trigger_edge = trigger_edge;
     }
 }
