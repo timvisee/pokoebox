@@ -1,7 +1,4 @@
-use result::Result;
+use super::perif::Perif;
 
 /// Peripheral that is a button.
-pub trait Button {
-    /// Check whether the button is pressed.
-    fn is_pressed(&self) -> Option<bool>;
-}
+pub trait Button: Perif {}

@@ -37,7 +37,7 @@ pub trait SigGpio: Sig {
             // Iterate through the list of pin configurations
             for (key, config) in configs.drain() {
                 // Convert the configuration into a pin
-                let (token, _) = config.into_pin(&mut gpio_manager)?;
+                let (token, _) = config.into_pin(gpio_manager)?;
 
                 // Add the pin to the hash map
                 pin_tokens.insert(key, token);
@@ -46,7 +46,7 @@ pub trait SigGpio: Sig {
 
         // Add the pin tokens of the created pins to the map
         for (key, token) in pin_tokens.drain() {
-            self.add_gpio_pin(key, token);
+            self.add_gpio_pin_token(key, token);
         }
 
         Ok(())
@@ -64,13 +64,7 @@ pub trait SigGpio: Sig {
 
     /// Get the GPIO pin with the given key.
     /// `None` is returned if there was no GPIO pin for the given `key`.
-    fn gpio_pin(&self, key: &'static str) -> Option<&Pin> {
-        // Get the GPIO manager
-        let gpio_manager = self.gpio_manager_ref();
-        if gpio_manager.is_err() {
-            return None;
-        }
-
+    fn gpio_pin<'a, 'b: 'a>(&'a self, key: &'static str, gpio_manager: &'b GpioManager) -> Option<&'a Pin> {
         // Get the pin token
         let token = self.gpio_pin_token(key);
         if token.is_none() {
@@ -78,20 +72,14 @@ pub trait SigGpio: Sig {
         }
 
         // Get the pin instance by it's token
-        gpio_manager.unwrap().pin(token.unwrap())
+        gpio_manager.pin(token.unwrap())
     }
 
     /// Get the GPIO pin with the given key as mutable.
     /// `None` is returned if there was no GPIO pin for the given `key`.
-    fn gpio_pin_mut(&mut self, key: &'static str)
-        -> Option<&mut Pin>
+    fn gpio_pin_mut<'a, 'b: 'a>(&'a mut self, key: &'static str, gpio_manager: &'b mut GpioManager)
+        -> Option<&'a mut Pin>
     {
-        // Get the GPIO manager
-        let gpio_manager = self.gpio_manager_mut_ref();
-        if gpio_manager.is_err() {
-            return None;
-        }
-
         // Get the pin token
         let token = self.gpio_pin_token(key);
         if token.is_none() {
@@ -99,7 +87,7 @@ pub trait SigGpio: Sig {
         }
 
         // Get the pin instance by it's token
-        gpio_manager.unwrap().pin_mut(token.unwrap())
+        gpio_manager.pin_mut(token.unwrap())
     }
 
     /// Add the given `pin` with the given `key` to the hash map of pins.

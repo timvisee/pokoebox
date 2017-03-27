@@ -204,11 +204,8 @@ impl PinConfig {
     }
 
     /// Convert this configuration into a pin instance.
-    // TODO: Should return a pin reference, not an owned value.
-    pub fn into_pin(self, gpio_manager: &mut GpioManager) -> Result<(PinToken, Pin)> {
-        // TODO: Implement the pin token here!
-        panic!("Pin token must be implemented here!");
-        (PinToken::new(0), Pin::from(gpio_manager, self))
+    pub fn into_pin(self, gpio_manager: &mut GpioManager) -> Result<(PinToken, &Pin)> {
+        gpio_manager.create_pin(self)
     }
 }
 

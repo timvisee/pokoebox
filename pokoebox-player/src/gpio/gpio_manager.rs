@@ -77,7 +77,7 @@ impl GpioManager {
     /// creation resulted into an error.
     pub fn create_pin(&mut self, config: PinConfig) -> Result<(PinToken, &Pin)> {
         // Create a new pin instance, get it's reference and return it's token
-        Pin::from(&mut self, config)
+        Pin::from(self, config)
     }
 
     /// Add the given pin to the manager.

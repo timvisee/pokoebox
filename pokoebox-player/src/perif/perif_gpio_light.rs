@@ -3,12 +3,13 @@
 use gpio::gpio_manager::GpioManager;
 use result::Result;
 use super::perif_type::PerifType;
+use super::traits::gpio::Gpio;
 use super::traits::perif::Perif;
 use super::traits::with_sig::WithSig;
 use super::traits::with_outputs::WithOutputs;
 use super::signal::sig_id::SigId;
 use super::signal::traits::sig_out::SigOut;
-use super::signal::traits::sig_out_light::SigOutLight;
+use super::signal::traits::sig_out_gpio_light::SigOutGpioLight;
 use super::signal::output_gpio_light::OutputGpioLight;
 
 /// Signal ID of the light.
@@ -59,20 +60,26 @@ impl PerifGpioLight {
     }
 
     /// Get the current state of the light.
-    pub fn state(&self) -> Result<bool> {
-        self.sig_light.state()
+    // TODO: Move this method into a GPIO light trait.
+    pub fn state(&self, gpio_manager: &GpioManager) -> Result<bool> {
+        self.sig_light.state(gpio_manager)
     }
 
     /// Set the state of the light.
-    pub fn set_state(&mut self, state: bool) -> Result<()> {
-        self.sig_light.set_state(state)
+    // TODO: Move this method into a GPIO light trait.
+    pub fn set_state(&mut self, state: bool, gpio_manager: &mut GpioManager) -> Result<()> {
+        self.sig_light.set_state(state, gpio_manager)
     }
 
     /// Toggle the light.
-    pub fn toggle(&mut self) -> Result<()> {
-        self.sig_light.toggle()
+    // TODO: Move this method into a GPIO light trait.
+    pub fn toggle(&mut self, gpio_manager: &mut GpioManager) -> Result<()> {
+        self.sig_light.toggle(gpio_manager)
     }
 }
+
+/// This peripheral uses GPIO.
+impl Gpio for PerifGpioLight {}
 
 /// This peripheral has outputs.
 impl WithOutputs for PerifGpioLight {

@@ -4,13 +4,15 @@ use gpio::gpio_manager::GpioManager;
 use result::Result;
 use super::perif_type::PerifType;
 use super::traits::button::Button;
+use super::traits::gpio::Gpio;
+use super::traits::gpio_button::GpioButton;
 use super::traits::perif::Perif;
 use super::traits::with_inputs::WithInputs;
 use super::traits::with_sig::WithSig;
 use super::signal::input_gpio_toggle::InputGpioToggle;
 use super::signal::sig_id::SigId;
 use super::signal::traits::sig_in::SigIn;
-use super::signal::traits::sig_in_toggle::SigInToggle;
+use super::signal::traits::sig_in_gpio_toggle::SigInGpioToggle;
 
 /// Signal ID of the button.
 pub const SIG_BUTTON_ID: &'static str = "button";
@@ -60,13 +62,19 @@ impl PerifGpioButton {
     }
 }
 
-/// This is a button.
-impl Button for PerifGpioButton {
+/// This is a GPIO button.
+impl GpioButton for PerifGpioButton {
     /// Check whether the button is pressed.
-    fn is_pressed(&self) -> Option<bool> {
-        self.sig_button.state().ok()
+    fn is_pressed(&self, gpio_manager: &GpioManager) -> Option<bool> {
+        self.sig_button.state(gpio_manager).ok()
     }
 }
+
+/// This is a button.
+impl Button for PerifGpioButton {}
+
+/// This peripheral uses GPIO.
+impl Gpio for PerifGpioButton {}
 
 /// This peripheral has inputs.
 impl WithInputs for PerifGpioButton {

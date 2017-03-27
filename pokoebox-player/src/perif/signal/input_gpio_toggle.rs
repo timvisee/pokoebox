@@ -67,8 +67,8 @@ impl InputGpioToggle {
     }
 
     /// Find the button signal pin.
-    fn find_button_pin(&self) -> Option<&Pin> {
-        self.gpio_pin(GPIO_PIN_KEY_BUTTON)
+    fn find_button_pin<'a, 'b: 'a>(&'a self, gpio_manager: &'b GpioManager) -> Option<&'a Pin> {
+        self.gpio_pin(GPIO_PIN_KEY_BUTTON, gpio_manager)
     }
 }
 
@@ -104,12 +104,12 @@ impl SigIn for InputGpioToggle {}
 
 impl SigInGpio for InputGpioToggle {}
 
-impl SigInToggle for InputGpioToggle {
-    fn state(&self) -> Result<bool> {
-        self.find_button_pin().and_then(|pin| Some(pin.read_bool())).ok_or(
+impl SigInToggle for InputGpioToggle {}
+
+impl SigInGpioToggle for InputGpioToggle {
+    fn state(&self, gpio_manager: &GpioManager) -> Result<bool> {
+        self.find_button_pin(gpio_manager).and_then(|pin| Some(pin.read_bool())).ok_or(
             Error::new("Failed to read button state, unable to find button pin.")
         )
     }
 }
-
-impl SigInGpioToggle for InputGpioToggle {}
