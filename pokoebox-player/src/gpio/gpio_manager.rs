@@ -1,8 +1,8 @@
 #![cfg(feature = "rpi")]
 
+use std::sync::{Mutex, MutexGuard};
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::collections::HashMap;
-use std::thread;
-use std::time::Duration;
 
 use super::cupi::CuPi;
 
@@ -12,11 +12,42 @@ use super::pin::Pin;
 use super::pin_config::PinConfig;
 use super::pin_token::PinToken;
 
-/// Number of nanoseconds per second.
-const NANOS_PER_SEC: u32 = 1000000000;
+pub struct PinAccessor<'a> {
+    /// The mutex guard.
+    guard: MutexGuard<'a, HashMap<PinToken, Pin>>,
+}
 
-/// Interval of the pin polling.
-const THREAD_POLLER_INTERVAL_NANO: u32 = NANOS_PER_SEC;
+impl<'a> PinAccessor<'a> {
+    /// Construct a new accessor.
+    pub fn new(guard: MutexGuard<'a, HashMap<PinToken, Pin>>) -> Self {
+        PinAccessor {
+            guard: guard,
+        }
+    }
+
+    /// Add the given pin to the manager.
+    /// A reference to the added pin is returned.
+    pub fn add_pin(&mut self, pin: Pin) -> &Pin {
+        // Store the pin token
+        let token = pin.token();
+
+        // Insert the pin, and return a reference
+        self.guard.insert(token, pin);
+        self.pin(token).unwrap()
+    }
+
+    /// Get a registered pin by it's pin token.
+    /// `None` is returned if the pin couldn't be found.
+    pub fn pin(&self, token: PinToken) -> Option<&Pin> {
+        self.guard.get(&token)
+    }
+
+    /// Get a mutable registered pin by it's pin token.
+    /// `None` is returned if the pin couldn't be found.
+    pub fn pin_mut(&mut self, token: PinToken) -> Option<&mut Pin> {
+        self.guard.get_mut(&token)
+    }
+}
 
 /// GPIO manager.
 pub struct GpioManager {
@@ -26,8 +57,11 @@ pub struct GpioManager {
     /// List of pins that are instantiated.
     pins: HashMap<PinToken, Pin>,
 
+    /// List of pins that are instantiated.
+    pins_mutex: Mutex<HashMap<PinToken, Pin>>,
+
     /// Token index, used to create an unique auto incrementing token value.
-    token_index: usize
+    token_index: AtomicUsize,
 }
 
 impl GpioManager {
@@ -45,7 +79,8 @@ impl GpioManager {
         let manager = Ok(GpioManager {
             cupi: cupi.unwrap(),
             pins: HashMap::new(),
-            token_index: 0,
+            pins_mutex: Mutex::new(HashMap::new()),
+            token_index: AtomicUsize::new(0),
         });
 
         debug!("Successfully initialized GPIO manager.");
@@ -56,6 +91,17 @@ impl GpioManager {
     /// Get the CuPi instance.
     pub fn cupi(&self) -> &CuPi {
         &self.cupi
+    }
+
+    /// Create a pin accessor instance, that provides accessibility to the pins that are managed
+    /// by the GPIO manager.
+    ///
+    /// This method creates a lock on the list of managed pins, to ensure concurrency safety.
+    /// The lock is automatically released when the pin accessor is dropped.
+    ///
+    /// If an existing lock is active, the method blocks until a lock can be successfully acquired.
+    pub fn pin_accessor<'a>(&'a self) -> PinAccessor<'a> {
+        PinAccessor::new(self.pins_mutex.lock().unwrap())
     }
 
     /// Create a new pin with the given configuration.
@@ -69,38 +115,38 @@ impl GpioManager {
         Pin::from(self, config)
     }
 
-    /// Add the given pin to the manager.
-    /// A reference to the added pin is returned.
-    pub fn add_pin(&mut self, pin: Pin) -> &Pin {
-        // Store the pin token
-        let token = pin.token();
-
-        // Insert the pin, and return a reference
-        self.pins.insert(token, pin);
-        self.pin(token).unwrap()
-    }
-
-    /// Get a registered pin by it's pin token.
-    /// `None` is returned if the pin couldn't be found.
-    pub fn pin(&self, token: PinToken) -> Option<&Pin> {
-        self.pins.get(&token)
-    }
-
-    /// Get a mutable registered pin by it's pin token.
-    /// `None` is returned if the pin couldn't be found.
-    pub fn pin_mut(&mut self, token: PinToken) -> Option<&mut Pin> {
-        self.pins.get_mut(&token)
-    }
+//    /// Add the given pin to the manager.
+//    /// A reference to the added pin is returned.
+//    pub fn add_pin(&mut self, pin: Pin) -> &Pin {
+//        // Store the pin token
+//        let token = pin.token();
+//
+//        // Insert the pin, and return a reference
+//        self.pins.insert(token, pin);
+//        self.pin(token).unwrap()
+//    }
+//
+//    /// Get a registered pin by it's pin token.
+//    /// `None` is returned if the pin couldn't be found.
+//    pub fn pin(&self, token: PinToken) -> Option<&Pin> {
+//        self.pins.get(&token)
+//    }
+//
+//    /// Get a mutable registered pin by it's pin token.
+//    /// `None` is returned if the pin couldn't be found.
+//    pub fn pin_mut(&mut self, token: PinToken) -> Option<&mut Pin> {
+//        self.pins.get_mut(&token)
+//    }
 
     /// Generate a new unique pin token, that can be used to identify a new pin.
     pub fn generate_pin_token(&mut self) -> PinToken {
-        // Get the token index
-        let token = self.token_index;
+        // Generate a new token
+        let token = PinToken::new(self.token_index.load(Ordering::Relaxed));
 
-        // Increase the token value, and return the token
-        self.token_index += 1;
+        // Increase the index by one for followup tokens
+        self.token_index.fetch_add(1usize, Ordering::Relaxed);
 
-        PinToken::new(token)
+        token
     }
 
     /// Poll the pins for signal changes.

@@ -72,7 +72,7 @@ pub trait SigGpio: Sig {
         }
 
         // Get the pin instance by it's token
-        gpio_manager.pin(token.unwrap())
+        gpio_manager.pin_accessor().pin(token.unwrap())
     }
 
     /// Get the GPIO pin with the given key as mutable.
@@ -87,7 +87,7 @@ pub trait SigGpio: Sig {
         }
 
         // Get the pin instance by it's token
-        gpio_manager.pin_mut(token.unwrap())
+        gpio_manager.pin_accessor().pin_mut(token.unwrap())
     }
 
     /// Add the given `pin` with the given `key` to the hash map of pins.
