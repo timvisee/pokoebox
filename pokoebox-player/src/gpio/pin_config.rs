@@ -4,7 +4,6 @@ use error::Error;
 use result::Result;
 use super::cupi::{CuPi, PinOptions};
 use super::gpio_manager::GpioManager;
-use super::pin::Pin;
 use super::pin_token::PinToken;
 use super::logic::Logic;
 

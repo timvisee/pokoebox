@@ -1,6 +1,6 @@
 #![cfg(feature = "rpi")]
 
-use gpio::gpio_manager::GpioManager;
+use gpio::gpio_manager::{GpioManager, PinAccessor};
 use result::Result;
 use super::perif_type::PerifType;
 use super::traits::button::Button;
@@ -65,8 +65,8 @@ impl PerifGpioButton {
 /// This is a GPIO button.
 impl GpioButton for PerifGpioButton {
     /// Check whether the button is pressed.
-    fn is_pressed(&self, gpio_manager: &GpioManager) -> Result<bool> {
-        self.sig_button.state(gpio_manager)
+    fn is_pressed(&self, pin_accessor: &PinAccessor) -> Result<bool> {
+        self.sig_button.state(pin_accessor)
     }
 }
 

@@ -2,7 +2,7 @@
 
 use std::collections::HashMap;
 
-use gpio::gpio_manager::GpioManager;
+use gpio::gpio_manager::{GpioManager, PinAccessor};
 use gpio::pin::Pin;
 use gpio::pin_token::PinToken;
 use gpio::pin_config::PinConfig;
@@ -64,7 +64,7 @@ pub trait SigGpio: Sig {
 
     /// Get the GPIO pin with the given key.
     /// `None` is returned if there was no GPIO pin for the given `key`.
-    fn gpio_pin<'a, 'b: 'a>(&'a self, key: &'static str, gpio_manager: &'b GpioManager) -> Option<&'a Pin> {
+    fn gpio_pin<'a, 'b: 'a>(&'a self, key: &'static str, pin_accessor: &'b PinAccessor) -> Option<&'a Pin> {
         // Get the pin token
         let token = self.gpio_pin_token(key);
         if token.is_none() {
@@ -72,12 +72,12 @@ pub trait SigGpio: Sig {
         }
 
         // Get the pin instance by it's token
-        gpio_manager.pin_accessor().pin(token.unwrap())
+        pin_accessor.pin(token.unwrap())
     }
 
     /// Get the GPIO pin with the given key as mutable.
     /// `None` is returned if there was no GPIO pin for the given `key`.
-    fn gpio_pin_mut<'a, 'b: 'a>(&'a mut self, key: &'static str, gpio_manager: &'b mut GpioManager)
+    fn gpio_pin_mut<'a, 'b: 'a>(&'a mut self, key: &'static str, pin_accessor: &'b mut PinAccessor)
         -> Option<&'a mut Pin>
     {
         // Get the pin token
@@ -87,7 +87,7 @@ pub trait SigGpio: Sig {
         }
 
         // Get the pin instance by it's token
-        gpio_manager.pin_accessor().pin_mut(token.unwrap())
+        pin_accessor.pin_mut(token.unwrap())
     }
 
     /// Add the given `pin` with the given `key` to the hash map of pins.

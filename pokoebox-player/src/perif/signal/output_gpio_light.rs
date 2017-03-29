@@ -3,7 +3,7 @@
 use std::collections::HashMap;
 
 use error::Error;
-use gpio::gpio_manager::GpioManager;
+use gpio::gpio_manager::{GpioManager, PinAccessor};
 use gpio::pin::Pin;
 use gpio::pin_token::PinToken;
 use gpio::pin_config::{PinConfig, IoMode};
@@ -60,13 +60,13 @@ impl OutputGpioLight {
     }
 
     /// Find the GPIO pin for the light.
-    fn find_light_pin<'a, 'b: 'a>(&'a self, gpio_manager: &'b GpioManager) -> Option<&'a Pin> {
-        self.gpio_pin(GPIO_PIN_KEY_LIGHT, gpio_manager)
+    fn find_light_pin<'a, 'b: 'a>(&'a self, pin_accessor: &'b PinAccessor) -> Option<&'a Pin> {
+        self.gpio_pin(GPIO_PIN_KEY_LIGHT, pin_accessor)
     }
 
     /// Find the GPIO pin for the light, mutable.
-    fn find_light_pin_mut<'a, 'b: 'a>(&'a mut self, gpio_manager: &'b mut GpioManager) -> Option<&'a mut Pin> {
-        self.gpio_pin_mut(GPIO_PIN_KEY_LIGHT, gpio_manager)
+    fn find_light_pin_mut<'a, 'b: 'a>(&'a mut self, pin_accessor: &'b mut PinAccessor) -> Option<&'a mut Pin> {
+        self.gpio_pin_mut(GPIO_PIN_KEY_LIGHT, pin_accessor)
     }
 }
 
@@ -105,15 +105,15 @@ impl SigOutGpio for OutputGpioLight {}
 impl SigOutLight for OutputGpioLight {}
 
 impl SigOutGpioLight for OutputGpioLight {
-    fn state(&self, gpio_manager: &GpioManager) -> Result<bool> {
-        self.find_light_pin(gpio_manager).and_then(|pin| Some(pin.read_bool())).ok_or(
+    fn state(&self, pin_accessor: &PinAccessor) -> Result<bool> {
+        self.find_light_pin(pin_accessor).and_then(|pin| Some(pin.read_bool())).ok_or(
             Error::new("Failed to read light state, unable to find light pin.")
         )
     }
 
-    fn set_state(&mut self, state: bool, gpio_manager: &mut GpioManager) -> Result<()> {
+    fn set_state(&mut self, state: bool, pin_accessor: &mut PinAccessor) -> Result<()> {
         // Get the light pin
-        let pin = self.find_light_pin_mut(gpio_manager).ok_or(
+        let pin = self.find_light_pin_mut(pin_accessor).ok_or(
             Error::new("Failed to toggle light, unable to find light pin.")
         )?;
 
@@ -122,9 +122,9 @@ impl SigOutGpioLight for OutputGpioLight {
         Ok(())
     }
 
-    fn toggle(&mut self, gpio_manager: &mut GpioManager) -> Result<()> {
+    fn toggle(&mut self, pin_accessor: &mut PinAccessor) -> Result<()> {
         // Get the light pin
-        let pin = self.find_light_pin_mut(gpio_manager).ok_or(
+        let pin = self.find_light_pin_mut(pin_accessor).ok_or(
             Error::new("Failed to toggle light, unable to find light pin.")
         )?;
 

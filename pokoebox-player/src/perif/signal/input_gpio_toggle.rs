@@ -3,7 +3,7 @@
 use std::collections::HashMap;
 
 use error::Error;
-use gpio::gpio_manager::GpioManager;
+use gpio::gpio_manager::{GpioManager, PinAccessor};
 use gpio::pin::Pin;
 use gpio::pin_token::PinToken;
 use gpio::pin_config::{PinConfig, PullMode, IoMode};
@@ -67,8 +67,8 @@ impl InputGpioToggle {
     }
 
     /// Find the button signal pin.
-    fn find_button_pin<'a, 'b: 'a>(&'a self, gpio_manager: &'b GpioManager) -> Option<&'a Pin> {
-        self.gpio_pin(GPIO_PIN_KEY_BUTTON, gpio_manager)
+    fn find_button_pin<'a, 'b: 'a>(&'a self, pin_accessor: &'b PinAccessor) -> Option<&'a Pin> {
+        self.gpio_pin(GPIO_PIN_KEY_BUTTON, pin_accessor)
     }
 }
 
@@ -107,8 +107,8 @@ impl SigInGpio for InputGpioToggle {}
 impl SigInToggle for InputGpioToggle {}
 
 impl SigInGpioToggle for InputGpioToggle {
-    fn state(&self, gpio_manager: &GpioManager) -> Result<bool> {
-        self.find_button_pin(gpio_manager).and_then(|pin| Some(pin.read_bool())).ok_or(
+    fn state(&self, pin_accessor: &PinAccessor) -> Result<bool> {
+        self.find_button_pin(pin_accessor).and_then(|pin| Some(pin.read_bool())).ok_or(
             Error::new("Failed to read button state, unable to find button pin.")
         )
     }

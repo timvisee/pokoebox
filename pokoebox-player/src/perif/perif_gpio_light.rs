@@ -1,6 +1,6 @@
 #![cfg(feature = "rpi")]
 
-use gpio::gpio_manager::GpioManager;
+use gpio::gpio_manager::{GpioManager, PinAccessor};
 use result::Result;
 use super::perif_type::PerifType;
 use super::traits::gpio::Gpio;
@@ -63,16 +63,16 @@ impl PerifGpioLight {
 }
 
 impl GpioLight for PerifGpioLight {
-    fn is_lit(&self, gpio_manager: &GpioManager) -> Result<bool> {
-        self.sig_light.state(gpio_manager)
+    fn is_lit(&self, pin_accessor: &PinAccessor) -> Result<bool> {
+        self.sig_light.state(pin_accessor)
     }
 
-    fn set_lit(&mut self, lit: bool, gpio_manager: &mut GpioManager) -> Result<()> {
-        self.sig_light.set_state(lit, gpio_manager)
+    fn set_lit(&mut self, lit: bool, pin_accessor: &mut PinAccessor) -> Result<()> {
+        self.sig_light.set_state(lit, pin_accessor)
     }
 
-    fn toggle_lit(&mut self, gpio_manager: &mut GpioManager) -> Result<()> {
-        self.sig_light.toggle(gpio_manager)
+    fn toggle_lit(&mut self, pin_accessor: &mut PinAccessor) -> Result<()> {
+        self.sig_light.toggle(pin_accessor)
     }
 }
 
