@@ -1,7 +1,7 @@
 #![cfg(feature = "rpi")]
 
 use result::Result;
-use gpio::gpio_manager::PinAccessor;
+use gpio::pin_accessor::PinAccessor;
 use super::sig_out_gpio::SigOutGpio;
 use super::sig_out_light::SigOutLight;
 

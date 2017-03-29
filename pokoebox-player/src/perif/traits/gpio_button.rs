@@ -1,6 +1,6 @@
 #![cfg(feature = "rpi")]
 
-use gpio::gpio_manager::PinAccessor;
+use gpio::pin_accessor::PinAccessor;
 use result::Result;
 use super::button::Button;
 use super::gpio::Gpio;

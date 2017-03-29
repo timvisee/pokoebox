@@ -1,4 +1,4 @@
-use gpio::gpio_manager::PinAccessor;
+use gpio::pin_accessor::PinAccessor;
 use result::Result;
 use super::gpio::Gpio;
 use super::light::Light;

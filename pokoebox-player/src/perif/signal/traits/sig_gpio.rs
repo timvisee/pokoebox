@@ -2,8 +2,9 @@
 
 use std::collections::HashMap;
 
-use gpio::gpio_manager::{GpioManager, PinAccessor};
+use gpio::gpio_manager::GpioManager;
 use gpio::pin::Pin;
+use gpio::pin_accessor::PinAccessor;
 use gpio::pin_token::PinToken;
 use gpio::pin_config::PinConfig;
 use result::Result;

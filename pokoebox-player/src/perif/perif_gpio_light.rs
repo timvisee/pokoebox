@@ -1,6 +1,7 @@
 #![cfg(feature = "rpi")]
 
-use gpio::gpio_manager::{GpioManager, PinAccessor};
+use gpio::gpio_manager::GpioManager;
+use gpio::pin_accessor::PinAccessor;
 use result::Result;
 use super::perif_type::PerifType;
 use super::traits::gpio::Gpio;

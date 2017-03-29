@@ -1,6 +1,6 @@
 #![cfg(feature = "rpi")]
 
-use std::sync::{Mutex, MutexGuard};
+use std::sync::Mutex;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::collections::HashMap;
 
@@ -9,45 +9,9 @@ use super::cupi::CuPi;
 use error::Error;
 use result::Result;
 use super::pin::Pin;
+use super::pin_accessor::PinAccessor;
 use super::pin_config::PinConfig;
 use super::pin_token::PinToken;
-
-pub struct PinAccessor<'a> {
-    /// The mutex guard.
-    guard: MutexGuard<'a, HashMap<PinToken, Pin>>,
-}
-
-impl<'a> PinAccessor<'a> {
-    /// Construct a new accessor.
-    pub fn new(guard: MutexGuard<'a, HashMap<PinToken, Pin>>) -> Self {
-        PinAccessor {
-            guard: guard,
-        }
-    }
-
-    /// Add the given pin to the manager.
-    /// A reference to the added pin is returned.
-    pub fn add_pin(&mut self, pin: Pin) -> &Pin {
-        // Store the pin token
-        let token = pin.token();
-
-        // Insert the pin, and return a reference
-        self.guard.insert(token, pin);
-        self.pin(token).unwrap()
-    }
-
-    /// Get a registered pin by it's pin token.
-    /// `None` is returned if the pin couldn't be found.
-    pub fn pin(&self, token: PinToken) -> Option<&Pin> {
-        self.guard.get(&token)
-    }
-
-    /// Get a mutable registered pin by it's pin token.
-    /// `None` is returned if the pin couldn't be found.
-    pub fn pin_mut(&mut self, token: PinToken) -> Option<&mut Pin> {
-        self.guard.get_mut(&token)
-    }
-}
 
 /// GPIO manager.
 pub struct GpioManager {
@@ -55,10 +19,7 @@ pub struct GpioManager {
     cupi: CuPi,
 
     /// List of pins that are instantiated.
-    pins: HashMap<PinToken, Pin>,
-
-    /// List of pins that are instantiated.
-    pins_mutex: Mutex<HashMap<PinToken, Pin>>,
+    pins: Mutex<HashMap<PinToken, Pin>>,
 
     /// Token index, used to create an unique auto incrementing token value.
     token_index: AtomicUsize,
@@ -78,8 +39,7 @@ impl GpioManager {
         // Construct and return
         let manager = Ok(GpioManager {
             cupi: cupi.unwrap(),
-            pins: HashMap::new(),
-            pins_mutex: Mutex::new(HashMap::new()),
+            pins: Mutex::new(HashMap::new()),
             token_index: AtomicUsize::new(0),
         });
 
@@ -101,7 +61,7 @@ impl GpioManager {
     ///
     /// If an existing lock is active, the method blocks until a lock can be successfully acquired.
     pub fn pin_accessor<'a>(&'a self) -> PinAccessor<'a> {
-        PinAccessor::new(self.pins_mutex.lock().unwrap())
+        PinAccessor::new(self.pins.lock().unwrap())
     }
 
     /// Create a new pin with the given configuration.
