@@ -37,7 +37,7 @@ pub trait SigGpio: Sig {
             // Iterate through the list of pin configurations
             for (key, config) in configs.drain() {
                 // Convert the configuration into a pin
-                let (token, _) = config.into_pin(gpio_manager)?;
+                let token = config.into_pin(gpio_manager)?;
 
                 // Add the pin to the hash map
                 pin_tokens.insert(key, token);

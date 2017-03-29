@@ -110,7 +110,7 @@ impl GpioManager {
     ///
     /// An error is returned when pin creation failed. This might be because the internal pin
     /// creation resulted into an error.
-    pub fn create_pin(&mut self, config: PinConfig) -> Result<(PinToken, &Pin)> {
+    pub fn create_pin(&mut self, config: PinConfig) -> Result<PinToken> {
         // Create a new pin instance, get it's reference and return it's token
         Pin::from(self, config)
     }

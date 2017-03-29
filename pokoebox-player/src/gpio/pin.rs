@@ -42,7 +42,7 @@ impl Pin {
     /// # Errors
     ///
     /// An error is returned when failing to construct the CuPi pin options object.
-    pub fn from<'a: 'b, 'b>(gpio_manager: &'b mut GpioManager, config: PinConfig) -> Result<(PinToken, &'a Self)> {
+    pub fn from<'a>(gpio_manager: &'a mut GpioManager, config: PinConfig) -> Result<PinToken> {
         // Create the CuPi pin options struct
         let options = config.as_cupi_pin_options(gpio_manager.cupi())?;
 
@@ -66,9 +66,12 @@ impl Pin {
             },
         }
 
+        // Generate a new unique token for the pin
+        let token = gpio_manager.generate_pin_token();
+
         // Construct a new pin object
         let pin = Pin {
-            token: gpio_manager.generate_pin_token(),
+            token: token,
             config: config,
             input: input,
             output: output,
@@ -76,8 +79,11 @@ impl Pin {
             trigger_edge: None,
         };
 
+        // Add the pin to the GPIO manager
+        gpio_manager.pin_accessor().add_pin(pin);
+
         // Add the pin to the GPIO manager and return
-        Ok((pin.token(), gpio_manager.pin_accessor().add_pin(pin)))
+        Ok(token)
     }
 
     /// Get the token for this pin.

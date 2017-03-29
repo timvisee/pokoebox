@@ -204,7 +204,7 @@ impl PinConfig {
     }
 
     /// Convert this configuration into a pin instance.
-    pub fn into_pin(self, gpio_manager: &mut GpioManager) -> Result<(PinToken, &Pin)> {
+    pub fn into_pin(self, gpio_manager: &mut GpioManager) -> Result<PinToken> {
         gpio_manager.create_pin(self)
     }
 }
