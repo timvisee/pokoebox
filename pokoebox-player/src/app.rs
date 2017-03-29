@@ -95,6 +95,7 @@ impl App {
     pub fn main_loop(&self) {
         loop {
             // Poll the GPIO manager
+            #[cfg(feature = "rpi")]
             self.gpio_manager.poll_pins();
 
             // Run the GUIs main loop
