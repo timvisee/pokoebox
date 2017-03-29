@@ -1,3 +1,5 @@
+#![cfg(feature = "rpi")]
+
 /// Possible edges to trigger at.
 #[derive(PartialEq, Eq, Copy, Clone)]
 pub enum TriggerEdge {

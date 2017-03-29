@@ -1,3 +1,5 @@
+#![cfg(feature = "rpi")]
+
 use std::sync::MutexGuard;
 use std::collections::HashMap;
 

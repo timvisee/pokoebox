@@ -1,3 +1,5 @@
+#![cfg(feature = "rpi")]
+
 /// Token of a pin.
 /// Pin tokens are used to identify a pin. Each pin that is created gets it's own unique token.
 /// Pins can then be requested from the GPIO manager by their token.

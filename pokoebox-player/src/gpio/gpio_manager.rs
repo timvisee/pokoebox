@@ -75,29 +75,6 @@ impl GpioManager {
         Pin::from(self, config)
     }
 
-//    /// Add the given pin to the manager.
-//    /// A reference to the added pin is returned.
-//    pub fn add_pin(&mut self, pin: Pin) -> &Pin {
-//        // Store the pin token
-//        let token = pin.token();
-//
-//        // Insert the pin, and return a reference
-//        self.pins.insert(token, pin);
-//        self.pin(token).unwrap()
-//    }
-//
-//    /// Get a registered pin by it's pin token.
-//    /// `None` is returned if the pin couldn't be found.
-//    pub fn pin(&self, token: PinToken) -> Option<&Pin> {
-//        self.pins.get(&token)
-//    }
-//
-//    /// Get a mutable registered pin by it's pin token.
-//    /// `None` is returned if the pin couldn't be found.
-//    pub fn pin_mut(&mut self, token: PinToken) -> Option<&mut Pin> {
-//        self.pins.get_mut(&token)
-//    }
-
     /// Generate a new unique pin token, that can be used to identify a new pin.
     pub fn generate_pin_token(&mut self) -> PinToken {
         // Generate a new token
@@ -113,28 +90,4 @@ impl GpioManager {
     pub fn poll_pins(&self) {
         // TODO: Poll pins here!
     }
-
-//    /// Register a new pin to start polling on.
-//    pub fn add_pin(&mut self, pin: &'a Pin) {
-//        // The pin must not be in the list, then add the pin to the list
-//        if !self.is_pin(&pin) {
-//            self.pins.push(&pin);
-//        }
-//    }
-//
-//    /// Check whether the given pin is registered for polling.
-//    /// `true` is returned if the pin is registered, `false` if it isn't.
-//    pub fn is_pin(&self, pin: &'a Pin) -> bool {
-//        self.pins.contains(&pin)
-//    }
-//
-//    /// Deregister the given pin to stop polling on it.
-//    /// Returns `true` if any pin was unregistered, `false` if no pin was unregistered.
-//    // TODO: Test this method, to ensure it works properly.
-//    pub fn remove_pin(&mut self, pin: &'a Pin) -> bool {
-//        *&self.pins.iter()
-//            .position(|e| e == &pin)
-//            .map(|e| self.pins.remove(e))
-//            .is_some()
-//    }
 }
