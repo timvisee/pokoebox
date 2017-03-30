@@ -1,5 +1,6 @@
 #![cfg(feature = "rpi")]
 
+use std::collections::hash_map::{Values, ValuesMut};
 use std::sync::MutexGuard;
 use std::collections::HashMap;
 
@@ -31,6 +32,16 @@ impl<'a> PinAccessor<'a> {
         // Insert the pin, and return a reference
         self.guard.insert(token, pin);
         self.pin(token).unwrap()
+    }
+
+    /// Get an iterator over the available pins.
+    pub fn pins(&self) -> Values<PinToken, Pin> {
+        self.guard.values()
+    }
+
+    /// Get a mutable iterator over the available pins.
+    pub fn pins_mut(&mut self) -> ValuesMut<PinToken, Pin> {
+        self.guard.values_mut()
     }
 
     /// Get a registered pin by it's pin token.

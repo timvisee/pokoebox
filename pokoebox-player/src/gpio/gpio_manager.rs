@@ -13,6 +13,9 @@ use super::pin_accessor::PinAccessor;
 use super::pin_config::PinConfig;
 use super::pin_token::PinToken;
 
+use std::thread;
+use std::time::Duration;
+
 /// GPIO manager.
 pub struct GpioManager {
     /// CuPi instance, to create new pin instances.
@@ -86,8 +89,35 @@ impl GpioManager {
         token
     }
 
-    /// Poll the pins for signal changes.
-    pub fn poll_pins(&self) {
-        // TODO: Poll pins here!
+    /// Start the polling thread.
+    /// The polling thread monitors the signal of each pin, and handles the appropriate triggers
+    /// when the signal of a pin changes.
+    pub fn start_poll_thread(&'static self) {
+        // Create the thread
+        thread::spawn(move || {
+            loop {
+                // Get an pin accessor lock
+                let mut accessor = self.pin_accessor();
+
+                // Show a status message
+                // TODO: Remove this debug message.
+                info!("# Polling...");
+
+                // Loop through the available pins to poll them
+                for pin in accessor.pins_mut() {
+                    // Show a status message
+                    // TODO: Remove this debug message.
+                    info!("# Iterating over pin for polling...");
+                }
+
+                // Sleep the thread until the next polling iteration
+                // TODO: Dynamically determine what time to wait for here.
+                thread::sleep(Duration::new(1, 0));
+            }
+        });
     }
 }
+
+unsafe impl Send for GpioManager {}
+
+unsafe impl Sync for GpioManager {}
