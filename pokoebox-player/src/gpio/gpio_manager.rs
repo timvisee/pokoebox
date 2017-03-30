@@ -1,10 +1,11 @@
 #![cfg(feature = "rpi")]
 
 use std::sync::Mutex;
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::collections::HashMap;
 
 use super::crossbeam;
+use super::crossbeam::ScopedJoinHandle;
 use super::cupi::CuPi;
 
 use error::Error;
@@ -27,6 +28,8 @@ pub struct GpioManager {
 
     /// Token index, used to create an unique auto incrementing token value.
     token_index: AtomicUsize,
+
+    thread: Option<ScopedJoinHandle<()>>,
 }
 
 impl GpioManager {
@@ -45,6 +48,7 @@ impl GpioManager {
             cupi: cupi.unwrap(),
             pins: Mutex::new(HashMap::new()),
             token_index: AtomicUsize::new(0),
+            thread: None,
         });
 
         debug!("Successfully initialized GPIO manager.");
@@ -93,17 +97,17 @@ impl GpioManager {
     /// Start the polling thread.
     /// The polling thread monitors the signal of each pin, and handles the appropriate triggers
     /// when the signal of a pin changes.
-    pub fn start_poll_thread(&self) {
+    pub fn start_poll_thread(&mut self) {
         // Define whether the thread should be active
-        let active = AtomicBool::new(true);
+        let active = Mutex::new(true);
 
         // Start a scoped thread
-        crossbeam::scope(|scope| {
+        self.thread = Some(crossbeam::scope(|scope| {
             // Define what happens when the thread falls out of scope
             scope.defer(|| {
                 // Show a status message, make the thread inactive on it's next iteration
                 info!("Stopping GPIO manager polling thread...");
-                active.store(false, Ordering::Relaxed);
+                *active.lock().unwrap() = false;
             });
 
             // Define the thread logic
@@ -133,14 +137,14 @@ impl GpioManager {
                     thread::sleep(Duration::new(1, 0));
 
                     // Break the thread if it shouldn't be active anymore
-                    if !active.load(Ordering::Relaxed) {
+                    if !*active.lock().unwrap() {
                         break;
                     }
                 }
 
                 info!("Stopped GPIO manager polling thread");
             })
-        });
+        }));
     }
 }
 
