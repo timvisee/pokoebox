@@ -1,5 +1,6 @@
 #![cfg(feature = "rpi")]
 
+extern crate crossbeam;
 extern crate cupi;
 
 pub mod event_handler;

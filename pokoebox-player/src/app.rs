@@ -72,6 +72,10 @@ impl App {
         // Start the GUI
         self.gui.start();
 
+        // Start the GPIO polling thread
+        #[cfg(feature = "rpi")]
+        self.gpio_manager.start_poll_thread();
+
         Ok(())
     }
 
@@ -94,10 +98,6 @@ impl App {
     /// Run the main loop of the application.
     pub fn main_loop(&self) {
         loop {
-            // Poll the GPIO manager
-            #[cfg(feature = "rpi")]
-            self.gpio_manager.poll_pins();
-
             // Run the GUIs main loop
             self.gui.main_loop();
         }
