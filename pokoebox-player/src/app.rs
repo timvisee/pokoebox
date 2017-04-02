@@ -80,9 +80,10 @@ impl App {
 
         #[cfg(feature = "rpi")]
         {
-//            // Create a pin for testing
-//            let pin_config = PinConfig::new_with_pin_and_io(0, IoMode::Output);
-//            pin_config.into_pin(&mut self.gpio_manager)?;
+            // Create a pin for testing
+            let pin_config = PinConfig::new_with_pin_and_io(0, IoMode::Output);
+            let pin = pin_config.into_pin(&mut self.gpio_manager)?;
+            self.gpio_manager.pin_accessor().pin(&pin).unwrap().write_bool(true);
         }
 
         Ok(())

@@ -104,13 +104,10 @@ impl GpioManager {
                 // Start a scope, as the GPIO manager accessor lock may not be held when sleeping
                 {
                     // Get an pin accessor lock
-                    info!("Obtaining pin accessor...");
                     let mut accessor = PinAccessor::from(&pins);
-                    info!("Got pin accessor!");
 
                     // Show a status message
-                    // TODO: Set the logging level for this message to trace
-                    info!("# Polling...");
+                    trace!("# Polling...");
 
                     // Loop through the available pins to poll them
                     for pin in accessor.pins_mut() {
@@ -119,7 +116,7 @@ impl GpioManager {
                         info!("# Iterating over pin for polling... (token: {})", pin.token());
 
                         // Toggle the pin signal
-//                        pin.write_inverse();
+                        pin.write_inverse();
                     }
                 }
 
