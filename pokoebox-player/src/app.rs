@@ -83,7 +83,7 @@ impl App {
             // Create a pin for testing
             let pin_config = PinConfig::new_with_pin_and_io(0, IoMode::Output);
             let pin = pin_config.into_pin(&mut self.gpio_manager)?;
-            self.gpio_manager.pin_accessor().pin(pin).unwrap().write_bool(true);
+            self.gpio_manager.pin_accessor().pin_mut(pin).unwrap().write_bool(true);
         }
 
         Ok(())
