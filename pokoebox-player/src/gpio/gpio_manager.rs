@@ -64,18 +64,7 @@ impl GpioManager {
     ///
     /// If an existing lock is active, the method blocks until a lock can be successfully acquired.
     pub fn pin_accessor<'a>(&'a self) -> PinAccessor<'a> {
-        return Self::extern_pin_accessor(&self.pins)
-    }
-
-    /// Create a pin accessor instance, that provides accessibility to the pins in a safe way.
-    /// The accessor is created for the given list of `pins`.
-    ///
-    /// This method creates a lock on the list of managed pins, to ensure concurrency safety.
-    /// The lock is automatically released when the pin accessor is dropped.
-    ///
-    /// If an existing lock is active, the method blocks until a lock can be successfully acquired.
-    fn extern_pin_accessor<'a>(pins: &'a Mutex<HashMap<PinToken, Pin>>) -> PinAccessor<'a> {
-        PinAccessor::new(pins.lock().unwrap())
+        PinAccessor::from(&self.pins)
     }
 
     /// Create a new pin with the given configuration.
@@ -116,7 +105,7 @@ impl GpioManager {
                 {
                     // Get an pin accessor lock
                     info!("Obtaining pin accessor...");
-                    let mut accessor = Self::extern_pin_accessor(&pins);
+                    let mut accessor = PinAccessor::from(&pins);
                     info!("Got pin accessor!");
 
                     // Show a status message
