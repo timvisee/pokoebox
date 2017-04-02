@@ -109,7 +109,7 @@ impl GpioManager {
 
         // Start the polling thread
         thread::spawn(move || {
-            info!("Started GPIO manager polling thread");
+            debug!("Started GPIO manager polling thread");
 
             loop {
                 // Start a scope, as the GPIO manager accessor lock may not be held when sleeping
@@ -126,6 +126,9 @@ impl GpioManager {
                         // Show a status message
                         // TODO: Set the logging level for this message to trace
                         info!("# Iterating over pin for polling... (token: {})", pin.token());
+
+                        // Toggle the pin signal
+                        pin.write_inverse();
                     }
                 }
 
@@ -134,7 +137,7 @@ impl GpioManager {
                 thread::sleep(Duration::new(1, 0));
             }
 
-            //info!("Stopped GPIO manager polling thread");
+            //debug!("Stopped GPIO manager polling thread");
         });
     }
 }
