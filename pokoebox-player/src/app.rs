@@ -69,6 +69,10 @@ impl App {
             ActionId::new("test-action")
         ).unwrap();
 
+        // Start the GPIO polling thread
+        #[cfg(feature = "rpi")]
+        self.gpio_manager.start_poll_thread();
+
         // TODO: Start the peripheral manager here!
 
         // Start the GUI
@@ -76,12 +80,9 @@ impl App {
 
         #[cfg(feature = "rpi")]
         {
-            // Start the GPIO polling thread
-            self.gpio_manager.start_poll_thread();
-
-            // Create a pin for testing
-            let pin_config = PinConfig::new_with_pin_and_io(0, IoMode::Output);
-            pin_config.into_pin(&mut self.gpio_manager)?;
+//            // Create a pin for testing
+//            let pin_config = PinConfig::new_with_pin_and_io(0, IoMode::Output);
+//            pin_config.into_pin(&mut self.gpio_manager)?;
         }
 
         Ok(())

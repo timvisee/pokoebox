@@ -1,8 +1,8 @@
 #![cfg(feature = "rpi")]
 
+use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::collections::HashMap;
 
 use super::cupi::CuPi;
 
@@ -115,7 +115,9 @@ impl GpioManager {
                 // Start a scope, as the GPIO manager accessor lock may not be held when sleeping
                 {
                     // Get an pin accessor lock
+                    info!("Obtaining pin accessor...");
                     let mut accessor = Self::extern_pin_accessor(&pins);
+                    info!("Got pin accessor!");
 
                     // Show a status message
                     // TODO: Set the logging level for this message to trace
@@ -128,7 +130,7 @@ impl GpioManager {
                         info!("# Iterating over pin for polling... (token: {})", pin.token());
 
                         // Toggle the pin signal
-                        pin.write_inverse();
+//                        pin.write_inverse();
                     }
                 }
 
