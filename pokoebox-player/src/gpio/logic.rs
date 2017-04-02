@@ -1,5 +1,7 @@
 #![cfg(feature = "rpi")]
 
+use std::fmt::{Display, Formatter, Result};
+
 use super::cupi;
 
 /// GPIO pin logic.
@@ -65,6 +67,26 @@ impl Logic {
     /// Convert to an inverted logical value.
     pub fn into_inverted(self) -> Self {
         self.as_inverted()
+    }
+
+    /// Get the name for this logic value.
+    ///
+    /// The following names are returned:
+    ///
+    /// * `High`
+    /// * `Low`
+    pub fn name(&self) -> &'static str {
+        match *self {
+            Logic::High => "High",
+            Logic::Low => "Low",
+        }
+    }
+}
+
+/// Make a pin token displayable.
+impl Display for Logic {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        write!(f, "{}", self.name())
     }
 }
 

@@ -25,6 +25,9 @@ pub struct Pin {
     /// Pin output struct from CuPi if this is an output pin.
     output: Option<PinOutput>,
 
+    /// Last known input logic for this pin, if this is an input pin.
+    input_logic: Option<Logic>,
+
     /// Last known output logic for this pin, if this is an output pin.
     output_logic: Logic,
 
@@ -75,6 +78,7 @@ impl Pin {
             config: config,
             input: input,
             output: output,
+            input_logic: None,
             output_logic: output_logic,
             trigger_edge: None,
         };
@@ -220,6 +224,30 @@ impl Pin {
     /// Set the mode to `None` to disable triggering.
     pub fn set_trigger_edge(&mut self, trigger_edge: Option<TriggerEdge>) {
         self.trigger_edge = trigger_edge;
+    }
+
+    /// Poll the pin for signal changes.
+    /// This will trigger the proper events when the signal changes on input pins.
+    pub fn poll(&mut self) {
+        // Return if this isn't an input pin
+        if !self.is_input() {
+            return;
+        }
+
+        // Get the current input state
+        let input = self.read();
+
+        // Return if the input signal is equal
+        if self.input_logic.is_some() && self.input_logic.unwrap() == input {
+            return;
+        }
+
+        // TODO: Pin signal change event handling here!
+        // TODO: Change this below to a debug message.
+        info!("Signal of input pin changed! (token: {}, signal: {})", self.token(), input);
+
+        // Update the last known input state
+        self.input_logic = Some(input);
     }
 }
 

@@ -16,6 +16,15 @@ use super::pin_token::PinToken;
 use std::thread;
 use std::time::Duration;
 
+/// Number of nanoseconds per second.
+const NANOS_PER_SEC: u32 = 1000000000;
+
+/// Interval of the pin polling in seconds.
+const THREAD_POLLER_INTERVAL_SEC: u64 = 0;
+
+/// Interval of the pin polling in nanoseconds.
+const THREAD_POLLER_INTERVAL_NANO: u32 = NANOS_PER_SEC / 10;
+
 /// GPIO manager.
 pub struct GpioManager {
     /// CuPi instance, to create new pin instances.
@@ -114,13 +123,14 @@ impl GpioManager {
                         // Show a status message
                         trace!("Iterating over pin for polling... (token: {})", pin.token());
 
-                        // TODO: Actually poll the pin here
+                        // Poll the pin
+                        pin.poll();
                     }
                 }
 
                 // Sleep the thread until the next polling iteration
                 // TODO: Dynamically determine what time to wait for here.
-                thread::sleep(Duration::new(1, 0));
+                thread::sleep(Duration::new(THREAD_POLLER_INTERVAL_SEC, THREAD_POLLER_INTERVAL_NANO));
             }
 
             //debug!("Stopped GPIO manager polling thread");
