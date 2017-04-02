@@ -2,7 +2,6 @@
 name = "pokoebox-player"
 version = "0.0.1"
 dependencies = [
- "crossbeam 0.2.10 (registry+https://github.com/rust-lang/crates.io-index)",
  "cupi 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "gtk 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.3.7 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -65,11 +64,6 @@ dependencies = [
 [[package]]
 name = "cfg-if"
 version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-
-[[package]]
-name = "crossbeam"
-version = "0.2.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
@@ -359,7 +353,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum cairo-rs 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)" = "efce5d4fc3d3369f0b6d249ece7807b8f05c3e08a149bdfe85f99ad5740b7919"
 "checksum cairo-sys-rs 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)" = "ee7f9df649493d57a37ae84f57e0d5848714802276151ad742c4ff75ef8e8cd8"
 "checksum cfg-if 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "de1e760d7b6535af4241fca8bd8adf68e2e7edacc6b29f5d399050c5e48cf88c"
-"checksum crossbeam 0.2.10 (registry+https://github.com/rust-lang/crates.io-index)" = "0c5ea215664ca264da8a9d9c3be80d2eaf30923c259d03e870388eb927508f97"
 "checksum cupi 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "afd53413c7d44260314007184a3f0f937103aba2c18118f8e464a475bfd27e85"
 "checksum gdk 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)" = "763c9a7cc10e18660c80f04d49a12da55743ef3363af4718320b119b60aaa49e"
 "checksum gdk-pixbuf 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)" = "792bacc7473ab6da4aaaba55f0b8b359f70ed1dee297af3decfb44c44f6e1fb8"

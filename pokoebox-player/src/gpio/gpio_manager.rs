@@ -1,11 +1,9 @@
 #![cfg(feature = "rpi")]
 
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::collections::HashMap;
 
-use super::crossbeam;
-use super::crossbeam::ScopedJoinHandle;
 use super::cupi::CuPi;
 
 use error::Error;
@@ -24,12 +22,10 @@ pub struct GpioManager {
     cupi: CuPi,
 
     /// List of pins that are instantiated.
-    pins: Mutex<HashMap<PinToken, Pin>>,
+    pins: Arc<Mutex<HashMap<PinToken, Pin>>>,
 
     /// Token index, used to create an unique auto incrementing token value.
     token_index: AtomicUsize,
-
-    thread: Option<ScopedJoinHandle<()>>,
 }
 
 impl GpioManager {
@@ -46,7 +42,7 @@ impl GpioManager {
         // Construct and return
         let manager = Ok(GpioManager {
             cupi: cupi.unwrap(),
-            pins: Mutex::new(HashMap::new()),
+            pins: Arc::new(Mutex::new(HashMap::new())),
             token_index: AtomicUsize::new(0),
             thread: None,
         });
@@ -69,7 +65,18 @@ impl GpioManager {
     ///
     /// If an existing lock is active, the method blocks until a lock can be successfully acquired.
     pub fn pin_accessor<'a>(&'a self) -> PinAccessor<'a> {
-        PinAccessor::new(self.pins.lock().unwrap())
+        return Self::extern_pin_accessor(&self.pins)
+    }
+
+    /// Create a pin accessor instance, that provides accessibility to the pins in a safe way.
+    /// The accessor is created for the given list of `pins`.
+    ///
+    /// This method creates a lock on the list of managed pins, to ensure concurrency safety.
+    /// The lock is automatically released when the pin accessor is dropped.
+    ///
+    /// If an existing lock is active, the method blocks until a lock can be successfully acquired.
+    fn extern_pin_accessor<'a>(pins: &'a Mutex<HashMap<PinToken, Pin>>) -> PinAccessor<'a> {
+        PinAccessor::new(pins.lock().unwrap())
     }
 
     /// Create a new pin with the given configuration.
@@ -98,53 +105,38 @@ impl GpioManager {
     /// The polling thread monitors the signal of each pin, and handles the appropriate triggers
     /// when the signal of a pin changes.
     pub fn start_poll_thread(&mut self) {
-        // Define whether the thread should be active
-        let active = Mutex::new(true);
+        // Clone the pins atomic pointer
+        let pins = self.pins.clone();
 
-        // Start a scoped thread
-        self.thread = Some(crossbeam::scope(|scope| {
-            // Define what happens when the thread falls out of scope
-            scope.defer(|| {
-                // Show a status message, make the thread inactive on it's next iteration
-                info!("Stopping GPIO manager polling thread...");
-                *active.lock().unwrap() = false;
-            });
+        // Start the polling thread
+        thread::spawn(move || {
+            info!("Started GPIO manager polling thread");
 
-            // Define the thread logic
-            scope.spawn(|| {
-                info!("Started GPIO manager polling thread");
+            loop {
+                // Start a scope, as the GPIO manager accessor lock may not be held when sleeping
+                {
+                    // Get an pin accessor lock
+                    let mut accessor = Self::extern_pin_accessor(&pins);
 
-                loop {
-                    // Start a scope, as the GPIO manager accessor lock may not be held when sleeping
-                    {
-                        // Get an pin accessor lock
-                        let mut accessor = self.pin_accessor();
+                    // Show a status message
+                    // TODO: Set the logging level for this message to trace
+                    info!("# Polling...");
 
+                    // Loop through the available pins to poll them
+                    for pin in accessor.pins_mut() {
                         // Show a status message
                         // TODO: Set the logging level for this message to trace
-                        info!("# Polling...");
-
-                        // Loop through the available pins to poll them
-                        for pin in accessor.pins_mut() {
-                            // Show a status message
-                            // TODO: Set the logging level for this message to trace
-                            info!("# Iterating over pin for polling... (token: {})", pin.token());
-                        }
-                    }
-
-                    // Sleep the thread until the next polling iteration
-                    // TODO: Dynamically determine what time to wait for here.
-                    thread::sleep(Duration::new(1, 0));
-
-                    // Break the thread if it shouldn't be active anymore
-                    if !*active.lock().unwrap() {
-                        break;
+                        info!("# Iterating over pin for polling... (token: {})", pin.token());
                     }
                 }
 
-                info!("Stopped GPIO manager polling thread");
-            })
-        }));
+                // Sleep the thread until the next polling iteration
+                // TODO: Dynamically determine what time to wait for here.
+                thread::sleep(Duration::new(1, 0));
+            }
+
+            //info!("Stopped GPIO manager polling thread");
+        });
     }
 }
 
