@@ -107,16 +107,14 @@ impl GpioManager {
                     let mut accessor = PinAccessor::from(&pins);
 
                     // Show a status message
-                    trace!("# Polling...");
+                    trace!("Polling GPIO pins...");
 
                     // Loop through the available pins to poll them
                     for pin in accessor.pins_mut() {
                         // Show a status message
-                        // TODO: Set the logging level for this message to trace
-                        info!("# Iterating over pin for polling... (token: {})", pin.token());
+                        trace!("Iterating over pin for polling... (token: {})", pin.token());
 
-                        // Toggle the pin signal
-                        pin.write_inverse();
+                        // TODO: Actually poll the pin here
                     }
                 }
 
