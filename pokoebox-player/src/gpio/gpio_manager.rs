@@ -44,7 +44,6 @@ impl GpioManager {
             cupi: cupi.unwrap(),
             pins: Arc::new(Mutex::new(HashMap::new())),
             token_index: AtomicUsize::new(0),
-            thread: None,
         });
 
         debug!("Successfully initialized GPIO manager.");
