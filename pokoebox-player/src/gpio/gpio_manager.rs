@@ -2,7 +2,6 @@
 
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
-use std::sync::atomic::{AtomicUsize, Ordering};
 
 use super::cupi::CuPi;
 
@@ -34,7 +33,7 @@ pub struct GpioManager {
     pins: Arc<Mutex<HashMap<PinToken, Pin>>>,
 
     /// Token index, used to create an unique auto incrementing token value.
-    token_index: AtomicUsize,
+    token_index: Arc<Mutex<usize>>,
 }
 
 impl GpioManager {
@@ -52,7 +51,7 @@ impl GpioManager {
         let manager = Ok(GpioManager {
             cupi: cupi.unwrap(),
             pins: Arc::new(Mutex::new(HashMap::new())),
-            token_index: AtomicUsize::new(0),
+            token_index: Arc::new(Mutex::new(0)),
         });
 
         debug!("Successfully initialized GPIO manager.");
@@ -89,11 +88,14 @@ impl GpioManager {
 
     /// Generate a new unique pin token, that can be used to identify a new pin.
     pub fn generate_pin_token(&mut self) -> PinToken {
+        // Create a lock on the token index
+        let mut index = self.token_index.lock().unwrap();
+
         // Generate a new token
-        let token = PinToken::new(self.token_index.load(Ordering::Relaxed));
+        let token = PinToken::new(*index);
 
         // Increase the index by one for followup tokens
-        self.token_index.fetch_add(1usize, Ordering::Relaxed);
+        *index += 1;
 
         token
     }
