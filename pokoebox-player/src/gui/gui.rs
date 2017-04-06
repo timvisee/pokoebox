@@ -48,7 +48,7 @@ impl Gui {
         Ok(Gui {
             master_frame: None,
             master_container: None,
-            master_ui: None
+            master_ui: None,
         })
     }
 

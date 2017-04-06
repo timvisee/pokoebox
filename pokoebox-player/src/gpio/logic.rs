@@ -8,7 +8,7 @@ use super::cupi;
 #[derive(PartialEq, Eq, Copy, Clone)]
 pub enum Logic {
     High,
-    Low
+    Low,
 }
 
 impl Logic {

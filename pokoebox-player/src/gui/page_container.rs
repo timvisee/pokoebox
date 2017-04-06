@@ -20,7 +20,7 @@ impl PageContainer {
     pub fn new() -> Self {
         PageContainer {
             container: Self::build_container(),
-            pages: Vec::new()
+            pages: Vec::new(),
         }
     }
 

@@ -32,7 +32,7 @@ pub struct Pin {
     output_logic: Logic,
 
     /// Edge to trigger at.
-    trigger_edge: Option<TriggerEdge>
+    trigger_edge: Option<TriggerEdge>,
 }
 
 impl Pin {
@@ -74,12 +74,12 @@ impl Pin {
 
         // Construct a new pin object
         let pin = Pin {
-            token: token,
-            config: config,
-            input: input,
-            output: output,
+            token,
+            config,
+            input,
+            output,
             input_logic: None,
-            output_logic: output_logic,
+            output_logic,
             trigger_edge: None,
         };
 

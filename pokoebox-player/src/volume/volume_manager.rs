@@ -10,7 +10,7 @@ impl VolumeManager {
     /// Construct a new controller.
     pub fn new() -> VolumeManager {
         VolumeManager {
-            controls: Vec::new()
+            controls: Vec::new(),
         }
     }
 }

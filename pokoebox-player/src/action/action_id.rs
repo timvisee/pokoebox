@@ -11,7 +11,7 @@ impl ActionId {
     /// Construct a new action ID instance.
     pub fn new(id: &'static str) -> Self {
         ActionId {
-            id: id
+            id,
         }
     }
 

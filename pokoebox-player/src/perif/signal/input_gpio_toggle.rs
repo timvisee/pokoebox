@@ -55,9 +55,9 @@ impl InputGpioToggle {
 
         // Construct the object
         let mut obj = InputGpioToggle {
-            id: id,
-            name: name,
-            pin_configs: pin_configs,
+            id,
+            name,
+            pin_configs,
             pins: HashMap::new(),
         };
 

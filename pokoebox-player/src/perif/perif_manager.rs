@@ -12,7 +12,7 @@ impl PerifManager {
     /// Construct a new peripheral manager.
     pub fn new() -> Self {
         PerifManager {
-            perifs: Vec::new()
+            perifs: Vec::new(),
         }
     }
 

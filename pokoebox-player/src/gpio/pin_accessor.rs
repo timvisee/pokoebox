@@ -19,7 +19,7 @@ impl<'a> PinAccessor<'a> {
     /// Construct a new accessor.
     pub fn new(guard: MutexGuard<'a, HashMap<PinToken, Pin>>) -> Self {
         PinAccessor {
-            guard: guard,
+            guard,
         }
     }
 

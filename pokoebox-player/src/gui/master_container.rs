@@ -14,7 +14,7 @@ impl MasterContainer {
     /// Create a new master container.
     pub fn new() -> Self {
         MasterContainer {
-            container: Self::build_container()
+            container: Self::build_container(),
         }
     }
 

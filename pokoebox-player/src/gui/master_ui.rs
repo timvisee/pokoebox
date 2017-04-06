@@ -14,7 +14,7 @@ impl MasterUi {
     pub fn new() -> Self {
         MasterUi {
             header: Self::build_header(),
-            page_container: Self::build_page_container()
+            page_container: Self::build_page_container(),
         }
     }
 

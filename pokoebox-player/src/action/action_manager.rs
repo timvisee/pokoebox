@@ -15,7 +15,7 @@ impl ActionManager {
     /// Create a new action manager.
     pub fn new() -> Self {
         ActionManager {
-            actions: HashMap::new()
+            actions: HashMap::new(),
         }
     }
 

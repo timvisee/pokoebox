@@ -222,7 +222,7 @@ pub enum PullMode {
     PullUp,
 
     /// Pull down.
-    PullDown
+    PullDown,
 }
 
 unsafe impl Send for PullMode {}
@@ -236,7 +236,7 @@ pub enum IoMode {
     Input,
 
     /// Output mode, to make the pin write outputs
-    Output
+    Output,
 }
 
 unsafe impl Send for IoMode {}

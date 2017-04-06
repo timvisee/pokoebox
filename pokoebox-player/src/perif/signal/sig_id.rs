@@ -8,7 +8,7 @@ impl SigId {
     /// Construct a new ID.
     pub fn new(id: &'static str) -> Self {
         SigId {
-            id: id
+            id,
         }
     }
 

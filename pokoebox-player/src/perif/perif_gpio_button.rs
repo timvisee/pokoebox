@@ -44,8 +44,8 @@ impl PerifGpioButton {
         )?;
 
         Ok(PerifGpioButton {
-            name: name,
-            sig_button: sig_button
+            name,
+            sig_button,
         })
     }
 

@@ -44,8 +44,8 @@ impl PerifGpioLight {
         )?;
 
         Ok(PerifGpioLight {
-            name: name,
-            sig_light: sig_light
+            name,
+            sig_light,
         })
     }
 

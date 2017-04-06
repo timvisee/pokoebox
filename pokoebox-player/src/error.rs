@@ -15,7 +15,7 @@ impl Error {
     /// parameter.
     pub fn new(description: &'static str) -> Self {
         Error {
-            description: description,
+            description,
         }
     }
 

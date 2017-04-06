@@ -11,7 +11,7 @@ impl Header {
     /// Construct a new header.
     pub fn new() -> Self {
         Header {
-            container: Self::build_container()
+            container: Self::build_container(),
         }
     }
 

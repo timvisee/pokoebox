@@ -15,7 +15,7 @@ impl MasterFrame {
     /// Create a new master frame.
     pub fn new() -> Self {
         MasterFrame {
-            window: Self::build_window()
+            window: Self::build_window(),
         }
     }
 
