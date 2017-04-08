@@ -33,4 +33,27 @@ impl TriggerEdge {
             _ => false
         }
     }
+
+    /// Concatenate this trigger edge with another trigger edge.
+    /// This method can be used to determine what edge type to globally listen for, when multiple
+    /// events are registered with different trigger edge types.
+    ///
+    /// The following rules are applied:
+    ///
+    /// * If `self` is equal to `other`, the type of `self` is returned.
+    /// * In any other case, `TriggerEdge::Both` is returned.
+    ///
+    /// This automatically results in the following semantics:
+    ///
+    /// * Concatenating the same types doesn't change the type.
+    /// * When any type is `TriggerEdge::Both`, `TriggerEdge::Both` is returned.
+    pub fn concat(&self, other: TriggerEdge) -> TriggerEdge {
+        // Always when the other is the same
+        if *self == other {
+            return *self;
+        }
+
+        // Return both in all other cases
+        return TriggerEdge::Both;
+    }
 }

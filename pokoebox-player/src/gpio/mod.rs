@@ -3,6 +3,7 @@
 extern crate cupi;
 
 pub mod event_handler;
+pub mod event_manager;
 pub mod gpio_manager;
 pub mod pin;
 pub mod pin_accessor;
