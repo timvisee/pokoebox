@@ -17,6 +17,12 @@ impl EventManager {
         }
     }
 
+    /// Register a new event handler to this manager.
+    // TODO: Use tokens to identify event handlers?
+    pub fn register(&mut self, event_handler: Box<EventHandler>) {
+        self.events.push(event_handler);
+    }
+
     /// Fire an event for the given trigger edge.
     /// This invokes all events that cover the given trigger edge.
     /// Returns true if the event was consumed, false if not.
@@ -33,7 +39,7 @@ impl EventManager {
             }
 
             // Invoke the event, and return true if it's consumed
-            if event.handle()? {
+            if event.invoke()? {
                 return Ok(true);
             }
         }
