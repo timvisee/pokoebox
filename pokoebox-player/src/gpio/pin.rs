@@ -3,6 +3,7 @@
 use super::cupi::{PinInput, PinOutput};
 
 use result::Result;
+use super::event_manager::EventManager;
 use super::gpio_manager::GpioManager;
 use super::logic::Logic;
 use super::pin_config::{PinConfig, IoMode};
@@ -31,8 +32,8 @@ pub struct Pin {
     /// Last known output logic for this pin, if this is an output pin.
     output_logic: Logic,
 
-    /// Edge to trigger at.
-    trigger_edge: Option<TriggerEdge>,
+    /// Event manager.
+    event_manager: EventManager,
 }
 
 impl Pin {
@@ -80,7 +81,7 @@ impl Pin {
             output,
             input_logic: None,
             output_logic,
-            trigger_edge: None,
+            event_manager: EventManager::new(),
         };
 
         // Add the pin to the GPIO manager
@@ -215,15 +216,7 @@ impl Pin {
     /// Get the edge triggering mode.
     /// If no mode is set and triggering isn't enabled, `None` is returned.
     pub fn trigger_edge(&self) -> Option<TriggerEdge> {
-        self.trigger_edge
-    }
-
-    /// Set the edge triggering mode.
-    /// Setting the trigger mode will enable pin polling to listen for signal changes.
-    ///
-    /// Set the mode to `None` to disable triggering.
-    pub fn set_trigger_edge(&mut self, trigger_edge: Option<TriggerEdge>) {
-        self.trigger_edge = trigger_edge;
+        self.event_manager.concatenated_trigger_edge()
     }
 
     /// Poll the pin for signal changes.
@@ -242,12 +235,18 @@ impl Pin {
             return;
         }
 
-        // TODO: Pin signal change event handling here!
+        // Update the last known input state
+        self.input_logic = Some(input);
+
         // TODO: Change this below to a debug message.
         info!("Signal of input pin changed! (token: {}, signal: {})", self.token(), input);
 
-        // Update the last known input state
-        self.input_logic = Some(input);
+        // Return if there are no edges to trigger at
+        if self.trigger_edge().is_none() {
+            return;
+        }
+
+        // TODO: Pin signal change event handling here!
     }
 }
 
