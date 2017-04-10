@@ -5,7 +5,7 @@ use std::fmt::{Display, Formatter, Result};
 use super::logic::Logic;
 
 /// Possible edges to trigger at.
-#[derive(PartialEq, Eq, Copy, Clone)]
+#[derive(PartialEq, Eq, Copy, Clone, Debug)]
 pub enum TriggerEdge {
     /// Trigger when the edge rises.
     Rising,
@@ -95,6 +95,6 @@ impl TriggerEdge {
 /// Make a pin token displayable.
 impl Display for TriggerEdge {
     fn fmt(&self, f: &mut Formatter) -> Result {
-        write!(f, "{}", self.name())
+        write!(f, "{:?}", self)
     }
 }
