@@ -16,7 +16,7 @@ use std::thread;
 use std::time::Duration;
 
 /// Number of nanoseconds per second.
-const NANOS_PER_SEC: u32 = 1000000000;
+const NANOS_PER_SEC: u32 = 1_000_000_000;
 
 /// Interval of the pin polling in seconds.
 const THREAD_POLLER_INTERVAL_SEC: u64 = 0;
