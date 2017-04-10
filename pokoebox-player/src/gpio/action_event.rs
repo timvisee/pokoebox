@@ -1,6 +1,7 @@
 #![cfg(feature = "rpi")]
 
 use action::action_id::ActionId;
+use result::Result;
 use super::event_handler::EventHandler;
 use super::trigger_edge::TriggerEdge;
 
@@ -17,7 +18,7 @@ pub struct ActionEvent {
 impl ActionEvent {
     /// Constructor.
     /// The ID of the action to invoke should be passed to the `action_id` parameter.
-    pub fn new(action_id: ActionId) -> Self {
+    pub fn new(action_id: ActionId, trigger_edge: TriggerEdge) -> Self {
         ActionEvent {
             action_id,
             trigger_edge,
