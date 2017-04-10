@@ -235,18 +235,23 @@ impl Pin {
             return;
         }
 
+        // Determine the trigger edge for this signal change
+        let trigger_edge = TriggerEdge::from_signal_change(
+            if self.input_logic.is_some() {
+                self.input_logic.unwrap()
+            } else {
+                input.as_inverted()
+            },
+            input).unwrap();
+
         // Update the last known input state
         self.input_logic = Some(input);
 
         // TODO: Change this below to a debug message.
-        info!("Signal of input pin changed! (token: {}, signal: {})", self.token(), input);
+        info!("Signal of input pin changed! (token: {}, edge: {}, signal: {})", self.token(), trigger_edge, input);
 
-        // Return if there are no edges to trigger at
-        if self.trigger_edge().is_none() {
-            return;
-        }
-
-        // TODO: Pin signal change event handling here!
+        // Fire the signal change event
+        let _ = self.event_manager.fire(trigger_edge);
     }
 }
 
