@@ -2,6 +2,8 @@
 
 extern crate cupi;
 
+pub mod action_event;
+pub mod closure_event;
 pub mod event_handler;
 pub mod event_manager;
 pub mod gpio_manager;
