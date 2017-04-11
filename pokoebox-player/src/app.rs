@@ -1,9 +1,9 @@
+use std::sync::{Arc, Mutex};
+
 use action::action_id::ActionId;
 use action::action_manager::ActionManager;
 #[cfg(feature = "rpi")]
 use gpio::gpio_manager::GpioManager;
-#[cfg(feature = "rpi")]
-use gpio::pin_config::*;
 use gui::gui::Gui;
 use perif::perif_manager::PerifManager;
 use result::Result;
@@ -14,7 +14,7 @@ pub struct App {
     gui: Gui,
 
     /// Action manager
-    action_manager: ActionManager,
+    action_manager: Arc<Mutex<ActionManager>>,
 
     /// Peripherals manager.
     perif_manager: PerifManager,
@@ -33,7 +33,7 @@ impl App {
         // Create the application instance
         let app = App {
             gui: Gui::new()?,
-            action_manager: ActionManager::new(),
+            action_manager: Arc::new(Mutex::new(ActionManager::new())),
             perif_manager: PerifManager::new(),
             gpio_manager: GpioManager::new()?,
         };
@@ -48,7 +48,7 @@ impl App {
         // Create the application instance
         let app = App {
             gui: Gui::new()?,
-            action_manager: ActionManager::new(),
+            action_manager: Arc::new(Mutex::new(ActionManager::new())),
             perif_manager: PerifManager::new(),
         };
 
@@ -60,12 +60,15 @@ impl App {
     /// This will create things like the GUI,
     /// and starts initialization of all peripherals.
     pub fn start(&mut self) -> Result<()> {
+        // Get a lock on the action manager
+        let mut action_manager_guard = self.action_manager.lock().unwrap();
+
         // Load the normal actions
-        self.action_manager.load_normal_actions();
+        action_manager_guard.load_normal_actions();
 
         // TODO: Remove this testing code
         // Run the test action
-        self.action_manager.invoke_action(
+        action_manager_guard.invoke_action(
             ActionId::new("test-action")
         ).unwrap();
 
@@ -79,12 +82,20 @@ impl App {
         self.gui.start();
 
         #[cfg(feature = "rpi")]
-        {
-            // Create a pin for testing
-            let pin_config = PinConfig::new_with_pin_and_io(0, IoMode::Output);
-            let pin = pin_config.into_pin(&mut self.gpio_manager)?;
-            self.gpio_manager.pin_accessor().pin_mut(pin).unwrap().write_bool(true);
-        }
+        self.gpio_manager.start_poll_thread();
+
+        // TODO: Start the peripheral manager here!
+
+        // Start the GUI
+        self.gui.start();
+
+//        #[cfg(feature = "rpi")]
+//        {
+//            // Create a pin for testing
+//            let pin_config = PinConfig::new_with_pin_and_io(0, IoMode::Output);
+//            let pin = pin_config.into_pin(&mut self.gpio_manager)?;
+//            self.gpio_manager.pin_accessor().pin_mut(pin).unwrap().write_bool(true);
+//        }
 
         Ok(())
     }
