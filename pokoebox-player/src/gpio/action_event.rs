@@ -28,7 +28,8 @@ impl ActionEvent {
         action_id: ActionId,
         action_manager: Arc<Mutex<ActionManager>>,
         trigger_edge: TriggerEdge)
-    -> Self {
+        -> Self
+    {
         ActionEvent {
             action_id,
             action_manager,
