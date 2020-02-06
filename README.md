@@ -21,5 +21,5 @@ The following compile time features are available:
 Example: `cargo run --features "rpi"`
 
 ## License
-This project is released under the GNU GPL-2.0 license.
+This project is released under the GNU GPL-3.0 license.
 Check out the [LICENSE](LICENSE) file for more information.
