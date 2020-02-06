@@ -35,20 +35,19 @@ impl Header {
     fn build_container_controls(container: &gtk::Box) {
         // Create a home button
         let home_button = gtk::Button::new();
-        let home_image =
-            gtk::Image::new_from_icon_name(Some("go-home"), IconSize::LargeToolbar.into());
+        let home_image = gtk::Image::new_from_icon_name(Some("go-home"), IconSize::LargeToolbar);
         home_button.add(&home_image);
         home_button.set_relief(ReliefStyle::None);
         home_button.set_focus_on_click(false);
         container.pack_start(&home_button, false, false, 0);
 
-        // Create a temperature label
-        let temp_label = gtk::Label::new(Some("56°C"));
-        container.pack_end(&temp_label, false, false, 0);
-
         // Create a volume button
         let volume = gtk::VolumeButton::new();
-        container.pack_end(&volume, false, false, 20);
+        container.pack_end(&volume, false, false, 0);
+
+        // Create a temperature label
+        let temp_label = gtk::Label::new(Some("56°C"));
+        container.pack_end(&temp_label, false, false, 20);
     }
 
     /// Get the GTK widget for this header.

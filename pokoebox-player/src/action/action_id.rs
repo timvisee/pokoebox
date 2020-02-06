@@ -4,15 +4,13 @@ use std::fmt::{Display, Formatter};
 /// Action ID.
 #[derive(Eq, PartialEq, Copy, Clone, Hash)]
 pub struct ActionId {
-    id: &'static str
+    id: &'static str,
 }
 
 impl ActionId {
     /// Construct a new action ID instance.
     pub fn new(id: &'static str) -> Self {
-        ActionId {
-            id,
-        }
+        ActionId { id }
     }
 
     /// Get the action ID as a string.

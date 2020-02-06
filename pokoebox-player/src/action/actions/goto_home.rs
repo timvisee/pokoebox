@@ -2,22 +2,21 @@ use super::{Action, ActionId};
 use crate::result::Result;
 
 /// Unique ID of this action.
-pub const ACTION_ID: &'static str = "test-action";
+pub const ACTION_ID: &'static str = "goto-home-action";
 
 /// Name of this action.
-pub const ACTION_NAME: &'static str = "Test action";
+pub const ACTION_NAME: &'static str = "Goto home action";
 
-/// Test action.
-pub struct TestAction;
+/// Go to home action.
+pub struct GotoHomeAction;
 
-impl TestAction {
-    /// Constructor.
+impl GotoHomeAction {
     pub fn new() -> Self {
-        TestAction
+        GotoHomeAction
     }
 }
 
-impl Action for TestAction {
+impl Action for GotoHomeAction {
     fn id(&self) -> ActionId {
         ActionId::new(ACTION_ID)
     }
@@ -27,8 +26,7 @@ impl Action for TestAction {
     }
 
     fn invoke(&self) -> Result<bool> {
-        // Show a status message
-        info!("Test action invoked!");
+        // TODO: goto home page
 
         Ok(true)
     }

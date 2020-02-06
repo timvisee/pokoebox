@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::action::action_id::ActionId;
-use crate::action::actions::test_action::TestAction;
+use crate::action::actions::NopAction;
 use crate::action::Action;
 use crate::result::Result;
 
@@ -25,7 +25,7 @@ impl ActionManager {
     pub fn load_normal_actions(&mut self) {
         info!("Loading normal actions...");
 
-        self.add_action(Box::new(TestAction::new()));
+        self.add_action(Box::new(NopAction::new()));
 
         info!("{} actions loaded.", self.actions.len());
     }
