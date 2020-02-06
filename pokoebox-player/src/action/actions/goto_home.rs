@@ -1,18 +1,18 @@
-use super::{Action, ActionId};
+use crate::action::prelude::*;
 use crate::result::Result;
 
 /// Unique ID of this action.
-pub const ACTION_ID: &'static str = "goto-home-action";
+pub const ACTION_ID: &str = "goto-home-action";
 
 /// Name of this action.
-pub const ACTION_NAME: &'static str = "Goto home action";
+pub const ACTION_NAME: &str = "Goto home action";
 
 /// Go to home action.
 pub struct GotoHomeAction;
 
-impl GotoHomeAction {
-    pub fn new() -> Self {
-        GotoHomeAction
+impl Default for GotoHomeAction {
+    fn default() -> Self {
+        Self
     }
 }
 

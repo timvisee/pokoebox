@@ -3,8 +3,8 @@ use std::sync::{Arc, Mutex};
 #[cfg(feature = "rpi")]
 use gpio::gpio_manager::GpioManager;
 
-use crate::action::action_id::ActionId;
-use crate::action::action_manager::ActionManager;
+use crate::action::prelude::*;
+use crate::action::ActionManager;
 use crate::gui::gui::Gui;
 use crate::perif::perif_manager::PerifManager;
 use crate::result::Result;
@@ -15,7 +15,7 @@ pub struct App {
     gui: Gui,
 
     /// Action manager
-    action_manager: Arc<Mutex<ActionManager>>,
+    pub actions: Arc<Mutex<ActionManager>>,
 
     /// Peripherals manager.
     perif_manager: PerifManager,
@@ -34,7 +34,7 @@ impl App {
         // Create the application instance
         let app = App {
             gui: Gui::new()?,
-            action_manager: Arc::new(Mutex::new(ActionManager::new())),
+            actions: Arc::new(Mutex::new(ActionManager::new())),
             perif_manager: PerifManager::new(),
             gpio_manager: GpioManager::new()?,
         };
@@ -49,7 +49,7 @@ impl App {
         // Create the application instance
         let app = App {
             gui: Gui::new()?,
-            action_manager: Arc::new(Mutex::new(ActionManager::new())),
+            actions: Arc::new(Mutex::new(ActionManager::default())),
             perif_manager: PerifManager::new(),
         };
 
@@ -61,17 +61,10 @@ impl App {
     /// This will create things like the GUI,
     /// and starts initialization of all peripherals.
     pub fn start(&mut self) -> Result<()> {
-        // Get a lock on the action manager
-        let mut action_manager_guard = self.action_manager.lock().unwrap();
-
-        // Load the normal actions
-        action_manager_guard.load_normal_actions();
-
-        // TODO: Remove this testing code
-        // Run the test action
-        action_manager_guard
-            .invoke_action(ActionId::new("test-action"))
-            .unwrap();
+        // Load normal actions, invoke NOP action
+        // TODO: remove after testing
+        let actions_guard = self.actions.lock().unwrap();
+        actions_guard.invoke(ActionId::new("nop-action")).unwrap();
 
         // Start the GPIO polling thread
         #[cfg(feature = "rpi")]

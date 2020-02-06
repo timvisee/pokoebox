@@ -1,18 +1,18 @@
-use super::{Action, ActionId};
+use crate::action::prelude::*;
 use crate::result::Result;
 
 /// Unique ID of this action.
-pub const ACTION_ID: &'static str = "nop-action";
+pub const ACTION_ID: &str = "nop-action";
 
 /// Name of this action.
-pub const ACTION_NAME: &'static str = "NOP action";
+pub const ACTION_NAME: &str = "NOP action";
 
 /// NOP action, doing exactly nothing.
 pub struct NopAction;
 
-impl NopAction {
-    pub fn new() -> Self {
-        NopAction
+impl Default for NopAction {
+    fn default() -> Self {
+        Self
     }
 }
 

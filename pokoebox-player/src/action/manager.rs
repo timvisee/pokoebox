@@ -1,8 +1,6 @@
 use std::collections::HashMap;
 
-use crate::action::action_id::ActionId;
-use crate::action::actions::NopAction;
-use crate::action::Action;
+use crate::action::{actions::*, prelude::*};
 use crate::result::Result;
 
 /// A struct to manage all available actions.
@@ -12,31 +10,14 @@ pub struct ActionManager {
 }
 
 impl ActionManager {
-    /// Create a new action manager.
-    pub fn new() -> Self {
-        ActionManager {
-            actions: HashMap::new(),
-        }
-    }
-
-    /// Load a fixed list of 'normal' actions.
-    /// Some actions require extra metadata and/or parameters,
-    /// those must be loaded manually.
-    pub fn load_normal_actions(&mut self) {
-        info!("Loading normal actions...");
-
-        self.add_action(Box::new(NopAction::new()));
-
-        info!("{} actions loaded.", self.actions.len());
-    }
-
     /// Add the given action to the manager.
-    pub fn add_action(&mut self, action: Box<dyn Action>) {
-        debug!("Adding action with ID '{}'...", action.as_ref().id());
-        self.actions.insert(action.as_ref().id(), action);
+    pub fn add(&mut self, action: Box<dyn Action>) {
+        debug!("Adding action (ID: {})'...", action.id());
+        self.actions.insert(action.id(), action);
     }
 
     /// Find a boxed action by it's ID.
+    #[allow(clippy::borrowed_box)]
     pub fn action(&self, id: ActionId) -> Option<&Box<dyn Action>> {
         self.actions.get(&id)
     }
@@ -55,11 +36,27 @@ impl ActionManager {
     /// been consumed. `true` if the action has been consumed, `false` if not.
     /// If no action is available with the given ID, `false` is returned.
     /// An error is returned if the actions fails.
-    pub fn invoke_action(&self, id: ActionId) -> Result<bool> {
+    pub fn invoke(&self, id: ActionId) -> Result<bool> {
         if let Some(action) = self.action_ref(id) {
             action.invoke()
         } else {
             Ok(false)
         }
+    }
+}
+
+impl Default for ActionManager {
+    fn default() -> Self {
+        let mut manager = Self {
+            actions: HashMap::default(),
+        };
+
+        // Add default list of actions
+        debug!("Loading default actions...");
+        manager.add(Box::new(NopAction::default()));
+        manager.add(Box::new(GotoHomeAction::default()));
+        debug!("{} actions loaded.", manager.actions.len());
+
+        manager
     }
 }
