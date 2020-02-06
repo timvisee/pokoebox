@@ -3,11 +3,10 @@ use super::gtk::*;
 
 /// Main UI header in the application.
 pub struct Header {
-    container: gtk::Box
+    container: gtk::Box,
 }
 
 impl Header {
-
     /// Construct a new header.
     pub fn new() -> Self {
         Header {
@@ -36,17 +35,15 @@ impl Header {
     fn build_container_controls(container: &gtk::Box) {
         // Create a home button
         let home_button = gtk::Button::new();
-        let home_image = gtk::Image::new_from_icon_name(
-            "go-home",
-            IconSize::LargeToolbar.into()
-        );
+        let home_image =
+            gtk::Image::new_from_icon_name(Some("go-home"), IconSize::LargeToolbar.into());
         home_button.add(&home_image);
         home_button.set_relief(ReliefStyle::None);
         home_button.set_focus_on_click(false);
         container.pack_start(&home_button, false, false, 0);
 
         // Create a temperature label
-        let temp_label = gtk::Label::new("Temp: 56°C");
+        let temp_label = gtk::Label::new(Some("56°C"));
         container.pack_end(&temp_label, false, false, 0);
 
         // Create a volume button

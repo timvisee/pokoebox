@@ -1,17 +1,30 @@
 #[macro_use]
 extern crate log;
-extern crate pokoebox_player;
+extern crate simple_logger;
 
-use pokoebox_player::app::App;
-use pokoebox_player::logger::Logger;
-use pokoebox_player::manifest;
+pub mod action;
+pub mod app;
+pub mod error;
+#[cfg(feature = "rpi")]
+pub mod gpio;
+pub mod gui;
+pub mod manifest;
+pub mod perif;
+pub mod result;
+pub mod volume;
+
+use app::App;
 
 fn main() {
-    // Initialize the application logger
-    Logger::init().expect("Failed to initialize logger.");
+    // Initialize logger
+    simple_logger::init().unwrap();
 
     // Show an initial message
-    info!("Starting {} v{}...", manifest::APP_NAME, manifest::APP_VERSION_NAME);
+    info!(
+        "Starting {} v{}...",
+        manifest::APP_NAME,
+        manifest::APP_VERSION_NAME
+    );
     info!("Developed by {}.", manifest::APP_ABOUT);
 
     // Create a new app instance

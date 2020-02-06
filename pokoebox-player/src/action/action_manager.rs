@@ -1,14 +1,14 @@
 use std::collections::HashMap;
 
-use result::Result;
-use super::action::Action;
 use super::action_id::ActionId;
 use super::actions::test_action::TestAction;
+use super::Action;
+use result::Result;
 
 /// A struct to manage all available actions.
 pub struct ActionManager {
     /// List of available actions.
-    actions: HashMap<ActionId, Box<Action>>,
+    actions: HashMap<ActionId, Box<dyn Action>>,
 }
 
 impl ActionManager {
@@ -31,18 +31,18 @@ impl ActionManager {
     }
 
     /// Add the given action to the manager.
-    pub fn add_action(&mut self, action: Box<Action>) {
+    pub fn add_action(&mut self, action: Box<dyn Action>) {
         debug!("Adding action with ID '{}'...", action.as_ref().id());
         self.actions.insert(action.as_ref().id(), action);
     }
 
     /// Find a boxed action by it's ID.
-    pub fn action(&self, id: ActionId) -> Option<&Box<Action>> {
+    pub fn action(&self, id: ActionId) -> Option<&Box<dyn Action>> {
         self.actions.get(&id)
     }
 
     /// Find an action reference by it's ID.
-    pub fn action_ref(&self, id: ActionId) -> Option<&Action> {
+    pub fn action_ref(&self, id: ActionId) -> Option<&dyn Action> {
         if let Some(action) = self.action(id) {
             Some(action.as_ref())
         } else {

@@ -4,11 +4,10 @@ use super::volume_control::VolumeControl;
 pub struct VolumeManager {
     // TODO: Remove this allow statement after implementing
     #[allow(dead_code)]
-    controls: Vec<Box<VolumeControl>>
+    controls: Vec<Box<dyn VolumeControl>>,
 }
 
 impl VolumeManager {
-
     /// Construct a new controller.
     pub fn new() -> VolumeManager {
         VolumeManager {

@@ -1,20 +1,16 @@
 [package]
 name = "pokoebox-player"
-version = "0.0.1"
-authors = ["timvisee <timvisee@gmail.com>"]
+version = "0.1.0"
+authors = ["Tim Visée <3a4fb3964f@sinenomine.email>"]
 
 [dependencies]
-gtk = { version = "0.1.2", features = ["v3_14"] }
-log = "0.3.7"
-cupi = { version = "0.1.0", optional = true }
+gtk = { version = "0.8", features = ["v3_16"] }
+log = "0.4"
+simple_logger = "1.0"
 version-compare = "0.0.10"
 
-[[bin]]
-name = "pokoebox-player"
-doc = false
-
-[lib]
-doc = true
+# GPIO on Raspberry Pi
+cupi = { version = "0.1", optional = true }
 
 [features]
 default = []
