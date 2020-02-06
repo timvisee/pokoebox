@@ -4,8 +4,8 @@ A custom speaker project.
 This is still a work in progress. The README will be updated anytime soon.
 
 ## Requirements
-* Linux operating system.
-* Rust 1.18 nightly.> `5e122f59b` 2017-04-01
+* Linux
+* Rust 1.38
 
 Required libraries:
 * `libgtk-3-dev`
