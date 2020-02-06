@@ -13,6 +13,7 @@ edition = "2018"
 gitlab = { repository = "timvisee/ffsend", branch = "master" }
 
 [dependencies]
+chrono = "0.4"
 gtk = { version = "0.8", features = ["v3_16"] }
 log = "0.4"
 simple_logger = "1.0"

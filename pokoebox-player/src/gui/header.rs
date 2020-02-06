@@ -1,5 +1,4 @@
-use super::gtk;
-use super::gtk::*;
+use gtk::{self, prelude::*, IconSize, ReliefStyle};
 
 /// Main UI header in the application.
 pub struct Header {
@@ -43,11 +42,21 @@ impl Header {
 
         // Create a volume button
         let volume = gtk::VolumeButton::new();
-        container.pack_end(&volume, false, false, 0);
+        container.pack_end(&volume, false, false, 10);
+
+        // Create a time label
+        let time_label = gtk::Label::new(None);
+        container.pack_end(&time_label, false, false, 10);
+        let time_tick = move || {
+            time_label.set_text(&format!("{}", chrono::Local::now().format("%H:%M:%S")));
+            gtk::prelude::Continue(true)
+        };
+        time_tick();
+        gtk::timeout_add_seconds(1, time_tick);
 
         // Create a temperature label
         let temp_label = gtk::Label::new(Some("56°C"));
-        container.pack_end(&temp_label, false, false, 20);
+        container.pack_end(&temp_label, false, false, 10);
     }
 
     /// Get the GTK widget for this header.
