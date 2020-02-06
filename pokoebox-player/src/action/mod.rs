@@ -3,7 +3,7 @@ pub mod action_manager;
 pub mod actions;
 
 use self::action_id::ActionId;
-use result::Result;
+use crate::result::Result;
 
 /// Action trait.
 pub trait Action {

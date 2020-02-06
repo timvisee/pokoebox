@@ -1,5 +1,5 @@
-use result::Result;
 use super::{Action, ActionId};
+use crate::result::Result;
 
 /// Unique ID of this action.
 pub const ACTION_ID: &'static str = "test-action";

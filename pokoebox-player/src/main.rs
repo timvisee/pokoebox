@@ -1,6 +1,5 @@
 #[macro_use]
 extern crate log;
-extern crate simple_logger;
 
 pub mod action;
 pub mod app;
@@ -13,7 +12,7 @@ pub mod perif;
 pub mod result;
 pub mod volume;
 
-use app::App;
+use crate::app::App;
 
 fn main() {
     // Initialize logger

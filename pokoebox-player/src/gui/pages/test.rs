@@ -1,8 +1,8 @@
 use super::gtk;
 use super::gtk::*;
 
-use gui::page::Page;
-use gui::page::Helper;
+use crate::gui::page::Helper;
+use crate::gui::page::Page;
 
 /// Name of the page.
 const PAGE_NAME: &'static str = "Test";
@@ -10,16 +10,15 @@ const PAGE_NAME: &'static str = "Test";
 /// Test page.
 pub struct Test {
     /// Page container
-    container: gtk::Grid
+    container: gtk::Grid,
 }
 
 impl Test {
-
     /// Constructor.
     pub fn new() -> Self {
         // Create the page instance
         let page = Test {
-            container: Helper::create_page_container()
+            container: Helper::create_page_container(),
         };
 
         // Build the ui
@@ -30,7 +29,6 @@ impl Test {
 }
 
 impl Page for Test {
-
     fn page_name(&self) -> &'static str {
         &PAGE_NAME
     }

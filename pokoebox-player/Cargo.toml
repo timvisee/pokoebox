@@ -2,6 +2,15 @@
 name = "pokoebox-player"
 version = "0.1.0"
 authors = ["Tim Visée <3a4fb3964f@sinenomine.email>"]
+license = "GPL-3.0"
+readme = "../README.md"
+homepage = "https://gitlab.com/timvisee/pokoebox"
+repository = "https://gitlab.com/timvisee/pokoebox"
+description = "Portable media center boombox project"
+edition = "2018"
+
+[badges]
+gitlab = { repository = "timvisee/ffsend", branch = "master" }
 
 [dependencies]
 gtk = { version = "0.8", features = ["v3_16"] }

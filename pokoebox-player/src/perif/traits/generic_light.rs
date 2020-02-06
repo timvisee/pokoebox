@@ -1,6 +1,6 @@
-use result::Result;
 use super::generic::Generic;
 use super::light::Light;
+use crate::result::Result;
 
 /// A trait for a generic light peripheral.
 pub trait GenericLight: Generic + Light {

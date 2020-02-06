@@ -1,8 +1,8 @@
 use super::gtk;
 use super::gtk::*;
 
-use gui::page::Helper;
-use gui::page::Page;
+use crate::gui::page::Helper;
+use crate::gui::page::Page;
 
 /// Name of the page.
 const PAGE_NAME: &'static str = "Volume";

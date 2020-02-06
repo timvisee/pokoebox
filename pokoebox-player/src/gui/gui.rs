@@ -2,14 +2,14 @@ use std::boxed;
 
 use super::gtk;
 
-use error::Error;
-use result::Result;
 use super::master_container::MasterContainer;
 use super::master_frame::MasterFrame;
 use super::master_ui::MasterUi;
 use super::pages::launchpad::Home;
 use super::pages::test::Test;
 use super::pages::volume::Volume;
+use crate::error::Error;
+use crate::result::Result;
 
 /// Main gui object, which manages the graphical interface side of the
 /// application.
@@ -23,11 +23,10 @@ pub struct Gui {
     master_container: Option<MasterContainer>,
 
     /// Master UI
-    master_ui: Option<MasterUi>
+    master_ui: Option<MasterUi>,
 }
 
 impl Gui {
-
     /// Constructor.
     ///
     /// Constructing the object will initialize the GTK toolkit.
@@ -81,15 +80,21 @@ impl Gui {
 
         // Add the home page
         let home = Home::new();
-        master_ui.mut_page_container().add_page(boxed::Box::new(home));
+        master_ui
+            .mut_page_container()
+            .add_page(boxed::Box::new(home));
 
         // Add the test page
         let test = Test::new();
-        master_ui.mut_page_container().add_page(boxed::Box::new(test));
+        master_ui
+            .mut_page_container()
+            .add_page(boxed::Box::new(test));
 
         // Add the volume page
         let volume = Volume::new();
-        master_ui.mut_page_container().add_page(boxed::Box::new(volume));
+        master_ui
+            .mut_page_container()
+            .add_page(boxed::Box::new(volume));
 
         // Store the master frame, container and ui
         self.master_frame = Some(master_frame);
@@ -102,7 +107,7 @@ impl Gui {
     pub fn master_frame(&self) -> Option<&MasterFrame> {
         match self.master_frame {
             Some(ref master_frame) => Some(master_frame),
-            None => None
+            None => None,
         }
     }
 

@@ -1,8 +1,8 @@
 use super::gtk;
 use super::gtk::*;
 
-use gui::page::Page;
-use gui::page::Helper;
+use crate::gui::page::Helper;
+use crate::gui::page::Page;
 
 /// Name of the page.
 const PAGE_NAME: &'static str = "Launchpad";
@@ -11,16 +11,15 @@ const BUTTON_GRID_SIZE: (i32, i32) = (450, 260);
 
 /// Home page.
 pub struct Home {
-    container: gtk::Grid
+    container: gtk::Grid,
 }
 
 impl Home {
-
     /// Constructor.
     pub fn new() -> Self {
         // Create the page instance
         let page = Home {
-            container: Helper::create_page_container()
+            container: Helper::create_page_container(),
         };
 
         // Build the page ui
@@ -31,7 +30,6 @@ impl Home {
 }
 
 impl Page for Home {
-
     fn page_name(&self) -> &'static str {
         &PAGE_NAME
     }

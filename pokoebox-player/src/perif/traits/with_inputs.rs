@@ -1,8 +1,8 @@
 use super::super::signal::sig_id::SigId;
 use super::super::signal::traits::sig_in::SigIn;
 use super::with_sig::WithSig;
-use error::Error;
-use result::Result;
+use crate::error::Error;
+use crate::result::Result;
 
 /// Defines that the peripheral has input signals.
 /// This may be combined with `WithOutputs`.

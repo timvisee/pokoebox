@@ -1,19 +1,16 @@
-use result::Result;
 use super::perif_type::PerifType;
+use crate::result::Result;
 
 /// The manager for external peripherals.
 pub struct PerifManager {
     /// List of peripherals which are managed.
-    perifs: Vec<PerifType>
+    perifs: Vec<PerifType>,
 }
 
 impl PerifManager {
-
     /// Construct a new peripheral manager.
     pub fn new() -> Self {
-        PerifManager {
-            perifs: Vec::new(),
-        }
+        PerifManager { perifs: Vec::new() }
     }
 
     /// Add the given peripheral.

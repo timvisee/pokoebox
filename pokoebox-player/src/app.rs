@@ -1,12 +1,13 @@
 use std::sync::{Arc, Mutex};
 
-use action::action_id::ActionId;
-use action::action_manager::ActionManager;
 #[cfg(feature = "rpi")]
 use gpio::gpio_manager::GpioManager;
-use gui::gui::Gui;
-use perif::perif_manager::PerifManager;
-use result::Result;
+
+use crate::action::action_id::ActionId;
+use crate::action::action_manager::ActionManager;
+use crate::gui::gui::Gui;
+use crate::perif::perif_manager::PerifManager;
+use crate::result::Result;
 
 /// Base application struct.
 pub struct App {
@@ -21,7 +22,7 @@ pub struct App {
 
     /// GPIO manager.
     #[cfg(feature = "rpi")]
-    gpio_manager: GpioManager
+    gpio_manager: GpioManager,
 }
 
 impl App {
@@ -68,9 +69,9 @@ impl App {
 
         // TODO: Remove this testing code
         // Run the test action
-        action_manager_guard.invoke_action(
-            ActionId::new("test-action")
-        ).unwrap();
+        action_manager_guard
+            .invoke_action(ActionId::new("test-action"))
+            .unwrap();
 
         // Start the GPIO polling thread
         #[cfg(feature = "rpi")]
@@ -89,13 +90,13 @@ impl App {
         // Start the GUI
         self.gui.start();
 
-//        #[cfg(feature = "rpi")]
-//        {
-//            // Create a pin for testing
-//            let pin_config = PinConfig::new_with_pin_and_io(0, IoMode::Output);
-//            let pin = pin_config.into_pin(&mut self.gpio_manager)?;
-//            self.gpio_manager.pin_accessor().pin_mut(pin).unwrap().write_bool(true);
-//        }
+        //        #[cfg(feature = "rpi")]
+        //        {
+        //            // Create a pin for testing
+        //            let pin_config = PinConfig::new_with_pin_and_io(0, IoMode::Output);
+        //            let pin = pin_config.into_pin(&mut self.gpio_manager)?;
+        //            self.gpio_manager.pin_accessor().pin_mut(pin).unwrap().write_bool(true);
+        //        }
 
         Ok(())
     }

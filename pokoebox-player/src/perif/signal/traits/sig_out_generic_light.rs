@@ -1,5 +1,5 @@
-use result::Result;
 use super::sig_out_light::SigOutLight;
+use crate::result::Result;
 
 /// A trait for a generic light signal.
 pub trait SigOutGenericLight: SigOutLight {

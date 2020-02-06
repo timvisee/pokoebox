@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
-use super::action_id::ActionId;
-use super::actions::test_action::TestAction;
-use super::Action;
-use result::Result;
+use crate::action::action_id::ActionId;
+use crate::action::actions::test_action::TestAction;
+use crate::action::Action;
+use crate::result::Result;
 
 /// A struct to manage all available actions.
 pub struct ActionManager {

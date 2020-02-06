@@ -1,5 +1,5 @@
-use result::Result;
 use super::sig_in_toggle::SigInToggle;
+use crate::result::Result;
 
 /// A trait for a toggle signal that is generic.
 pub trait SigInGenericToggle: SigInToggle {
