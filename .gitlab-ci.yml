@@ -118,7 +118,6 @@ build-armv7-linux-gnueabihf:
 
     - cargo build --target=$RUST_TARGET --release --verbose
     - mv target/$RUST_TARGET/release/pokoebox-player ./pokoebox-player-$RUST_TARGET
-    - strip -g ./pokoebox-player-$RUST_TARGET
   artifacts:
     name: pokoebox-player-armv7-linux-gnueabihf
     paths:
