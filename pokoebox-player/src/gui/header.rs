@@ -33,11 +33,15 @@ impl Header {
     /// Build and add container controls to the container
     fn build_container_controls(container: &gtk::Box) {
         // Create a home button
+        // TODO: use Button::new_from_icon_name instead?
         let home_button = gtk::Button::new();
         let home_image = gtk::Image::new_from_icon_name(Some("go-home"), IconSize::LargeToolbar);
         home_button.add(&home_image);
         home_button.set_relief(ReliefStyle::None);
         home_button.set_focus_on_click(false);
+        home_button.connect_clicked(|_| {
+            println!("Clicked home button!");
+        });
         container.pack_start(&home_button, false, false, 0);
 
         // Create a volume button

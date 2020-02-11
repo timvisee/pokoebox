@@ -42,6 +42,7 @@ impl App {
         debug!("Application core initialized.");
         Ok(app)
     }
+
     #[cfg(not(feature = "rpi"))]
     pub fn new() -> Result<Self> {
         debug!("Initializing application core...");
