@@ -26,6 +26,7 @@ before_script:
   - |
     rustup install $RUST_VERSION
     rustup default $RUST_VERSION
+    rustup target add $RUST_TARGET
   - |
     rustc --version
     cargo --version
@@ -73,14 +74,11 @@ build-x86_64-linux-musl:
   stage: build
   needs:
     - check-stable
-  allow_failure: true
   variables:
     RUST_TARGET: x86_64-unknown-linux-musl
+    PKG_CONFIG_ALLOW_CROSS: 1
   script:
     - cd ./pokoebox-player
-
-    # Install the static target
-    - rustup target add $RUST_TARGET
 
     # Install dependencies
     - apt-get install -y musl-tools
@@ -94,6 +92,26 @@ build-x86_64-linux-musl:
     - strip -g ./pokoebox-player-$RUST_TARGET
   artifacts:
     name: pokoebox-player-x86_64-linux-musl
+    paths:
+      - pokoebox-player/pokoebox-player-$RUST_TARGET
+    expire_in: 1 month
+
+# Build for Raspbarry Pi
+build-armv7-linux-gnueabihf:
+  stage: build
+  needs:
+    - check-stable
+  allow_failure: true
+  variables:
+    RUST_TARGET: armv7-unknown-linux-gnueabihf
+    PKG_CONFIG_ALLOW_CROSS: 1
+  script:
+    - cd ./pokoebox-player
+    - cargo build --target=$RUST_TARGET --release --verbose
+    - mv target/$RUST_TARGET/release/pokoebox-player ./pokoebox-player-$RUST_TARGET
+    - strip -g ./pokoebox-player-$RUST_TARGET
+  artifacts:
+    name: pokoebox-player-armv7-linux-gnueabihf
     paths:
       - pokoebox-player/pokoebox-player-$RUST_TARGET
     expire_in: 1 month
