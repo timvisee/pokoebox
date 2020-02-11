@@ -76,6 +76,7 @@ build-x86_64-linux-musl:
   stage: build
   needs:
     - check-stable
+  allow_failure: true
   variables:
     RUST_TARGET: x86_64-unknown-linux-musl
   script:
