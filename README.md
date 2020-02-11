@@ -5,7 +5,7 @@ This is still a work in progress. The README will be updated anytime soon.
 
 ## Requirements
 * Linux
-* Rust 1.38
+* Rust 1.39
 
 Required libraries:
 * `libgtk-3-dev`
