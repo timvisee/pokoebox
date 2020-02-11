@@ -5,8 +5,10 @@ stages:
   - build
   - test
 
+# Variable defaults
 variables:
   RUST_VERSION: stable
+  RUST_TARGET: x86_64-unknown-linux-gnu
 
 # Cache rust/cargo/build artifacts
 cache:
@@ -27,11 +29,6 @@ before_script:
   - |
     rustc --version
     cargo --version
-
-# Variable defaults
-variables:
-  RUST_VERSION: stable
-  RUST_TARGET: x86_64-unknown-linux-gnu
 
 # Check on stable, beta and nightly 
 .check-base: &check-base
