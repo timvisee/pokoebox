@@ -22,6 +22,7 @@ cache:
 # Install compiler and OpenSSL dependencies
 before_script:
   - apt-get update
+  - apt-get upgrade -yqq
   - apt-get install -y --no-install-recommends libgtk-3-dev
   - |
     rustup install $RUST_VERSION
@@ -101,12 +102,20 @@ build-armv7-linux-gnueabihf:
   stage: build
   needs:
     - check-stable
-  allow_failure: true
   variables:
     RUST_TARGET: armv7-unknown-linux-gnueabihf
+    CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER: arm-linux-gnueabihf-gcc
     PKG_CONFIG_ALLOW_CROSS: 1
+    PKG_CONFIG_PATH: /usr/lib/arm-linux-gnueabihf/pkgconfig/
   script:
     - cd ./pokoebox-player
+
+    # Install armv7 dependencies
+    - dpkg --add-architecture armhf
+    - apt-get update
+    - apt-get upgrade -yqq
+    - apt-get install -y --no-install-recommends gcc-arm-linux-gnueabihf libgtk-3-dev:armhf
+
     - cargo build --target=$RUST_TARGET --release --verbose
     - mv target/$RUST_TARGET/release/pokoebox-player ./pokoebox-player-$RUST_TARGET
     - strip -g ./pokoebox-player-$RUST_TARGET
