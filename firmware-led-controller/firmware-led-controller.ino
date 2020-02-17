@@ -13,33 +13,25 @@ void setup() {
     for(int i = 0; i < LED_COUNT; i++)
         pinMode(LED_PINS[i], OUTPUT);
 
-    // Set-up i2c
-    Wire.begin(I2C_ADDR);
-    Wire.onReceive(onReceive);
-
     // Set-up serial for debugging
     Serial.begin(9600);
+
+    // Set-up i2c
+    Wire.begin(I2C_ADDR);
+    Wire.onReceive(onI2cReceive);
 
     // Initialize LEDs
     setLeds(LOW);
 }
 
 void loop() {
-    // Sink serial input to buffer
-    while(Serial.available()) {
-        int b = Serial.read();
-        if(b == 0)
-            continue;
-        serial_buff += (char) b;
-    }
-
-    // Handle serial commands
-    processBuffer(&serial_buff);
-
     delay(100);
 }
 
-void onReceive(int count) {
+/**
+ * Interrupt on i2c data receive, sinks to command buffer.
+ */
+void onI2cReceive(int count) {
     // Sink i2c input to buffer
     while(Wire.available()) {
         int b = Wire.read();
@@ -50,6 +42,22 @@ void onReceive(int count) {
 
     // Handle i2c commands
     processBuffer(&i2c_buff);
+}
+
+/**
+ * Interrupt on serial event, sinks input to command buffer.
+ */
+void serialEvent() {
+    // Sink serial input to buffer
+    while(Serial.available()) {
+        int b = Serial.read();
+        if(b == 0)
+            continue;
+        serial_buff += (char) b;
+    }
+
+    // Handle serial commands
+    processBuffer(&serial_buff);
 }
 
 /**
