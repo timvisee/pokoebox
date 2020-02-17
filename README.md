@@ -1,3 +1,8 @@
+[![Build status on GitLab CI][gitlab-ci-master-badge]][gitlab-ci-link]
+
+[gitlab-ci-link]: https://gitlab.com/timvisee/pokoebox/pipelines
+[gitlab-ci-master-badge]: https://gitlab.com/timvisee/pokoebox/badges/master/pipeline.svg
+
 # PokoeBox
 A custom speaker project.
 
