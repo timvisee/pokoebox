@@ -64,7 +64,7 @@ build-x86_64-linux-gnu:
     - (cd ./pokoebox-player && cargo build --target=$RUST_TARGET --release --verbose)
 
     # Prepare the release artifact, strip it
-    - mv pokoebox-player/target/release/pokoebox-player ./pokoebox-player-$RUST_TARGET
+    - mv pokoebox-player/target/$RUST_TARGET/release/pokoebox-player ./pokoebox-player-$RUST_TARGET
     - ls -lah ./pokoebox-player-$RUST_TARGET
     - strip -g ./pokoebox-player-$RUST_TARGET
   artifacts:
@@ -119,7 +119,7 @@ build-armv7-linux-gnueabihf:
     - (cd ./pokoebox-player && cargo build --target=$RUST_TARGET --release --verbose)
 
     # Prepare the release artifact
-    - mv target/$RUST_TARGET/release/pokoebox-player ./pokoebox-player-$RUST_TARGET
+    - mv pokoebox-player/target/$RUST_TARGET/release/pokoebox-player ./pokoebox-player-$RUST_TARGET
     - ls -lah ./pokoebox-player-$RUST_TARGET
   artifacts:
     name: pokoebox-player-armv7-linux-gnueabihf
