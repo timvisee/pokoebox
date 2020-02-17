@@ -14,7 +14,7 @@ mkdir -p $DL_DIR
 
 # Download newest version
 echo "Downloading newest version..."
-curl -SL "https://gitlab.com/timvisee/pokoebox/-/jobs/artifacts/master/download?job=build-$ARCH" -o $DL_DIR/pokoebox.zip
+wget "https://gitlab.com/timvisee/pokoebox/-/jobs/artifacts/master/download?job=build-$ARCH" -O $DL_DIR/pokoebox.zip
 
 # Unzip player binary from download
 echo "Extracting..."
