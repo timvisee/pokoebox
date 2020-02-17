@@ -34,11 +34,7 @@ void loop() {
     }
 
     // Handle serial commands
-    int i;
-    while((i = serial_buff.indexOf('\n')) > -1) {
-        onCommand(serial_buff.substring(0, i));
-        serial_buff.remove(0, i + 1);
-    }
+    processBuffer(&serial_buff);
 
     delay(100);
 }
@@ -53,13 +49,24 @@ void onReceive(int count) {
     }
 
     // Handle i2c commands
+    processBuffer(&i2c_buff);
+}
+
+/**
+ * Invoke all commands in the given buffer.
+ * Any invoked command is trimmed from the buffer.
+ */
+void processBuffer(String* buff) {
     int i;
-    while((i = i2c_buff.indexOf('\n')) > -1) {
-        onCommand(i2c_buff.substring(0, i));
-        i2c_buff.remove(0, i + 1);
+    while((i = (*buff).indexOf('\n')) > -1) {
+        onCommand((*buff).substring(0, i));
+        (*buff).remove(0, i + 1);
     }
 }
 
+/**
+ * Invoke the given command.
+ */
 void onCommand(String cmd) {
     // Debug received command
     Serial.println("CMD: '" + cmd + "'");
@@ -76,6 +83,9 @@ void onCommand(String cmd) {
         Serial.println("CMD '" + cmd + "' is unknown, use 'help'");
 }
 
+/**
+ * Invoke the given LED command.
+ */
 void onLedCommand(String cmd) {
     if(cmd == "reset")
         setLeds(LOW);
