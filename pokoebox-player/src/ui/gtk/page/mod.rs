@@ -1,11 +1,13 @@
-use super::gtk;
-use super::gtk::*;
+mod container;
+
+use gtk::{self, prelude::*};
+
+pub use container::Container;
 
 /// Page trait.
 /// This trait is used for a page implementation.
 /// It builds and manages the page.
 pub trait Page {
-
     /// Get the name of the page.
     fn page_name(&self) -> &'static str;
 
@@ -17,10 +19,9 @@ pub trait Page {
 }
 
 /// Page helper struct.
-pub struct Helper { }
+pub struct Helper {}
 
 impl Helper {
-
     /// Create a new GTK page container,
     /// that may be used to build a new page upon.
     /// The container is partially configured to show the page on.

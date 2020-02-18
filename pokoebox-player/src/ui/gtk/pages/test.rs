@@ -1,11 +1,10 @@
-use super::gtk;
-use super::gtk::*;
+use gtk::{self, prelude::*};
 
-use crate::gui::page::Helper;
-use crate::gui::page::Page;
+use crate::ui::gtk::page::Helper;
+use crate::ui::gtk::page::Page;
 
 /// Name of the page.
-const PAGE_NAME: &'static str = "Test";
+const PAGE_NAME: &str = "Test";
 
 /// Test page.
 pub struct Test {

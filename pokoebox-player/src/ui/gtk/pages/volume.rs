@@ -1,11 +1,10 @@
-use super::gtk;
-use super::gtk::*;
+use gtk::{self, prelude::*, PositionType};
 
-use crate::gui::page::Helper;
-use crate::gui::page::Page;
+use crate::ui::gtk::page::Helper;
+use crate::ui::gtk::page::Page;
 
 /// Name of the page.
-const PAGE_NAME: &'static str = "Volume";
+const PAGE_NAME: &str = "Volume";
 
 /// Volume page.
 pub struct Volume {

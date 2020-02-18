@@ -10,6 +10,20 @@ pub struct ActionManager {
 }
 
 impl ActionManager {
+    pub fn new() -> Self {
+        let mut manager = Self {
+            actions: HashMap::default(),
+        };
+
+        // Add default list of actions
+        debug!("Loading default actions...");
+        manager.add(Box::new(NopAction::default()));
+        manager.add(Box::new(GotoHomeAction::default()));
+        debug!("{} actions loaded.", manager.actions.len());
+
+        manager
+    }
+
     /// Add the given action to the manager.
     pub fn add(&mut self, action: Box<dyn Action>) {
         debug!("Adding action (ID: {})'...", action.id());
@@ -42,21 +56,5 @@ impl ActionManager {
         } else {
             Ok(false)
         }
-    }
-}
-
-impl Default for ActionManager {
-    fn default() -> Self {
-        let mut manager = Self {
-            actions: HashMap::default(),
-        };
-
-        // Add default list of actions
-        debug!("Loading default actions...");
-        manager.add(Box::new(NopAction::default()));
-        manager.add(Box::new(GotoHomeAction::default()));
-        debug!("{} actions loaded.", manager.actions.len());
-
-        manager
     }
 }

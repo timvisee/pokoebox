@@ -1,28 +1,19 @@
-use std::boxed;
+use std::boxed::Box;
 
-use super::gtk;
-use super::gtk::*;
+use gtk::{self, prelude::*};
 
-use super::page::Page;
+use super::Page;
 
 /// The margin of the tab/page label
 const TAB_LABEL_MARGIN: i32 = 8;
 
 /// Container holding and managing the application pages.
-pub struct PageContainer {
+pub struct Container {
     container: gtk::Notebook,
-    pages: Vec<boxed::Box<dyn Page>>,
+    pages: Vec<Box<dyn Page>>,
 }
 
-impl PageContainer {
-    /// Create a new page container.
-    pub fn new() -> Self {
-        PageContainer {
-            container: Self::build_container(),
-            pages: Vec::new(),
-        }
-    }
-
+impl Container {
     /// Build the container.
     fn build_container() -> gtk::Notebook {
         // Create the container instance
@@ -41,7 +32,7 @@ impl PageContainer {
 
     /// Add the given page to the page container.
     /// The page to add must be passed to the `page` parameter.
-    pub fn add_page(&mut self, page: boxed::Box<dyn Page>) {
+    pub fn add_page(&mut self, page: Box<dyn Page>) {
         // Add the pages GTK widget to the page container
         self.container.add(page.gtk_widget());
 
@@ -64,5 +55,14 @@ impl PageContainer {
     /// Get the GTK widget for this page container.
     pub fn gtk_widget(&self) -> &gtk::Notebook {
         &self.container
+    }
+}
+
+impl Default for Container {
+    fn default() -> Self {
+        Self {
+            container: Self::build_container(),
+            pages: Vec::new(),
+        }
     }
 }

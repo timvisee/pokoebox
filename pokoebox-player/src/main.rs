@@ -4,11 +4,10 @@ extern crate log;
 pub mod action;
 pub mod app;
 pub mod error;
-#[cfg(feature = "rpi")]
-pub mod gpio;
-pub mod gui;
+pub mod pages;
 pub mod perif;
 pub mod result;
+pub mod ui;
 pub mod volume;
 
 use crate::app::App;
@@ -24,12 +23,6 @@ fn main() {
         env!("CARGO_PKG_VERSION"),
     );
 
-    // Create a new app instance
-    let mut app = App::new().expect("Failed to initialize application.");
-
-    // Start the application
-    app.start().expect("Failed to start application.");
-
-    // Start the main loop of the application
-    app.main_loop();
+    // Build and run app
+    App::new().expect("failed to initialize application.").run();
 }

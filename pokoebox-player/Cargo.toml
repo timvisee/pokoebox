@@ -19,12 +19,9 @@ log = "0.4"
 simple_logger = "1.0"
 version-compare = "0.0.10"
 
-# GPIO on Raspberry Pi
-cupi = { version = "0.1", optional = true }
+# [features]
+# default = []
 
-[features]
-default = []
-
-# Raspberry Pi features, such as GPIO usage and support for external devices.
-# Will compile, but won't run if not running on a Raspberry Pi board.
-rpi = ["cupi"]
+# # Raspberry Pi features, such as GPIO usage and support for external devices.
+# # Will compile, but won't run if not running on a Raspberry Pi board.
+# rpi = ["cupi"]

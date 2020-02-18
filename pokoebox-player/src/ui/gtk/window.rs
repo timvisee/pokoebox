@@ -1,35 +1,34 @@
-use super::gtk;
-use super::gtk::*;
+use gtk::{self, prelude::*, Inhibit};
 
-use super::master_container::MasterContainer;
+use super::main::App;
 
-/// The master frame, which creates a window or frame depending on the use
-/// case, to show the master container in.
-pub struct MasterFrame {
-    /// Frame window.
-    window: gtk::Window
+const TITLE: &str = "PokoeBox Player";
+const WIDTH: i32 = 1024;
+const HEIGHT: i32 = 600;
+
+/// The main window.
+pub struct Window {
+    window: gtk::Window,
 }
 
-impl MasterFrame {
-
-    /// Create a new master frame.
+impl Window {
+    /// Create new window.
     pub fn new() -> Self {
-        MasterFrame {
+        Self {
             window: Self::build_window(),
         }
     }
 
-    /// Build the master frame window, and it's main container.
-    /// Returns the created window.
+    /// Build the window UI.
     fn build_window() -> gtk::Window {
         // Create a window instance
         let window = gtk::Window::new(gtk::WindowType::Toplevel);
 
         // Configure the window
-        window.set_title("PokoeBox Player");
+        window.set_title(TITLE);
         window.set_border_width(0);
         window.set_position(gtk::WindowPosition::Center);
-        window.set_default_size(1024, 600);
+        window.set_default_size(WIDTH, HEIGHT);
 
         // Connect the window delete event
         window.connect_delete_event(|_, _| {
@@ -43,14 +42,14 @@ impl MasterFrame {
         window
     }
 
-    /// Set the container that is shown in this frame.
-    pub fn set_container(&self, container: &MasterContainer) {
+    /// Set the app UI in the window.
+    pub fn set_app(&self, app: &App) {
         // TODO: Should we remove the current child(ren) to replace them?
 
-        self.window.add(container.gtk_grid());
+        self.window.add(&app.grid);
     }
 
-    /// Show the master frame and all it's widgets.
+    /// Show the window.
     pub fn show(&self) {
         self.window.show_all();
     }
