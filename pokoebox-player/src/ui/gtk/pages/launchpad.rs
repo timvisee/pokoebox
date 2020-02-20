@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use gtk::prelude::*;
 
-use crate::action::{actions::GotoPageAction, prelude::*};
+use crate::action::actions::GotoPageAction;
 use crate::app::Core;
 use crate::pages::PageType;
 
@@ -59,11 +59,12 @@ impl Page for Launchpad {
 
         // Add some buttons
         let btn_play = gtk::Button::new_with_label("Play");
+        let closure_core = core.clone();
         btn_play.connect_clicked(move |_| {
             // TODO: handle result
-            let _ = core
+            let _ = closure_core
                 .actions
-                .invoke(GotoPageAction::new_home().id(), core.clone());
+                .invoke(GotoPageAction::new_home(), closure_core.clone());
         });
         btns.attach(&btn_play, 0, 0, 1, 1);
         let btn_b = gtk::Button::new_with_label("");
@@ -79,7 +80,13 @@ impl Page for Launchpad {
         btn_e.set_sensitive(false);
         btns.attach(&btn_e, 1, 1, 1, 1);
         let btn_settings = gtk::Button::new_with_label("Settings");
-        btn_settings.set_sensitive(false);
+        let closure_core = core;
+        btn_settings.connect_clicked(move |_| {
+            // TODO: handle result
+            let _ = closure_core
+                .actions
+                .invoke(GotoPageAction::new(PageType::Volume), closure_core.clone());
+        });
         btns.attach(&btn_settings, 2, 1, 1, 1);
     }
 

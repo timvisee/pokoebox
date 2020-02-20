@@ -1,8 +1,8 @@
 pub mod actions;
-pub mod manager;
+pub mod runtime;
 pub mod traits;
 
-pub use self::manager::ActionManager;
+pub use self::runtime::ActionRuntime;
 
 /// Prelude the action traits
 pub mod prelude {

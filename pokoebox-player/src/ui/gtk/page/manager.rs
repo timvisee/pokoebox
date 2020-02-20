@@ -54,8 +54,10 @@ impl PageManager {
             PageType::Test => Box::new(pages::Test::new(core)),
         };
 
-        // Add new page
+        // Add new page, select last tab
         self.add_page(page);
+        self.container
+            .set_property_page(self.container.get_children().len() as i32 - 1);
     }
 
     fn add_page(&self, page: Box<dyn Page>) {

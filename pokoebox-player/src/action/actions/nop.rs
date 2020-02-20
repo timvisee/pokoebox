@@ -4,9 +4,6 @@ use crate::action::prelude::*;
 use crate::app::Core;
 use crate::result::Result;
 
-/// Unique ID of this action.
-pub const ACTION_ID: &str = "nop-action";
-
 /// Name of this action.
 pub const ACTION_NAME: &str = "NOP action";
 
@@ -20,10 +17,6 @@ impl Default for NopAction {
 }
 
 impl Action for NopAction {
-    fn id(&self) -> ActionId {
-        ActionId::new(ACTION_ID)
-    }
-
     fn name(&self) -> &'static str {
         ACTION_NAME
     }

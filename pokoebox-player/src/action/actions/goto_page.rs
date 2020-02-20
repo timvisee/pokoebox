@@ -5,9 +5,6 @@ use crate::app::Core;
 use crate::pages::PageType;
 use crate::result::Result;
 
-/// Unique ID of this action.
-pub const ACTION_ID: &str = "goto-page-action";
-
 /// Name of this action.
 pub const ACTION_NAME: &str = "Goto page action";
 
@@ -25,10 +22,6 @@ impl GotoPageAction {
 }
 
 impl Action for GotoPageAction {
-    fn id(&self) -> ActionId {
-        ActionId::new(ACTION_ID)
-    }
-
     fn name(&self) -> &'static str {
         ACTION_NAME
     }

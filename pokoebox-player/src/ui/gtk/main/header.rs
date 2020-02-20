@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use gtk::{prelude::*, IconSize, ReliefStyle};
 
-use crate::action::{actions::GotoPageAction, prelude::*};
+use crate::action::actions::GotoPageAction;
 use crate::app::Core;
 
 /// Main UI header in the application.
@@ -48,7 +48,7 @@ impl Header {
             // TODO: handle result
             let _ = core
                 .actions
-                .invoke(GotoPageAction::new_home().id(), core.clone());
+                .invoke(GotoPageAction::new_home(), core.clone());
         });
         container.pack_start(&home_button, false, false, 0);
 

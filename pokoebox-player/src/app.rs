@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::action::ActionManager;
+use crate::action::ActionRuntime;
 use crate::result::Result;
 use crate::ui::gtk::Ui;
 
@@ -32,7 +32,7 @@ impl App {
 
 pub struct Core {
     /// Action manager
-    pub actions: ActionManager,
+    pub actions: ActionRuntime,
 
     pub pages: PageController,
 }
@@ -40,7 +40,7 @@ pub struct Core {
 impl Core {
     pub fn new() -> Result<Self> {
         Ok(Self {
-            actions: ActionManager::new(),
+            actions: ActionRuntime::default(),
             pages: PageController::new(),
         })
     }
