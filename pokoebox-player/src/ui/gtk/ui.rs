@@ -55,21 +55,21 @@ impl Ui {
     fn build_ui(core: Arc<Core>) -> (Window, App) {
         // Create window and app UI
         let window = Window::new();
-        let mut app = App::new(core);
+        let mut app = App::new(core.clone());
 
         // Put app UI in window
         window.set_app(&app);
 
         // Add the launchpad page
-        let launchpad = Launchpad::new();
+        let launchpad = Launchpad::new(core.clone());
         app.pages.add_page(Box::new(launchpad));
 
         // Add the test page
-        let test = Test::new();
+        let test = Test::new(core.clone());
         app.pages.add_page(Box::new(test));
 
         // Add the volume page
-        let volume = Volume::new();
+        let volume = Volume::new(core);
         app.pages.add_page(Box::new(volume));
 
         (window, app)

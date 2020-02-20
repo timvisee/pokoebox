@@ -1,7 +1,11 @@
+use std::sync::Arc;
+
 use gtk::{self, prelude::*, PositionType};
 
-use crate::ui::gtk::page::Helper;
-use crate::ui::gtk::page::Page;
+use crate::app::Core;
+
+use super::page::Helper;
+use super::page::Page;
 
 /// Name of the page.
 const PAGE_NAME: &str = "Volume";
@@ -14,14 +18,14 @@ pub struct Volume {
 
 impl Volume {
     /// Constructor.
-    pub fn new() -> Self {
+    pub fn new(core: Arc<Core>) -> Self {
         // Create the page instance
         let page = Volume {
             container: Helper::create_page_container(),
         };
 
         // Build the ui
-        page.build_page();
+        page.build_page(core);
 
         page
     }
@@ -32,7 +36,7 @@ impl Page for Volume {
         &PAGE_NAME
     }
 
-    fn build_page(&self) {
+    fn build_page(&self, _core: Arc<Core>) {
         // Add a volume slider
         let slider = gtk::Scale::new_with_range(gtk::Orientation::Vertical, 0f64, 100f64, 0.1f64);
         slider.add_mark(50f64, PositionType::Right, Some("M"));

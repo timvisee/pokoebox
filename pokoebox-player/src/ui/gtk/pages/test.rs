@@ -1,7 +1,11 @@
+use std::sync::Arc;
+
 use gtk::{self, prelude::*};
 
-use crate::ui::gtk::page::Helper;
-use crate::ui::gtk::page::Page;
+use crate::app::Core;
+
+use super::page::Helper;
+use super::page::Page;
 
 /// Name of the page.
 const PAGE_NAME: &str = "Test";
@@ -14,14 +18,14 @@ pub struct Test {
 
 impl Test {
     /// Constructor.
-    pub fn new() -> Self {
+    pub fn new(core: Arc<Core>) -> Self {
         // Create the page instance
         let page = Test {
             container: Helper::create_page_container(),
         };
 
         // Build the ui
-        page.build_page();
+        page.build_page(core);
 
         page
     }
@@ -32,7 +36,7 @@ impl Page for Test {
         &PAGE_NAME
     }
 
-    fn build_page(&self) {
+    fn build_page(&self, _core: Arc<Core>) {
         // Add a test button
         let button = gtk::Button::new_with_label("Test button");
         self.container.add(&button);

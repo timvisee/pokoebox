@@ -1,6 +1,10 @@
 mod container;
 
+use std::sync::Arc;
+
 use gtk::{self, prelude::*};
+
+use crate::app::Core;
 
 pub use container::Container;
 
@@ -12,7 +16,7 @@ pub trait Page {
     fn page_name(&self) -> &'static str;
 
     /// Build the actual page gui on the GTK widget of the given page.
-    fn build_page(&self);
+    fn build_page(&self, core: Arc<Core>);
 
     /// Get the GTK widget that represents the page.
     fn gtk_widget(&self) -> &gtk::Grid;
