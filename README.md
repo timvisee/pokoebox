@@ -8,6 +8,8 @@ A custom speaker project.
 
 This is still a work in progress. The README will be updated anytime soon.
 
+![PokoeBox Player Screenshot](./res/pokoebox-player-screenshot.png)
+
 ## Requirements
 * Linux
 * Rust 1.39
