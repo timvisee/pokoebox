@@ -1,4 +1,9 @@
+use std::sync::Arc;
+
 use gtk::{self, prelude::*, IconSize, ReliefStyle};
+
+use crate::action::{actions::GotoHomeAction, prelude::*};
+use crate::app::Core;
 
 /// Main UI header in the application.
 pub struct Header {
@@ -7,14 +12,14 @@ pub struct Header {
 
 impl Header {
     /// Construct a new header.
-    pub fn new() -> Self {
+    pub fn new(core: Arc<Core>) -> Self {
         Header {
-            container: Self::build_container(),
+            container: Self::build_ui(core),
         }
     }
 
-    /// Build the header container.
-    fn build_container() -> gtk::Box {
+    /// Build the header.
+    fn build_ui(core: Arc<Core>) -> gtk::Box {
         // Create a container instance
         let container = gtk::Box::new(gtk::Orientation::Horizontal, 0);
 
@@ -24,14 +29,14 @@ impl Header {
         container.set_halign(gtk::Align::Fill);
         container.set_border_width(8);
 
-        // Build the container controls
-        Self::build_container_controls(&container);
+        // Build and add controls
+        Self::build_ui_controls(core, &container);
 
         container
     }
 
-    /// Build and add container controls to the container
-    fn build_container_controls(container: &gtk::Box) {
+    /// Build and add header controls.
+    fn build_ui_controls(core: Arc<Core>, container: &gtk::Box) {
         // Create a home button
         // TODO: use Button::new_from_icon_name instead?
         let home_button = gtk::Button::new();
@@ -39,8 +44,9 @@ impl Header {
         home_button.add(&home_image);
         home_button.set_relief(ReliefStyle::None);
         home_button.set_focus_on_click(false);
-        home_button.connect_clicked(|_| {
-            println!("Clicked home button!");
+        home_button.connect_clicked(move |_| {
+            // TODO: handle result
+            let _ = core.actions.invoke(GotoHomeAction::default().id());
         });
         container.pack_start(&home_button, false, false, 0);
 

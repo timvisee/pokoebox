@@ -28,6 +28,8 @@ impl Action for GotoHomeAction {
     fn invoke(&self) -> Result<bool> {
         // TODO: goto home page
 
+        info!("Invoked home action!");
+
         Ok(true)
     }
 }

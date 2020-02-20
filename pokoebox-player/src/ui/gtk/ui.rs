@@ -1,5 +1,7 @@
 use std::boxed::Box;
+use std::sync::Arc;
 
+use crate::app::Core;
 use crate::error::Error;
 use crate::result::Result;
 
@@ -28,7 +30,7 @@ impl Ui {
     ///
     /// Returns an error if GTK failed to initialize,
     /// blocking further GTK usage.
-    pub fn new() -> Result<Self> {
+    pub fn new(core: Arc<Core>) -> Result<Self> {
         // Initialize GTK
         debug!("Initializing GTK...");
         if gtk::init().is_err() {
@@ -37,7 +39,7 @@ impl Ui {
         debug!("Successfully initialized GTK.");
 
         // Build UI
-        let (window, app_ui) = Self::build_ui();
+        let (window, app_ui) = Self::build_ui(core);
         let gui = Self { window, app_ui };
 
         // Show window
@@ -50,10 +52,10 @@ impl Ui {
     /// Set up the main gui interface.
     /// This creates a window or frame, and builds the interface in it.
     /// Nothing happens if a master frame is already available.
-    fn build_ui() -> (Window, App) {
+    fn build_ui(core: Arc<Core>) -> (Window, App) {
         // Create window and app UI
         let window = Window::new();
-        let mut app = App::new();
+        let mut app = App::new(core);
 
         // Put app UI in window
         window.set_app(&app);

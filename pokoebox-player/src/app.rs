@@ -6,14 +6,17 @@ use crate::ui::gtk::Ui;
 
 pub struct App {
     ui: Ui,
-    state: Arc<State>,
+    core: Arc<Core>,
 }
 
 impl App {
     pub fn new() -> Result<Self> {
+        // Init app core
+        let core = Arc::new(Core::new()?);
+
         Ok(Self {
-            ui: Ui::new()?,
-            state: Arc::new(State::new()?),
+            ui: Ui::new(core.clone())?,
+            core,
         })
     }
 
@@ -25,15 +28,15 @@ impl App {
     }
 }
 
-pub struct State {
+pub struct Core {
     /// Action manager
-    _actions: ActionManager,
+    pub actions: ActionManager,
 }
 
-impl State {
+impl Core {
     pub fn new() -> Result<Self> {
         Ok(Self {
-            _actions: ActionManager::new(),
+            actions: ActionManager::new(),
         })
     }
 }

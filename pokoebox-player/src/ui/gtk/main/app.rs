@@ -1,14 +1,14 @@
+use std::sync::Arc;
+
 use gtk::{self, prelude::*};
 
+use crate::app::Core;
 use crate::ui::gtk::page::Container;
 
 use super::Header;
 
 /// Main application UI and layout.
 pub struct App {
-    /// Header.
-    header: Header,
-
     /// Page container.
     pub pages: Container,
 
@@ -18,23 +18,19 @@ pub struct App {
 
 impl App {
     /// Create new app UI.
-    pub fn new() -> Self {
+    pub fn new(core: Arc<Core>) -> Self {
         // Build container
         let grid = Self::build_container();
 
         // Build header and pages
-        let header = Header::new();
+        let header = Header::new(core);
         let pages = Container::default();
 
         // Add the master UI components
         grid.attach(header.gtk_widget(), 0, 0, 1, 1);
         grid.attach(pages.gtk_widget(), 0, 1, 1, 1);
 
-        Self {
-            header,
-            pages,
-            grid,
-        }
+        Self { pages, grid }
     }
 
     /// Build main layout grid.
