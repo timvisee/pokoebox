@@ -4,7 +4,7 @@ use crate::action::prelude::*;
 use crate::app::Core;
 use crate::result::Result;
 
-pub struct ActionRuntime {}
+pub struct ActionRuntime;
 
 impl ActionRuntime {
     // TODO: update docs

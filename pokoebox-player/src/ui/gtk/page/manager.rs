@@ -50,6 +50,7 @@ impl PageManager {
         // Initialize new page
         let page: Box<dyn Page> = match page {
             PageType::Launchpad => Box::new(pages::Launchpad::new(core)),
+            PageType::Player => Box::new(pages::Player::new(core)),
             PageType::Volume => Box::new(pages::Volume::new(core)),
             PageType::Test => Box::new(pages::Test::new(core)),
         };

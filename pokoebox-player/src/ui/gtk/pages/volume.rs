@@ -21,7 +21,7 @@ impl Volume {
     /// Constructor.
     pub fn new(core: Arc<Core>) -> Self {
         // Create the page instance
-        let page = Volume {
+        let page = Self {
             container: Helper::create_page_container(),
         };
 

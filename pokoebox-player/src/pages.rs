@@ -5,6 +5,7 @@ use std::sync::Mutex;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PageType {
     Launchpad,
+    Player,
     Volume,
     Test,
 }

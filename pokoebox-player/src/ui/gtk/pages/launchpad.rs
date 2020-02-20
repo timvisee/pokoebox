@@ -64,7 +64,7 @@ impl Page for Launchpad {
             // TODO: handle result
             let _ = closure_core
                 .actions
-                .invoke(GotoPageAction::new_home(), closure_core.clone());
+                .invoke(GotoPageAction::new(PageType::Player), closure_core.clone());
         });
         btns.attach(&btn_play, 0, 0, 1, 1);
         let btn_b = gtk::Button::new_with_label("");

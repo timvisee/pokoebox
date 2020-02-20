@@ -38,10 +38,8 @@ impl Header {
     /// Build and add header controls.
     fn build_ui_controls(core: Arc<Core>, container: &gtk::Box) {
         // Create a home button
-        // TODO: use Button::new_from_icon_name instead?
-        let home_button = gtk::Button::new();
-        let home_image = gtk::Image::new_from_icon_name(Some("view-grid"), IconSize::LargeToolbar);
-        home_button.add(&home_image);
+        let home_button =
+            gtk::Button::new_from_icon_name(Some("view-grid"), IconSize::LargeToolbar);
         home_button.set_relief(ReliefStyle::None);
         home_button.set_focus_on_click(false);
         home_button.connect_clicked(move |_| {
@@ -50,7 +48,7 @@ impl Header {
                 .actions
                 .invoke(GotoPageAction::new_home(), core.clone());
         });
-        container.pack_start(&home_button, false, false, 0);
+        container.pack_start(&home_button, false, false, 10);
 
         // Create a volume button
         let volume = gtk::VolumeButton::new();
