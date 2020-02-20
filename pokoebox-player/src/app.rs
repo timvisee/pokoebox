@@ -4,9 +4,11 @@ use crate::action::ActionManager;
 use crate::result::Result;
 use crate::ui::gtk::Ui;
 
+use super::pages::PageController;
+
 pub struct App {
     ui: Ui,
-    core: Arc<Core>,
+    pub core: Arc<Core>,
 }
 
 impl App {
@@ -31,12 +33,15 @@ impl App {
 pub struct Core {
     /// Action manager
     pub actions: ActionManager,
+
+    pub pages: PageController,
 }
 
 impl Core {
     pub fn new() -> Result<Self> {
         Ok(Self {
             actions: ActionManager::new(),
+            pages: PageController::new(),
         })
     }
 }

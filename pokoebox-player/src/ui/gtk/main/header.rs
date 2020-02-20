@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
-use gtk::{self, prelude::*, IconSize, ReliefStyle};
+use gtk::{prelude::*, IconSize, ReliefStyle};
 
-use crate::action::{actions::GotoHomeAction, prelude::*};
+use crate::action::{actions::GotoPageAction, prelude::*};
 use crate::app::Core;
 
 /// Main UI header in the application.
@@ -40,13 +40,15 @@ impl Header {
         // Create a home button
         // TODO: use Button::new_from_icon_name instead?
         let home_button = gtk::Button::new();
-        let home_image = gtk::Image::new_from_icon_name(Some("go-home"), IconSize::LargeToolbar);
+        let home_image = gtk::Image::new_from_icon_name(Some("view-grid"), IconSize::LargeToolbar);
         home_button.add(&home_image);
         home_button.set_relief(ReliefStyle::None);
         home_button.set_focus_on_click(false);
         home_button.connect_clicked(move |_| {
             // TODO: handle result
-            let _ = core.actions.invoke(GotoHomeAction::default().id());
+            let _ = core
+                .actions
+                .invoke(GotoPageAction::new_home().id(), core.clone());
         });
         container.pack_start(&home_button, false, false, 0);
 

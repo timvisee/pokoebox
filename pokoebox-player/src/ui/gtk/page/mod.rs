@@ -1,10 +1,12 @@
 mod container;
+mod manager;
 
 use std::sync::Arc;
 
-use gtk::{self, prelude::*};
+use gtk::prelude::*;
 
 use crate::app::Core;
+use crate::pages::PageType;
 
 pub use container::Container;
 
@@ -12,6 +14,9 @@ pub use container::Container;
 /// This trait is used for a page implementation.
 /// It builds and manages the page.
 pub trait Page {
+    /// Get the page type.
+    fn page_type(&self) -> PageType;
+
     /// Get the name of the page.
     fn page_name(&self) -> &'static str;
 
@@ -23,6 +28,7 @@ pub trait Page {
 }
 
 /// Page helper struct.
+// TODO: remove this struct?
 pub struct Helper {}
 
 impl Helper {

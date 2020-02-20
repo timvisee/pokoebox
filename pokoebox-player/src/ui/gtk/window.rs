@@ -1,4 +1,4 @@
-use gtk::{self, prelude::*, Inhibit};
+use gtk::{prelude::*, Inhibit};
 
 use super::main::App;
 

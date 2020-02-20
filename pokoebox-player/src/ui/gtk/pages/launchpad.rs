@@ -1,14 +1,15 @@
 use std::sync::Arc;
 
-use gtk::{self, prelude::*};
+use gtk::prelude::*;
 
-use crate::action::{actions::GotoHomeAction, prelude::*};
+use crate::action::{actions::GotoPageAction, prelude::*};
 use crate::app::Core;
+use crate::pages::PageType;
 
 use super::page::Helper;
 use super::page::Page;
 
-/// Name of the page.
+const PAGE_TYPE: PageType = PageType::Launchpad;
 const PAGE_NAME: &str = "Launchpad";
 const BUTTON_SPACING: u32 = 16;
 const BUTTON_GRID_SIZE: (i32, i32) = (450, 260);
@@ -34,6 +35,10 @@ impl Launchpad {
 }
 
 impl Page for Launchpad {
+    fn page_type(&self) -> PageType {
+        PAGE_TYPE
+    }
+
     fn page_name(&self) -> &'static str {
         &PAGE_NAME
     }
@@ -44,31 +49,38 @@ impl Page for Launchpad {
         self.container.set_valign(gtk::Align::Center);
 
         // Create a button grid
-        let buttons = gtk::Grid::new();
-        buttons.set_row_spacing(BUTTON_SPACING);
-        buttons.set_column_spacing(BUTTON_SPACING);
-        buttons.set_row_homogeneous(true);
-        buttons.set_column_homogeneous(true);
-        buttons.set_size_request(BUTTON_GRID_SIZE.0, BUTTON_GRID_SIZE.1);
-        self.container.add(&buttons);
+        let btns = gtk::Grid::new();
+        btns.set_row_spacing(BUTTON_SPACING);
+        btns.set_column_spacing(BUTTON_SPACING);
+        btns.set_row_homogeneous(true);
+        btns.set_column_homogeneous(true);
+        btns.set_size_request(BUTTON_GRID_SIZE.0, BUTTON_GRID_SIZE.1);
+        self.container.add(&btns);
 
         // Add some buttons
-        let button_play = gtk::Button::new_with_label("Play");
-        button_play.connect_clicked(move |_| {
+        let btn_play = gtk::Button::new_with_label("Play");
+        btn_play.connect_clicked(move |_| {
             // TODO: handle result
-            let _ = core.actions.invoke(GotoHomeAction::default().id());
+            let _ = core
+                .actions
+                .invoke(GotoPageAction::new_home().id(), core.clone());
         });
-        buttons.attach(&button_play, 0, 0, 1, 1);
-        let button_b = gtk::Button::new_with_label("Button B");
-        buttons.attach(&button_b, 1, 0, 1, 1);
-        let button_c = gtk::Button::new_with_label("Button C");
-        buttons.attach(&button_c, 2, 0, 1, 1);
-        let button_d = gtk::Button::new_with_label("Button D");
-        buttons.attach(&button_d, 0, 1, 1, 1);
-        let button_e = gtk::Button::new_with_label("Button E");
-        buttons.attach(&button_e, 1, 1, 1, 1);
-        let button_settings = gtk::Button::new_with_label("Settings");
-        buttons.attach(&button_settings, 2, 1, 1, 1);
+        btns.attach(&btn_play, 0, 0, 1, 1);
+        let btn_b = gtk::Button::new_with_label("");
+        btn_b.set_sensitive(false);
+        btns.attach(&btn_b, 1, 0, 1, 1);
+        let btn_c = gtk::Button::new_with_label("");
+        btn_c.set_sensitive(false);
+        btns.attach(&btn_c, 2, 0, 1, 1);
+        let btn_d = gtk::Button::new_with_label("");
+        btn_d.set_sensitive(false);
+        btns.attach(&btn_d, 0, 1, 1, 1);
+        let btn_e = gtk::Button::new_with_label("");
+        btn_e.set_sensitive(false);
+        btns.attach(&btn_e, 1, 1, 1, 1);
+        let btn_settings = gtk::Button::new_with_label("Settings");
+        btn_settings.set_sensitive(false);
+        btns.attach(&btn_settings, 2, 1, 1, 1);
     }
 
     fn gtk_widget(&self) -> &gtk::Grid {

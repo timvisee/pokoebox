@@ -1,23 +1,41 @@
-use std::boxed::Box;
+use std::rc::Rc;
+use std::sync::Arc;
 
-use gtk::{self, prelude::*};
+use gtk::prelude::*;
 
-use super::Page;
+use crate::app::Core;
 
-/// The margin of the tab/page label
-const TAB_LABEL_MARGIN: i32 = 8;
+use super::manager::PageManager;
 
 /// Container holding and managing the application pages.
 pub struct Container {
-    container: gtk::Notebook,
-    pages: Vec<Box<dyn Page>>,
+    container: Rc<gtk::Notebook>,
+    pub manager: Rc<PageManager>,
 }
 
 impl Container {
-    /// Build the container.
-    fn build_container() -> gtk::Notebook {
+    pub fn new(core: Arc<Core>) -> Self {
+        let container = Self::build_ui();
+        let manager = Rc::new(PageManager::new(container.clone()));
+
+        // TODO: create channel here, attach to page controller
+        // TODO: use correct priority here
+        let (tx, rx) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
+        let chan_manager = manager.clone();
+        let chan_core = core.clone();
+        rx.attach(None, move |page| {
+            chan_manager.goto_page(chan_core.clone(), page);
+            glib::Continue(true)
+        });
+        core.pages.set_channel(tx);
+
+        Self { container, manager }
+    }
+
+    /// Build the UI container.
+    fn build_ui() -> Rc<gtk::Notebook> {
         // Create the container instance
-        let container = gtk::Notebook::new();
+        let container = Rc::new(gtk::Notebook::new());
 
         // Configure the container
         container.set_hexpand(true);
@@ -26,43 +44,13 @@ impl Container {
         container.set_valign(gtk::Align::Fill);
         container.set_tab_pos(gtk::PositionType::Bottom);
         container.set_show_border(false);
+        container.set_scrollable(true);
 
         container
-    }
-
-    /// Add the given page to the page container.
-    /// The page to add must be passed to the `page` parameter.
-    pub fn add_page(&mut self, page: Box<dyn Page>) {
-        // Add the pages GTK widget to the page container
-        self.container.add(page.gtk_widget());
-
-        // Configure the tab
-        self.container.set_tab_reorderable(page.gtk_widget(), true);
-
-        // Create a tab label
-        let label = gtk::Label::new(Some(page.page_name()));
-        label.set_margin_start(TAB_LABEL_MARGIN);
-        label.set_margin_end(TAB_LABEL_MARGIN);
-        label.set_margin_top(TAB_LABEL_MARGIN);
-        label.set_margin_bottom(TAB_LABEL_MARGIN);
-        self.container
-            .set_tab_label(page.gtk_widget(), Some(&label));
-
-        // Add the page to the list of pages
-        self.pages.push(page);
     }
 
     /// Get the GTK widget for this page container.
     pub fn gtk_widget(&self) -> &gtk::Notebook {
         &self.container
-    }
-}
-
-impl Default for Container {
-    fn default() -> Self {
-        Self {
-            container: Self::build_container(),
-            pages: Vec::new(),
-        }
     }
 }

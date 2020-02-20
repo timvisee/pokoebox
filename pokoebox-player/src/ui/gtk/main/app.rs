@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use gtk::{self, prelude::*};
+use gtk::prelude::*;
 
 use crate::app::Core;
 use crate::ui::gtk::page::Container;
@@ -23,8 +23,8 @@ impl App {
         let grid = Self::build_container();
 
         // Build header and pages
-        let header = Header::new(core);
-        let pages = Container::default();
+        let header = Header::new(core.clone());
+        let pages = Container::new(core);
 
         // Add the master UI components
         grid.attach(header.gtk_widget(), 0, 0, 1, 1);

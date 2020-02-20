@@ -1,13 +1,14 @@
 use std::sync::Arc;
 
-use gtk::{self, prelude::*};
+use gtk::prelude::*;
 
 use crate::app::Core;
+use crate::pages::PageType;
 
 use super::page::Helper;
 use super::page::Page;
 
-/// Name of the page.
+const PAGE_TYPE: PageType = PageType::Test;
 const PAGE_NAME: &str = "Test";
 
 /// Test page.
@@ -32,6 +33,10 @@ impl Test {
 }
 
 impl Page for Test {
+    fn page_type(&self) -> PageType {
+        PAGE_TYPE
+    }
+
     fn page_name(&self) -> &'static str {
         &PAGE_NAME
     }

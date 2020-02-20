@@ -1,12 +1,11 @@
-use std::boxed::Box;
 use std::sync::Arc;
 
 use crate::app::Core;
 use crate::error::Error;
+use crate::pages::PageType;
 use crate::result::Result;
 
 use super::main::App;
-use super::pages::{launchpad::Launchpad, test::Test, volume::Volume};
 use super::Window;
 
 /// Main gui object, which manages the graphical interface side of the
@@ -55,22 +54,13 @@ impl Ui {
     fn build_ui(core: Arc<Core>) -> (Window, App) {
         // Create window and app UI
         let window = Window::new();
-        let mut app = App::new(core.clone());
+        let app = App::new(core.clone());
 
         // Put app UI in window
         window.set_app(&app);
 
-        // Add the launchpad page
-        let launchpad = Launchpad::new(core.clone());
-        app.pages.add_page(Box::new(launchpad));
-
-        // Add the test page
-        let test = Test::new(core.clone());
-        app.pages.add_page(Box::new(test));
-
-        // Add the volume page
-        let volume = Volume::new(core);
-        app.pages.add_page(Box::new(volume));
+        // Show launchpad
+        app.pages.manager.goto_page(core, PageType::Launchpad);
 
         (window, app)
     }

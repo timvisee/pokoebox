@@ -1,4 +1,7 @@
+use std::sync::Arc;
+
 use crate::action::prelude::*;
+use crate::app::Core;
 use crate::result::Result;
 
 /// Unique ID of this action.
@@ -25,7 +28,7 @@ impl Action for NopAction {
         ACTION_NAME
     }
 
-    fn invoke(&self) -> Result<bool> {
+    fn invoke(&self, _core: Arc<Core>) -> Result<bool> {
         debug!("NOP action got invoked");
         Ok(true)
     }

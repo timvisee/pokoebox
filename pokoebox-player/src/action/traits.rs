@@ -1,5 +1,7 @@
 use std::fmt::{self, Display, Formatter};
+use std::sync::Arc;
 
+use crate::app::Core;
 use crate::result::Result;
 
 /// Action trait.
@@ -19,7 +21,7 @@ pub trait Action: Send + Sync {
     /// A boolean is returned on success which defines whether the action has
     /// been consumed. `true` if the action is consumed, `false` if not.
     /// An error is returned if the action fails.
-    fn invoke(&self) -> Result<bool>;
+    fn invoke(&self, core: Arc<Core>) -> Result<bool>;
 }
 
 /// Action ID.

@@ -1,6 +1,8 @@
 use std::collections::HashMap;
+use std::sync::Arc;
 
 use crate::action::{actions::*, prelude::*};
+use crate::app::Core;
 use crate::result::Result;
 
 /// A struct to manage all available actions.
@@ -18,7 +20,7 @@ impl ActionManager {
         // Add default list of actions
         debug!("Loading default actions...");
         manager.add(Box::new(NopAction::default()));
-        manager.add(Box::new(GotoHomeAction::default()));
+        manager.add(Box::new(GotoPageAction::new_home()));
         debug!("{} actions loaded.", manager.actions.len());
 
         manager
@@ -50,9 +52,9 @@ impl ActionManager {
     /// been consumed. `true` if the action has been consumed, `false` if not.
     /// If no action is available with the given ID, `false` is returned.
     /// An error is returned if the actions fails.
-    pub fn invoke(&self, id: ActionId) -> Result<bool> {
+    pub fn invoke(&self, id: ActionId, core: Arc<Core>) -> Result<bool> {
         if let Some(action) = self.action_ref(id) {
-            action.invoke()
+            action.invoke(core)
         } else {
             Ok(false)
         }
