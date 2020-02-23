@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+#[cfg(feature = "bluetooth")]
 use pokoebox_bluetooth::Manager as BluetoothManager;
 
 use crate::action::ActionRuntime;
@@ -37,6 +38,7 @@ pub struct Core {
     pub actions: ActionRuntime,
 
     /// Bluetooth manager.
+    #[cfg(feature = "bluetooth")]
     pub bluetooth: BluetoothManager,
 
     pub pages: PageController,
@@ -47,6 +49,7 @@ impl Core {
         Ok(Self {
             actions: ActionRuntime::default(),
             // TODO: propagate error
+            #[cfg(feature = "bluetooth")]
             bluetooth: BluetoothManager::new().expect("failed to initialize bluetooth manager"),
             pages: PageController::new(),
         })
