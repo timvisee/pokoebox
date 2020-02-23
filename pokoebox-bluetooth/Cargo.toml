@@ -5,5 +5,5 @@ authors = ["Tim Visée <3a4fb3964f@sinenomine.email>"]
 edition = "2018"
 
 [dependencies]
-bluez = { version = "*", git = "https://github.com/timvisee/bluez-rs.git" }
-async-std = "1.5"
+bluez = "0.1.2"
+futures-executor = "0.3"
