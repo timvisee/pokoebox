@@ -1,0 +1,9 @@
+[package]
+name = "pokoebox-bluetooth"
+version = "0.1.0"
+authors = ["Tim Visée <3a4fb3964f@sinenomine.email>"]
+edition = "2018"
+
+[dependencies]
+bluez = { version = "*", git = "https://github.com/timvisee/bluez-rs.git" }
+async-std = "1.5"
