@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate log;
+
 use std::error::Error;
 use std::sync::mpsc::{self, Receiver, Sender};
 use std::thread;
@@ -7,7 +10,9 @@ use bluez::client::{BlueZClient, DiscoverableMode, IoCapability};
 use bluez::interface::controller::{Controller, ControllerSetting};
 use bluez::interface::event::Event as BlueZEvent;
 use bluez::result::Error as BlueZError;
-use futures_executor::block_on;
+use futures::executor::block_on;
+use tokio_executor::park::ParkThread;
+use tokio_timer::timer::Timer;
 
 /// Publicly visible bluetooth controller name.
 const BT_NAME: &str = "PokoeBox";
@@ -37,14 +42,7 @@ impl<'a> Driver<'a> {
             Self::init_controller(&mut client, controller)?;
         }
 
-        let mut driver = Self { client, controller };
-
-        // TODO: do not make discoverable on init?
-        driver
-            .set_discoverable(true)
-            .expect("failed to make discoverable");
-
-        Ok(driver)
+        Ok(Self { client, controller })
     }
 
     fn select_controller(client: &mut BlueZClient) -> Result<Option<Controller>, Box<dyn Error>> {
@@ -82,16 +80,20 @@ impl<'a> Driver<'a> {
     /// Discoverability is enabled for a limited time and is automatically disabled after a while,
     /// see `BT_DISCOVER_TIMEOUT`.
     pub fn set_discoverable(&mut self, discoverable: bool) -> Result<(), BlueZError> {
-        let mode = if discoverable {
-            DiscoverableMode::General
-        } else {
-            DiscoverableMode::None
-        };
-
+        let controller = self.controller.unwrap();
+        block_on(self.client.set_connectable(controller, true))?;
         block_on(self.client.set_discoverable(
-            self.controller.unwrap(),
-            mode,
-            Some(BT_DISCOVER_TIMEOUT),
+            controller,
+            if discoverable {
+                DiscoverableMode::General
+            } else {
+                DiscoverableMode::None
+            },
+            if discoverable {
+                Some(BT_DISCOVER_TIMEOUT)
+            } else {
+                None
+            },
         ))
         .map(|_| ())
     }
@@ -142,39 +144,39 @@ impl Manager {
         //     return Ok(());
         // }
 
+        // Create timer thread, get handle
+        let (_worker_guard, worker_token): (_, Receiver<()>) = mpsc::channel();
+        let timer = {
+            let (timer_tx, timer_rx) = mpsc::channel();
+            thread::spawn(move || {
+                // Set-up timer, pass to parent thread
+                let park = ParkThread::new();
+                let mut timer = Timer::new(park);
+                timer_tx
+                    .send(timer.handle())
+                    .expect("failed to provide timer handle");
+
+                // Keep turning timer until parent thread dies
+                while let Err(mpsc::TryRecvError::Empty) = worker_token.try_recv() {
+                    if let Err(err) = timer.turn(None) {
+                        error!("Failed to drive bluetooth manager timer turn: {:?}", err);
+                    }
+                }
+            });
+            timer_rx.recv().expect("failed to set-up timer thread")
+        };
+
         loop {
-            // Blocking until event is received
-            // TODO: add timeout (to kill thread without bluetooth event on stop)
-            let response = block_on(driver.client.process())?;
-
-            // TODO: remove this debug print
-            eprintln!(">>> EVENT: {:?}", &response.event);
-
-            // Parse bluetooth events, send over channel
-            let event = match &response.event {
-                BlueZEvent::NewSettings { settings, .. } => {
-                    // TODO: only invoke if this specific setting changed
-                    Some(Event::Power(settings.contains(ControllerSetting::Powered)))
-                }
-                BlueZEvent::Discovering { discovering, .. } => {
-                    Some(Event::Discovering(*discovering))
-                }
-                BlueZEvent::DeviceConnected { .. } => Some(Event::DeviceConnected),
-                BlueZEvent::DeviceDisconnected { .. } => Some(Event::DeviceDisconnected),
-                _ => None,
-            };
-            if let Some(event) = event {
-                event_tx.send(event).unwrap();
+            // Process bluetooth events with timeout
+            // TODO: increase timeout if no events/commands for a while
+            let response = block_on(timer.timeout(driver.client.process(), Duration::from_secs(1)));
+            if let Ok(response) = response {
+                // TODO: propagate error
+                process_bluetooth_event(response.expect("failed to process bluetooth"), &event_tx);
             }
 
             // Process commands
-            while let Ok(cmd) = cmd_rx.recv_timeout(Duration::from_millis(50)) {
-                match cmd {
-                    DriverCmd::Discoverable(discoverable) => driver
-                        .set_discoverable(discoverable)
-                        .expect("failed to make bluetooth device discoverable"),
-                }
-            }
+            process_commands(&cmd_rx, &event_tx, &mut driver);
 
             // TODO: break if bluetooth manager was dropped
         }
@@ -206,4 +208,52 @@ pub enum Event {
     Discovering(bool),
     DeviceConnected,
     DeviceDisconnected,
+}
+
+#[inline]
+fn process_bluetooth_event(
+    response: bluez::interface::response::Response,
+    event_tx: &Sender<Event>,
+) {
+    // TODO: remove this debug print
+    eprintln!(">>> EVENT: {:?}", &response.event);
+
+    // Parse bluetooth events, send over channel
+    let mut events = vec![];
+    match &response.event {
+        BlueZEvent::NewSettings { settings, .. } => {
+            // TODO: only invoke if this specific setting changed
+            events.push(Event::Power(settings.contains(ControllerSetting::Powered)));
+            events.push(Event::Discovering(
+                settings.contains(ControllerSetting::Discoverable),
+            ));
+        }
+        BlueZEvent::Discovering { discovering, .. } => {
+            events.push(Event::Discovering(*discovering))
+        }
+        BlueZEvent::DeviceConnected { .. } => {
+            events.push(Event::DeviceConnected);
+        }
+        BlueZEvent::DeviceDisconnected { .. } => {
+            events.push(Event::DeviceDisconnected);
+        }
+        _ => {}
+    };
+    for event in events {
+        event_tx.send(event).unwrap();
+    }
+}
+
+#[inline]
+fn process_commands(cmd_rx: &Receiver<DriverCmd>, events_tx: &Sender<Event>, driver: &mut Driver) {
+    while let Ok(cmd) = cmd_rx.try_recv() {
+        match cmd {
+            DriverCmd::Discoverable(discoverable) => {
+                driver
+                    .set_discoverable(discoverable)
+                    .expect("failed to make bluetooth device discoverable");
+                let _ = events_tx.send(Event::Discovering(discoverable));
+            }
+        }
+    }
 }

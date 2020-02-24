@@ -7,6 +7,8 @@ pub enum PageType {
     Launchpad,
     Player,
     Volume,
+    #[cfg(feature = "bluetooth")]
+    Bluetooth,
     Test,
 }
 

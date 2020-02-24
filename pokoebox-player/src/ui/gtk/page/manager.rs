@@ -49,10 +49,12 @@ impl PageManager {
     fn new_page(&self, core: Arc<Core>, page: PageType) {
         // Initialize new page
         let page: Box<dyn Page> = match page {
+            #[cfg(feature = "bluetooth")]
+            PageType::Bluetooth => Box::new(pages::Bluetooth::new(core)),
             PageType::Launchpad => Box::new(pages::Launchpad::new(core)),
             PageType::Player => Box::new(pages::Player::new(core)),
-            PageType::Volume => Box::new(pages::Volume::new(core)),
             PageType::Test => Box::new(pages::Test::new(core)),
+            PageType::Volume => Box::new(pages::Volume::new(core)),
         };
 
         // Add new page, select last tab

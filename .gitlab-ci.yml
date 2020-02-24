@@ -39,6 +39,7 @@ before_script:
     - cd ./pokoebox-player
     - cargo check --verbose
     - cargo check --no-default-features --verbose
+    - cargo check --no-default-features --features bluetooth --verbose
 check-stable:
   <<: *check-base
 check-beta:
@@ -52,7 +53,7 @@ check-nightly:
 check-old:
   <<: *check-base
   variables:
-    RUST_VERSION: "1.39.0"
+    RUST_VERSION: "1.40.0"
 
 # Build using Rust stable
 build-x86_64-linux-gnu:
