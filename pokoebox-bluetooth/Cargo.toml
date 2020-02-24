@@ -6,4 +6,8 @@ edition = "2018"
 
 [dependencies]
 bluez = "0.1.2"
-futures-executor = "0.3"
+futures = "0.3"
+futures-timer = "0.3"
+log = "0.4"
+tokio-executor = "0.2.0-alpha.1"
+tokio-timer = "0.3.0-alpha.5"
