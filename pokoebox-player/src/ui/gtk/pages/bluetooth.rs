@@ -11,7 +11,7 @@ use super::page::Page;
 
 const PAGE_TYPE: PageType = PageType::Bluetooth;
 const PAGE_NAME: &str = "Bluetooth";
-const BUTTON_SPACING: u32 = 16;
+const SPACING: i32 = 8;
 
 /// Bluetooth page.
 pub struct Bluetooth {
@@ -44,17 +44,13 @@ impl Page for Bluetooth {
     }
 
     fn build_page(&self, core: Arc<Core>) {
-        // Configure the page
-        self.container.set_halign(gtk::Align::Center);
-        self.container.set_valign(gtk::Align::Center);
+        let gbox = gtk::Box::new(gtk::Orientation::Vertical, SPACING);
+        self.container.add(&gbox);
 
-        // Create a button grid
-        let btns = gtk::Grid::new();
-        btns.set_row_spacing(BUTTON_SPACING);
-        btns.set_column_spacing(BUTTON_SPACING);
-        btns.set_row_homogeneous(true);
-        btns.set_column_homogeneous(true);
-        self.container.add(&btns);
+        let btns = gtk::ButtonBox::new(gtk::Orientation::Horizontal);
+        btns.set_spacing(SPACING);
+        btns.set_layout(gtk::ButtonBoxStyle::Center);
+        gbox.add(&btns);
 
         let btn_power = gtk::Button::new_with_label("Power");
         btn_power.set_sensitive(false);
@@ -72,10 +68,15 @@ impl Page for Bluetooth {
         });
         btns.add(&btn_discoverable);
 
-        let btn_discoverable = Rc::new(btn_discoverable);
+        let scroll_view = gtk::ViewportBuilder::new().expand(true).build();
+        gbox.add(&scroll_view);
+
+        let list = gtk::ListBox::new();
+        scroll_view.add(&list);
 
         // Handle bluetooth manager events
         // TODO: find better way to handle events
+        let btn_discoverable = Rc::new(btn_discoverable);
         gtk::timeout_add_seconds(1, move || {
             let core = core.clone();
             let btn_discoverable = btn_discoverable.clone();
