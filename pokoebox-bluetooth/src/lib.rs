@@ -2,6 +2,7 @@
 extern crate log;
 
 use std::error::Error;
+use std::process::Command;
 use std::sync::mpsc::{self, Receiver, Sender};
 use std::thread;
 use std::time::Duration;
@@ -254,10 +255,10 @@ fn process_bluetooth_event(
                 settings.contains(ControllerSetting::Discoverable),
             ));
         }
-        BlueZEvent::Discovering { discovering, .. } => {
-            events.push(Event::Discovering(*discovering))
-        }
-        BlueZEvent::DeviceConnected { .. } => {
+        BlueZEvent::DeviceConnected { address, .. } => {
+            // Add bluetooth device as trusted
+            trust_device(*address);
+
             events.push(Event::DeviceConnected);
         }
         BlueZEvent::DeviceDisconnected { .. } => {
@@ -294,5 +295,46 @@ fn process_commands(cmd_rx: &Receiver<DriverCmd>, events_tx: &Sender<Event>, dri
                 let _ = events_tx.send(Event::Connections(connections));
             }
         }
+    }
+}
+
+/// Convert BlueZ address into hexadecimal representation with `:` separator.
+fn address_hex(address: bluez::Address) -> String {
+    let hex_address: [u8; 6] = address.into();
+    hex_address
+        .iter()
+        .rev()
+        .map(|b| format!("{:02X}", b))
+        .collect::<Vec<String>>()
+        .join(":")
+}
+
+/// Mark a bluetooth device as trusted through the `bluetoothctl` command-line.
+///
+/// TODO: find way to do this through BlueZ API.
+fn trust_device(address: bluez::Address) {
+    // Get hex address for device
+    let address_hex = address_hex(address);
+
+    info!("Trusting bluetooth device: {}", address_hex);
+
+    // Add bluetooth device as trusted
+    match Command::new("bluetoothctl")
+        .arg("trust")
+        .arg(&address_hex)
+        .output()
+    {
+        Ok(output) if !output.status.success() => {
+            error!(
+                "Failed to add bluetooth device as trusted, command had non-zero exit code ({}):\nstdout: {}\nstderr: {}",
+                output.status.code().unwrap_or(-1),
+                String::from_utf8(output.stdout).unwrap_or_else(|_| "?".into()),
+                String::from_utf8(output.stderr).unwrap_or_else(|_| "?".into()),
+            );
+        }
+        Err(err) => {
+            error!("Failed to add bluetooth device as trusted: {:?}", err);
+        }
+        _ => {}
     }
 }
