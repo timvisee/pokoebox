@@ -67,9 +67,19 @@ impl Page for Launchpad {
                 .invoke(GotoPageAction::new(PageType::Player), closure_core.clone());
         });
         btns.attach(&btn_play, 0, 0, 1, 1);
-        let btn_b = gtk::Button::new_with_label("");
-        btn_b.set_sensitive(false);
-        btns.attach(&btn_b, 1, 0, 1, 1);
+        let btn_bluetooth = gtk::Button::new_with_label("Bluetooth");
+        let closure_core = core.clone();
+        #[cfg(feature = "bluetooth")]
+        btn_bluetooth.connect_clicked(move |_| {
+            // TODO: handle result
+            let _ = closure_core.actions.invoke(
+                GotoPageAction::new(PageType::Bluetooth),
+                closure_core.clone(),
+            );
+        });
+        #[cfg(not(feature = "bluetooth"))]
+        btn_bluetooth.set_sensitive(false);
+        btns.attach(&btn_bluetooth, 1, 0, 1, 1);
         let btn_c = gtk::Button::new_with_label("");
         btn_c.set_sensitive(false);
         btns.attach(&btn_c, 2, 0, 1, 1);
