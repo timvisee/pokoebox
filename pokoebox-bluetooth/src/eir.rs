@@ -73,10 +73,6 @@ pub fn parse(mut eir_data: &[u8]) -> Option<EirData> {
                 flags = eir_data[2];
             }
             x if x == EirByte::NameShort as u8 || x == EirByte::NameComplete as u8 => {
-                dbg!(&eir_data[2..field_len - 1]);
-                dbg!(&eir_data[2..field_len]);
-                dbg!(&eir_data[2..=field_len]);
-
                 name = String::from_utf8(eir_data[2..=field_len].to_vec()).ok();
                 name_complete = x == EirByte::NameComplete as u8;
             }

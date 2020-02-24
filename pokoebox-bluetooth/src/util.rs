@@ -1,4 +1,6 @@
 use std::process::Command;
+use std::thread;
+use std::time::Duration;
 
 use bluez::Address;
 
@@ -12,25 +14,31 @@ pub fn trust_device(address: Address) {
     let address_hex = address_hex(address);
 
     info!("Trusting bluetooth device: {}", address_hex);
-    // Add bluetooth device as trusted
-    match Command::new("bluetoothctl")
-        .arg("trust")
-        .arg(&address_hex)
-        .output()
-    {
-        Ok(output) if !output.status.success() => {
-            error!(
-                "Failed to add bluetooth device as trusted, command had non-zero exit code ({}):\nstdout: {}\nstderr: {}",
-                output.status.code().unwrap_or(-1),
-                String::from_utf8(output.stdout).unwrap_or_else(|_| "?".into()),
-                String::from_utf8(output.stderr).unwrap_or_else(|_| "?".into()),
-            );
+
+    // Delay trusting for a second
+    thread::spawn(move || {
+        thread::sleep(Duration::from_secs(1));
+
+        // Add bluetooth device as trusted
+        match Command::new("bluetoothctl")
+            .arg("trust")
+            .arg(&address_hex)
+            .output()
+        {
+            Ok(output) if !output.status.success() => {
+                error!(
+                    "Failed to add bluetooth device as trusted, command had non-zero exit code ({}):\nstdout: {}\nstderr: {}",
+                    output.status.code().unwrap_or(-1),
+                    String::from_utf8(output.stdout).unwrap_or_else(|_| "?".into()),
+                    String::from_utf8(output.stderr).unwrap_or_else(|_| "?".into()),
+                );
+            }
+            Err(err) => {
+                error!("Failed to add bluetooth device as trusted: {:?}", err);
+            }
+            _ => {}
         }
-        Err(err) => {
-            error!("Failed to add bluetooth device as trusted: {:?}", err);
-        }
-        _ => {}
-    }
+    });
 }
 
 /// Convert BlueZ address into hexadecimal representation with `:` separator.
