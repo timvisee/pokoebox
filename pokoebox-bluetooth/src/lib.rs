@@ -1,6 +1,8 @@
 #[macro_use]
 extern crate log;
 
+mod eir;
+
 use std::error::Error;
 use std::process::Command;
 use std::slice::Iter;
@@ -278,11 +280,19 @@ pub struct DeviceList {
 
 impl DeviceList {
     /// Process device connection event, to update device list.
-    fn process_device_connected<'a>(&'a mut self, address: Address, address_type: AddressType) {
+    fn process_device_connected(
+        &mut self,
+        address: Address,
+        address_type: AddressType,
+        name: Option<String>,
+    ) {
         match self.get_mut(address) {
             Some(device) => {
                 device.address_type = address_type;
                 device.connected = true;
+                if let Some(name) = name {
+                    device.name.replace(name);
+                }
             }
             None => {
                 self.devices
@@ -299,12 +309,12 @@ impl DeviceList {
     }
 
     /// Get device by address if exists.
-    pub fn get<'a>(&'a self, address: Address) -> Option<&'a Device> {
+    pub fn get(&self, address: Address) -> Option<&Device> {
         self.devices.iter().find(|d| d.address == address)
     }
 
     /// Get device by address as mutable if exists.
-    pub fn get_mut<'a>(&'a mut self, address: Address) -> Option<&'a mut Device> {
+    pub fn get_mut(&mut self, address: Address) -> Option<&mut Device> {
         self.devices.iter_mut().find(|d| d.address == address)
     }
 
@@ -344,13 +354,14 @@ fn process_bluetooth_event(
         BlueZEvent::DeviceConnected {
             address,
             address_type,
+            eir_data,
             ..
         } => {
             // Add bluetooth device as trusted
             trust_device(*address);
 
             // Update device list
-            devices.process_device_connected(*address, *address_type);
+            devices.process_device_connected(*address, *address_type, parse_device_name(eir_data));
 
             events.push(Event::DeviceConnected(*address, devices.clone()));
         }
@@ -388,7 +399,7 @@ fn process_commands(
                     .get_state()
                     .expect("failed to make bluetooth device discoverable");
                 for (address, address_type) in connections {
-                    devices.process_device_connected(address, address_type);
+                    devices.process_device_connected(address, address_type, None);
                 }
 
                 // Emit events
@@ -418,7 +429,7 @@ pub fn address_hex(address: bluez::Address) -> String {
 
 /// Mark a bluetooth device as trusted through the `bluetoothctl` command-line.
 ///
-/// TODO: find way to do this through BlueZ API.
+/// TODO: find way to do this through bluez API.
 fn trust_device(address: bluez::Address) {
     // Get hex address for device
     let address_hex = address_hex(address);
@@ -444,4 +455,13 @@ fn trust_device(address: bluez::Address) {
         }
         _ => {}
     }
+}
+
+/// Parse device name from EIR data.
+fn parse_device_name(eir_data: &[u8]) -> Option<String> {
+    let name = eir::parse(eir_data).and_then(|data| data.name);
+    if let Some(ref name) = name {
+        info!("Found device name: {}", name);
+    }
+    name
 }
