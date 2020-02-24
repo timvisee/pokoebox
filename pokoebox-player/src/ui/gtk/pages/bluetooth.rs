@@ -2,7 +2,8 @@ use std::rc::Rc;
 use std::sync::{mpsc, Arc};
 
 use gtk::prelude::*;
-use pokoebox_bluetooth::{DeviceList, Event};
+use pokoebox_bluetooth::device::DeviceList;
+use pokoebox_bluetooth::manager::Event;
 
 use crate::app::Core;
 use crate::pages::PageType;

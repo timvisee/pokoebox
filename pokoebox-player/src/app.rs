@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 #[cfg(feature = "bluetooth")]
-use pokoebox_bluetooth::Manager as BluetoothManager;
+use pokoebox_bluetooth::manager::Manager as BluetoothManager;
 
 use crate::action::ActionRuntime;
 use crate::result::Result;
