@@ -7,7 +7,7 @@ use std::thread;
 use std::time::Duration;
 
 use bluez::client::{BlueZClient, DiscoverableMode, IoCapability};
-use bluez::interface::controller::{Controller, ControllerSetting};
+use bluez::interface::controller::{Controller, ControllerInfo, ControllerSetting};
 use bluez::interface::event::Event as BlueZEvent;
 use bluez::result::Error as BlueZError;
 use futures::executor::block_on;
@@ -75,6 +75,17 @@ impl<'a> Driver<'a> {
         Ok(())
     }
 
+    /// Get bluetooth controller state.
+    pub fn get_state(&mut self) -> Result<(ControllerInfo, Vec<String>), BlueZError> {
+        let controller = self.controller.unwrap();
+        let info = block_on(self.client.get_controller_info(controller))?;
+        let connections = block_on(self.client.get_connections(controller))?
+            .into_iter()
+            .map(|(a, _)| a.to_string())
+            .collect();
+        Ok((info, connections))
+    }
+
     /// Set discoverability of bluetooth controller.
     ///
     /// Discoverability is enabled for a limited time and is automatically disabled after a while,
@@ -111,10 +122,17 @@ pub struct Manager {
 impl Manager {
     pub fn new() -> Result<Self, Box<dyn Error>> {
         let (event_rx, cmd_tx) = Self::spawn_worker();
-        Ok(Self {
+        let manager = Self {
             events: event_rx,
             cmds: cmd_tx,
-        })
+        };
+
+        // Poll and emit bluetooth driver state
+        if let Err(err) = manager.emit_state() {
+            error!("Failed to emit bluetooth driver state: {:?}", err);
+        }
+
+        Ok(manager)
     }
 
     /// Spawn single worker thread with bluetooth controller
@@ -182,6 +200,12 @@ impl Manager {
         }
     }
 
+    /// Poll the state from the bluetooth driver, and emit events for it.
+    pub fn emit_state(&self) -> Result<(), ()> {
+        // TODO: propagate errors?
+        self.cmds.send(DriverCmd::EmitState).map_err(|_| ())
+    }
+
     /// Set discoverability of bluetooth controller.
     ///
     /// Discoverability is enabled for a limited time and is automatically disabled after a while,
@@ -197,6 +221,7 @@ impl Manager {
 #[derive(Clone, Eq, PartialEq)]
 enum DriverCmd {
     Discoverable(bool),
+    EmitState,
 }
 
 /// Bluetooth driver event.
@@ -204,10 +229,11 @@ enum DriverCmd {
 /// These events describe the current state, and may not necessarily be a state change.
 #[derive(Clone, Eq, PartialEq)]
 pub enum Event {
-    Power(bool),
-    Discovering(bool),
+    Connections(Vec<String>),
     DeviceConnected,
     DeviceDisconnected,
+    Discovering(bool),
+    Power(bool),
 }
 
 #[inline]
@@ -253,6 +279,19 @@ fn process_commands(cmd_rx: &Receiver<DriverCmd>, events_tx: &Sender<Event>, dri
                     .set_discoverable(discoverable)
                     .expect("failed to make bluetooth device discoverable");
                 let _ = events_tx.send(Event::Discovering(discoverable));
+            }
+            DriverCmd::EmitState => {
+                let (info, connections) = driver
+                    .get_state()
+                    .expect("failed to make bluetooth device discoverable");
+                let _ = events_tx.send(Event::Power(
+                    info.current_settings.contains(ControllerSetting::Powered),
+                ));
+                let _ = events_tx.send(Event::Discovering(
+                    info.current_settings
+                        .contains(ControllerSetting::Discoverable),
+                ));
+                let _ = events_tx.send(Event::Connections(connections));
             }
         }
     }

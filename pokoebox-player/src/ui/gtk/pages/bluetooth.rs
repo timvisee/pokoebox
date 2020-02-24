@@ -56,7 +56,7 @@ impl Page for Bluetooth {
         btn_power.set_sensitive(false);
         btns.add(&btn_power);
 
-        let btn_discoverable = gtk::Button::new_with_label("Discoverable");
+        let btn_discoverable = gtk::Button::new_with_label("Connect");
         let core_closure = core.clone();
         btn_discoverable.connect_clicked(move |btn| {
             btn.set_sensitive(false);
@@ -70,17 +70,16 @@ impl Page for Bluetooth {
 
         let scroll_view = gtk::ViewportBuilder::new().expand(true).build();
         gbox.add(&scroll_view);
-
-        let list = gtk::ListBox::new();
-        scroll_view.add(&list);
+        let (treeview, store) = build_list();
+        scroll_view.add(&treeview);
 
         // Handle bluetooth manager events
         // TODO: find better way to handle events
         let btn_discoverable = Rc::new(btn_discoverable);
+        let store = Rc::new(store);
+        handle_bluetooth_events(core.clone(), btn_discoverable.clone(), store.clone());
         gtk::timeout_add_seconds(1, move || {
-            let core = core.clone();
-            let btn_discoverable = btn_discoverable.clone();
-            handle_bluetooth_events(core, btn_discoverable)
+            handle_bluetooth_events(core.clone(), btn_discoverable.clone(), store.clone())
         });
     }
 
@@ -89,7 +88,11 @@ impl Page for Bluetooth {
     }
 }
 
-fn handle_bluetooth_events(core: Arc<Core>, btn_discoverable: Rc<gtk::Button>) -> glib::Continue {
+fn handle_bluetooth_events(
+    core: Arc<Core>,
+    btn_discoverable: Rc<gtk::Button>,
+    store: Rc<gtk::ListStore>,
+) -> glib::Continue {
     loop {
         match core.bluetooth.events.try_recv() {
             Err(mpsc::TryRecvError::Empty) => return glib::Continue(true),
@@ -100,11 +103,89 @@ fn handle_bluetooth_events(core: Arc<Core>, btn_discoverable: Rc<gtk::Button>) -
                     btn_discoverable.set_sensitive(false);
                 }
                 pokoebox_bluetooth::Event::Discovering(false) => {
-                    btn_discoverable.set_label("Discoverable");
+                    btn_discoverable.set_label("Connect");
                     btn_discoverable.set_sensitive(true);
+                }
+                pokoebox_bluetooth::Event::Connections(connections) => {
+                    store.clear();
+                    for address in connections {
+                        store.set(
+                            &store.append(),
+                            &COLUMNS,
+                            &[&address.to_value(), &address.to_value(), &true.to_value()],
+                        );
+                    }
+                }
+                // TODO: this is nasty!
+                pokoebox_bluetooth::Event::DeviceConnected
+                | pokoebox_bluetooth::Event::DeviceDisconnected => {
+                    let _ = core.bluetooth.emit_state();
                 }
                 _ => {}
             },
         }
     }
+}
+
+#[repr(i32)]
+enum Column {
+    Name = 0,
+    Address,
+    Connected,
+}
+
+const COLUMNS: [u32; 3] = [
+    Column::Name as u32,
+    Column::Address as u32,
+    Column::Connected as u32,
+];
+
+fn build_list() -> (gtk::TreeView, gtk::ListStore) {
+    let store = gtk::ListStore::new(&[
+        glib::types::Type::String,
+        glib::types::Type::String,
+        glib::types::Type::Bool,
+    ]);
+
+    let treeview = gtk::TreeViewBuilder::new()
+        .model(&store)
+        .headers_clickable(false)
+        .build();
+
+    {
+        let renderer = gtk::CellRendererText::new();
+        let column = gtk::TreeViewColumn::new();
+        column.pack_start(&renderer, true);
+        column.set_title("Device name");
+        column.add_attribute(&renderer, "text", Column::Name as i32);
+        column.set_expand(true);
+        column.set_sizing(gtk::TreeViewColumnSizing::Autosize);
+        column.set_sort_column_id(Column::Name as i32);
+        treeview.append_column(&column);
+    }
+
+    {
+        let renderer = gtk::CellRendererText::new();
+        let column = gtk::TreeViewColumn::new();
+        column.pack_start(&renderer, true);
+        column.set_title("Address");
+        column.add_attribute(&renderer, "text", Column::Address as i32);
+        column.set_expand(true);
+        column.set_sizing(gtk::TreeViewColumnSizing::Autosize);
+        column.set_sort_column_id(Column::Address as i32);
+        treeview.append_column(&column);
+    }
+
+    {
+        let renderer = gtk::CellRendererToggle::new();
+        // let model_clone = model.clone();
+        // renderer.connect_toggled(move |w, path| fixed_toggled(&model_clone, w, path));
+        let column = gtk::TreeViewColumn::new();
+        column.pack_start(&renderer, true);
+        column.set_title("Connected");
+        column.add_attribute(&renderer, "active", Column::Connected as i32);
+        treeview.append_column(&column);
+    }
+
+    (treeview, store)
 }
