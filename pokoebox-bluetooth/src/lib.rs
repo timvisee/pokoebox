@@ -80,16 +80,20 @@ impl<'a> Driver<'a> {
     /// Discoverability is enabled for a limited time and is automatically disabled after a while,
     /// see `BT_DISCOVER_TIMEOUT`.
     pub fn set_discoverable(&mut self, discoverable: bool) -> Result<(), BlueZError> {
-        let mode = if discoverable {
-            DiscoverableMode::General
-        } else {
-            DiscoverableMode::None
-        };
-
+        let controller = self.controller.unwrap();
+        block_on(self.client.set_connectable(controller, true))?;
         block_on(self.client.set_discoverable(
-            self.controller.unwrap(),
-            mode,
-            Some(BT_DISCOVER_TIMEOUT),
+            controller,
+            if discoverable {
+                DiscoverableMode::General
+            } else {
+                DiscoverableMode::None
+            },
+            if discoverable {
+                Some(BT_DISCOVER_TIMEOUT)
+            } else {
+                None
+            },
         ))
         .map(|_| ())
     }
