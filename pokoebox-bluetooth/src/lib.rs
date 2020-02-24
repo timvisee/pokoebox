@@ -94,6 +94,7 @@ impl<'a> Driver<'a> {
     pub fn set_discoverable(&mut self, discoverable: bool) -> Result<(), BlueZError> {
         let controller = self.controller.unwrap();
         block_on(self.client.set_connectable(controller, true))?;
+        block_on(self.client.set_bondable(controller, true))?;
         block_on(self.client.set_discoverable(
             controller,
             if discoverable {
