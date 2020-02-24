@@ -2,6 +2,7 @@ use std::rc::Rc;
 use std::sync::{mpsc, Arc};
 
 use gtk::prelude::*;
+use pokoebox_bluetooth::{DeviceList, Event};
 
 use crate::app::Core;
 use crate::pages::PageType;
@@ -98,28 +99,18 @@ fn handle_bluetooth_events(
             Err(mpsc::TryRecvError::Empty) => return glib::Continue(true),
             Err(mpsc::TryRecvError::Disconnected) => return glib::Continue(false),
             Ok(event) => match event {
-                pokoebox_bluetooth::Event::Discovering(true) => {
+                Event::Discovering(true) => {
                     btn_discoverable.set_label("Discoverable...");
                     btn_discoverable.set_sensitive(false);
                 }
-                pokoebox_bluetooth::Event::Discovering(false) => {
+                Event::Discovering(false) => {
                     btn_discoverable.set_label("Connect");
                     btn_discoverable.set_sensitive(true);
                 }
-                pokoebox_bluetooth::Event::Connections(connections) => {
-                    store.clear();
-                    for address in connections {
-                        store.set(
-                            &store.append(),
-                            &COLUMNS,
-                            &[&address.to_value(), &address.to_value(), &true.to_value()],
-                        );
-                    }
-                }
-                // TODO: this is nasty!
-                pokoebox_bluetooth::Event::DeviceConnected
-                | pokoebox_bluetooth::Event::DeviceDisconnected => {
-                    let _ = core.bluetooth.emit_state();
+                Event::DeviceConnected(_, devices)
+                | Event::DeviceDisconnected(_, devices)
+                | Event::Devices(devices) => {
+                    update_list(&store, devices);
                 }
                 _ => {}
             },
@@ -140,6 +131,7 @@ const COLUMNS: [u32; 3] = [
     Column::Connected as u32,
 ];
 
+/// Build device list.
 fn build_list() -> (gtk::TreeView, gtk::ListStore) {
     let store = gtk::ListStore::new(&[
         glib::types::Type::String,
@@ -188,4 +180,20 @@ fn build_list() -> (gtk::TreeView, gtk::ListStore) {
     }
 
     (treeview, store)
+}
+
+/// Update device list with new device information.
+fn update_list(store: &Rc<gtk::ListStore>, devices: DeviceList) {
+    store.clear();
+    for device in devices.iter() {
+        store.set(
+            &store.append(),
+            &COLUMNS,
+            &[
+                &device.name.as_deref().unwrap_or("?").to_value(),
+                &device.address_string().to_value(),
+                &device.connected.to_value(),
+            ],
+        );
+    }
 }

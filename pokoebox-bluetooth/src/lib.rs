@@ -3,14 +3,16 @@ extern crate log;
 
 use std::error::Error;
 use std::process::Command;
+use std::slice::Iter;
 use std::sync::mpsc::{self, Receiver, Sender};
 use std::thread;
 use std::time::Duration;
 
-use bluez::client::{BlueZClient, DiscoverableMode, IoCapability};
+use bluez::client::{AddressType, BlueZClient, DiscoverableMode, IoCapability};
 use bluez::interface::controller::{Controller, ControllerInfo, ControllerSetting};
 use bluez::interface::event::Event as BlueZEvent;
 use bluez::result::Error as BlueZError;
+use bluez::Address;
 use futures::executor::block_on;
 use tokio_executor::park::ParkThread;
 use tokio_timer::timer::Timer;
@@ -77,13 +79,12 @@ impl<'a> Driver<'a> {
     }
 
     /// Get bluetooth controller state.
-    pub fn get_state(&mut self) -> Result<(ControllerInfo, Vec<String>), BlueZError> {
+    pub fn get_state(
+        &mut self,
+    ) -> Result<(ControllerInfo, Vec<(Address, AddressType)>), BlueZError> {
         let controller = self.controller.unwrap();
         let info = block_on(self.client.get_controller_info(controller))?;
-        let connections = block_on(self.client.get_connections(controller))?
-            .into_iter()
-            .map(|(a, _)| a.to_string())
-            .collect();
+        let connections = block_on(self.client.get_connections(controller))?;
         Ok((info, connections))
     }
 
@@ -157,6 +158,7 @@ impl Manager {
     ) -> Result<(), Box<dyn Error>> {
         // Set up bluetooth controller
         let mut driver = Driver::new()?;
+        let mut devices = DeviceList::default();
 
         // TODO: stop if no controller is found
         // // We must have a controller selected
@@ -192,11 +194,15 @@ impl Manager {
             let response = block_on(timer.timeout(driver.client.process(), Duration::from_secs(1)));
             if let Ok(response) = response {
                 // TODO: propagate error
-                process_bluetooth_event(response.expect("failed to process bluetooth"), &event_tx);
+                process_bluetooth_event(
+                    response.expect("failed to process bluetooth"),
+                    &mut devices,
+                    &event_tx,
+                );
             }
 
             // Process commands
-            process_commands(&cmd_rx, &event_tx, &mut driver);
+            process_commands(&cmd_rx, &event_tx, &mut driver, &mut devices);
 
             // TODO: break if bluetooth manager was dropped
         }
@@ -229,18 +235,97 @@ enum DriverCmd {
 /// Bluetooth driver event.
 ///
 /// These events describe the current state, and may not necessarily be a state change.
-#[derive(Clone, Eq, PartialEq)]
+#[derive(Clone)]
 pub enum Event {
-    Connections(Vec<String>),
-    DeviceConnected,
-    DeviceDisconnected,
+    Devices(DeviceList),
+    DeviceConnected(Address, DeviceList),
+    DeviceDisconnected(Address, DeviceList),
     Discovering(bool),
     Power(bool),
+}
+
+/// Represents a bluetooth device.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Device {
+    pub address: Address,
+    pub address_type: AddressType,
+    pub name: Option<String>,
+    pub connected: bool,
+}
+
+impl Device {
+    /// Construct new default device with given address.
+    pub fn from_address(address: Address, address_type: AddressType) -> Self {
+        Self {
+            address,
+            address_type,
+            name: None,
+            connected: true,
+        }
+    }
+
+    /// Get address as human readable hex string separated by `:`.
+    pub fn address_string(&self) -> String {
+        address_hex(self.address)
+    }
+}
+
+/// Represents a list of bluetooth devices.
+#[derive(Clone)]
+pub struct DeviceList {
+    devices: Vec<Device>,
+}
+
+impl DeviceList {
+    /// Process device connection event, to update device list.
+    fn process_device_connected<'a>(&'a mut self, address: Address, address_type: AddressType) {
+        match self.get_mut(address) {
+            Some(device) => {
+                device.address_type = address_type;
+                device.connected = true;
+            }
+            None => {
+                self.devices
+                    .push(Device::from_address(address, address_type));
+            }
+        }
+    }
+
+    /// Process device disconnect event, to update device list.
+    fn process_device_disconnected(&mut self, address: Address) {
+        if let Some(device) = self.get_mut(address) {
+            device.connected = false;
+        }
+    }
+
+    /// Get device by address if exists.
+    pub fn get<'a>(&'a self, address: Address) -> Option<&'a Device> {
+        self.devices.iter().find(|d| d.address == address)
+    }
+
+    /// Get device by address as mutable if exists.
+    pub fn get_mut<'a>(&'a mut self, address: Address) -> Option<&'a mut Device> {
+        self.devices.iter_mut().find(|d| d.address == address)
+    }
+
+    /// Get device iterator.
+    pub fn iter(&self) -> Iter<Device> {
+        self.devices.iter()
+    }
+}
+
+impl Default for DeviceList {
+    fn default() -> Self {
+        Self {
+            devices: Vec::new(),
+        }
+    }
 }
 
 #[inline]
 fn process_bluetooth_event(
     response: bluez::interface::response::Response,
+    devices: &mut DeviceList,
     event_tx: &Sender<Event>,
 ) {
     // TODO: remove this debug print
@@ -256,14 +341,24 @@ fn process_bluetooth_event(
                 settings.contains(ControllerSetting::Discoverable),
             ));
         }
-        BlueZEvent::DeviceConnected { address, .. } => {
+        BlueZEvent::DeviceConnected {
+            address,
+            address_type,
+            ..
+        } => {
             // Add bluetooth device as trusted
             trust_device(*address);
 
-            events.push(Event::DeviceConnected);
+            // Update device list
+            devices.process_device_connected(*address, *address_type);
+
+            events.push(Event::DeviceConnected(*address, devices.clone()));
         }
-        BlueZEvent::DeviceDisconnected { .. } => {
-            events.push(Event::DeviceDisconnected);
+        BlueZEvent::DeviceDisconnected { address, .. } => {
+            // Update device list
+            devices.process_device_disconnected(*address);
+
+            events.push(Event::DeviceDisconnected(*address, devices.clone()));
         }
         _ => {}
     };
@@ -273,7 +368,12 @@ fn process_bluetooth_event(
 }
 
 #[inline]
-fn process_commands(cmd_rx: &Receiver<DriverCmd>, events_tx: &Sender<Event>, driver: &mut Driver) {
+fn process_commands(
+    cmd_rx: &Receiver<DriverCmd>,
+    events_tx: &Sender<Event>,
+    driver: &mut Driver,
+    devices: &mut DeviceList,
+) {
     while let Ok(cmd) = cmd_rx.try_recv() {
         match cmd {
             DriverCmd::Discoverable(discoverable) => {
@@ -283,9 +383,15 @@ fn process_commands(cmd_rx: &Receiver<DriverCmd>, events_tx: &Sender<Event>, dri
                 let _ = events_tx.send(Event::Discovering(discoverable));
             }
             DriverCmd::EmitState => {
+                // Get state, update device list
                 let (info, connections) = driver
                     .get_state()
                     .expect("failed to make bluetooth device discoverable");
+                for (address, address_type) in connections {
+                    devices.process_device_connected(address, address_type);
+                }
+
+                // Emit events
                 let _ = events_tx.send(Event::Power(
                     info.current_settings.contains(ControllerSetting::Powered),
                 ));
@@ -293,14 +399,14 @@ fn process_commands(cmd_rx: &Receiver<DriverCmd>, events_tx: &Sender<Event>, dri
                     info.current_settings
                         .contains(ControllerSetting::Discoverable),
                 ));
-                let _ = events_tx.send(Event::Connections(connections));
+                let _ = events_tx.send(Event::Devices(devices.clone()));
             }
         }
     }
 }
 
 /// Convert BlueZ address into hexadecimal representation with `:` separator.
-fn address_hex(address: bluez::Address) -> String {
+pub fn address_hex(address: bluez::Address) -> String {
     let hex_address: [u8; 6] = address.into();
     hex_address
         .iter()
