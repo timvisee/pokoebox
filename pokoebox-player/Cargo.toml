@@ -18,11 +18,15 @@ glib = { version = "0.9", features = ["v2_44"] }
 gtk = { version = "0.8", features = ["v3_16"] }
 log = "0.4"
 pokoebox-bluetooth = { version = "*", path = "../pokoebox-bluetooth", optional = true }
+pokoebox-rpi = { version = "*", path = "../pokoebox-rpi", optional = true }
 simple_logger = "1.0"
 version-compare = "0.0.10"
 
 [features]
-default = ["bluetooth"]
+default = ["bluetooth", "rpi"]
 
 # Feature: bluetooth control for audio
 bluetooth = ["pokoebox-bluetooth"]
+
+# Feature: Raspberry Pi features
+rpi = ["pokoebox-rpi"]

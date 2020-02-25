@@ -1,0 +1,8 @@
+[package]
+name = "pokoebox-rpi"
+version = "0.1.0"
+authors = ["Tim Visée <3a4fb3964f@sinenomine.email>"]
+edition = "2018"
+
+[dependencies]
+rppal = "0.11"
