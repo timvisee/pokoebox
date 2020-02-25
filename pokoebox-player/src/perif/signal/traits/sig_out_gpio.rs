@@ -1,4 +1,4 @@
-#![cfg(feature = "rpi")]
+#![cfg(feature = "old-rpi")]
 
 use super::sig_gpio::SigGpio;
 use super::sig_out::SigOut;

@@ -1,9 +1,9 @@
-#![cfg(feature = "rpi")]
+#![cfg(feature = "old-rpi")]
 
-use gpio::pin_accessor::PinAccessor;
-use result::Result;
 use super::button::Button;
 use super::gpio::Gpio;
+use gpio::pin_accessor::PinAccessor;
+use result::Result;
 
 pub trait GpioButton: Gpio + Button {
     /// Check whether the button is pressed.

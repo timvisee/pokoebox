@@ -1,12 +1,12 @@
-#![cfg(feature = "rpi")]
+#![cfg(feature = "old-rpi")]
 
 use std::sync::{Arc, Mutex};
 
+use super::event_handler::EventHandler;
+use super::trigger_edge::TriggerEdge;
 use action::action_id::ActionId;
 use action::action_manager::ActionManager;
 use result::Result;
-use super::event_handler::EventHandler;
-use super::trigger_edge::TriggerEdge;
 
 /// Action event.
 /// This event is used to invoke an action when the event is triggered.
@@ -27,9 +27,8 @@ impl ActionEvent {
     pub fn new(
         action_id: ActionId,
         action_manager: Arc<Mutex<ActionManager>>,
-        trigger_edge: TriggerEdge)
-        -> Self
-    {
+        trigger_edge: TriggerEdge,
+    ) -> Self {
         ActionEvent {
             action_id,
             action_manager,

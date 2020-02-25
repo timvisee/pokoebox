@@ -1,9 +1,9 @@
-#![cfg(feature = "rpi")]
+#![cfg(feature = "old-rpi")]
 
-use result::Result;
-use gpio::pin_accessor::PinAccessor;
 use super::sig_out_gpio::SigOutGpio;
 use super::sig_out_light::SigOutLight;
+use gpio::pin_accessor::PinAccessor;
+use result::Result;
 
 /// A peripheral output for a light that is using GPIO.
 pub trait SigOutGpioLight: SigOutGpio + SigOutLight {

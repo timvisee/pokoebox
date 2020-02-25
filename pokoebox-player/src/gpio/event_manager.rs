@@ -1,8 +1,8 @@
-#![cfg(feature = "rpi")]
+#![cfg(feature = "old-rpi")]
 
-use result::Result;
 use super::event_handler::EventHandler;
 use super::trigger_edge::TriggerEdge;
+use result::Result;
 
 pub struct EventManager {
     /// List of registered events.
@@ -12,9 +12,7 @@ pub struct EventManager {
 impl EventManager {
     /// Constructor.
     pub fn new() -> Self {
-        EventManager {
-            events: Vec::new(),
-        }
+        EventManager { events: Vec::new() }
     }
 
     /// Register a new event handler to this manager.

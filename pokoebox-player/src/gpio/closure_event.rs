@@ -1,9 +1,9 @@
-#![cfg(feature = "rpi")]
+#![cfg(feature = "old-rpi")]
 
-use error::Error;
-use result::Result;
 use super::event_handler::EventHandler;
 use super::trigger_edge::TriggerEdge;
+use error::Error;
+use result::Result;
 
 pub enum ClosureEvent {
     // Event with an unmutable closure

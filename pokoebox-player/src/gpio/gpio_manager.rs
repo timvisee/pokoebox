@@ -1,16 +1,16 @@
-#![cfg(feature = "rpi")]
+#![cfg(feature = "old-rpi")]
 
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
 use super::cupi::CuPi;
 
-use error::Error;
-use result::Result;
 use super::pin::Pin;
 use super::pin_accessor::PinAccessor;
 use super::pin_config::PinConfig;
 use super::pin_token::PinToken;
+use error::Error;
+use result::Result;
 
 use std::thread;
 use std::time::Duration;
@@ -132,7 +132,10 @@ impl GpioManager {
 
                 // Sleep the thread until the next polling iteration
                 // TODO: Dynamically determine what time to wait for here.
-                thread::sleep(Duration::new(THREAD_POLLER_INTERVAL_SEC, THREAD_POLLER_INTERVAL_NANO));
+                thread::sleep(Duration::new(
+                    THREAD_POLLER_INTERVAL_SEC,
+                    THREAD_POLLER_INTERVAL_NANO,
+                ));
             }
 
             //debug!("Stopped GPIO manager polling thread");

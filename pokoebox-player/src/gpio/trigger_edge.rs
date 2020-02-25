@@ -1,4 +1,4 @@
-#![cfg(feature = "rpi")]
+#![cfg(feature = "old-rpi")]
 
 use std::fmt::{Display, Formatter, Result};
 
@@ -64,7 +64,7 @@ impl TriggerEdge {
         // True if the current edge is for both
         match *self {
             TriggerEdge::Both => true,
-            _ => false
+            _ => false,
         }
     }
 

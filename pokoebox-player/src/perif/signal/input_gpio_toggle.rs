@@ -1,14 +1,7 @@
-#![cfg(feature = "rpi")]
+#![cfg(feature = "old-rpi")]
 
 use std::collections::HashMap;
 
-use error::Error;
-use gpio::gpio_manager::GpioManager;
-use gpio::pin::Pin;
-use gpio::pin_accessor::PinAccessor;
-use gpio::pin_token::PinToken;
-use gpio::pin_config::{PinConfig, PullMode, IoMode};
-use result::Result;
 use super::sig_id::SigId;
 use super::traits::sig::Sig;
 use super::traits::sig_gpio::SigGpio;
@@ -16,6 +9,13 @@ use super::traits::sig_in::SigIn;
 use super::traits::sig_in_gpio::SigInGpio;
 use super::traits::sig_in_gpio_toggle::SigInGpioToggle;
 use super::traits::sig_in_toggle::SigInToggle;
+use error::Error;
+use gpio::gpio_manager::GpioManager;
+use gpio::pin::Pin;
+use gpio::pin_accessor::PinAccessor;
+use gpio::pin_config::{IoMode, PinConfig, PullMode};
+use gpio::pin_token::PinToken;
+use result::Result;
 
 /// Key for the GPIO pin of the light
 pub const GPIO_PIN_KEY_BUTTON: &'static str = "light";
@@ -35,23 +35,18 @@ impl InputGpioToggle {
         id: SigId,
         name: &'static str,
         pin: usize,
-        gpio_manager: &mut GpioManager
+        gpio_manager: &mut GpioManager,
     ) -> Result<Self> {
         // Create a hash map of pin configurations
         let mut pin_configs = HashMap::new();
 
         // Create a pin configuration
-        let mut pin_config = PinConfig::new_with_pin_and_io(
-            pin, IoMode::Input
-        );
+        let mut pin_config = PinConfig::new_with_pin_and_io(pin, IoMode::Input);
         pin_config.set_pull_mode(PullMode::PullUp);
         pin_config.set_inverted(true);
 
         // Create the pin configuration, and add it to the configurations list
-        pin_configs.insert(
-            GPIO_PIN_KEY_BUTTON,
-            pin_config
-        );
+        pin_configs.insert(GPIO_PIN_KEY_BUTTON, pin_config);
 
         // Construct the object
         let mut obj = InputGpioToggle {
@@ -109,8 +104,10 @@ impl SigInToggle for InputGpioToggle {}
 
 impl SigInGpioToggle for InputGpioToggle {
     fn state(&self, pin_accessor: &PinAccessor) -> Result<bool> {
-        self.find_button_pin(pin_accessor).and_then(|pin| Some(pin.read_bool())).ok_or(
-            Error::new("Failed to read button state, unable to find button pin.")
-        )
+        self.find_button_pin(pin_accessor)
+            .and_then(|pin| Some(pin.read_bool()))
+            .ok_or(Error::new(
+                "Failed to read button state, unable to find button pin.",
+            ))
     }
 }

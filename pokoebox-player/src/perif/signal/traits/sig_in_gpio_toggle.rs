@@ -1,9 +1,9 @@
-#![cfg(feature = "rpi")]
+#![cfg(feature = "old-rpi")]
 
-use gpio::pin_accessor::PinAccessor;
-use result::Result;
 use super::sig_in_gpio::SigInGpio;
 use super::sig_in_toggle::SigInToggle;
+use gpio::pin_accessor::PinAccessor;
+use result::Result;
 
 /// Signal input for a GPIO toggle.
 pub trait SigInGpioToggle: SigInGpio + SigInToggle {

@@ -1,7 +1,7 @@
-#![cfg(feature = "rpi")]
+#![cfg(feature = "old-rpi")]
 
-use result::Result;
 use super::trigger_edge::TriggerEdge;
+use result::Result;
 
 /// Event handler trait, to handle GPIO events.
 pub trait EventHandler {

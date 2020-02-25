@@ -1,14 +1,14 @@
-#![cfg(feature = "rpi")]
+#![cfg(feature = "old-rpi")]
 
 use std::collections::HashMap;
 
+use super::sig::Sig;
 use gpio::gpio_manager::GpioManager;
 use gpio::pin::Pin;
 use gpio::pin_accessor::PinAccessor;
-use gpio::pin_token::PinToken;
 use gpio::pin_config::PinConfig;
+use gpio::pin_token::PinToken;
 use result::Result;
-use super::sig::Sig;
 
 /// An input or output signal for a peripheral that uses GPIO features.
 pub trait SigGpio: Sig {
@@ -18,8 +18,7 @@ pub trait SigGpio: Sig {
 
     /// Get a list of GPIO pin configurations, mutable.
     /// This includes input and output pins.
-    fn gpio_pin_configs_mut(&mut self)
-       -> &mut HashMap<&'static str, PinConfig>;
+    fn gpio_pin_configs_mut(&mut self) -> &mut HashMap<&'static str, PinConfig>;
 
     /// Setup all the pins from the pin configurations.
     /// All pin configurations will be consumed, and this leaves the list
@@ -60,12 +59,18 @@ pub trait SigGpio: Sig {
     /// Get the pin token for the given pin key.
     /// `None` is returned if there was no GPIO pin for the given `key`.
     fn gpio_pin_token(&self, key: &'static str) -> Option<PinToken> {
-        self.gpio_pin_tokens().get(key).and_then(|token| Some(*token))
+        self.gpio_pin_tokens()
+            .get(key)
+            .and_then(|token| Some(*token))
     }
 
     /// Get the GPIO pin with the given key.
     /// `None` is returned if there was no GPIO pin for the given `key`.
-    fn gpio_pin<'a, 'b: 'a>(&'a self, key: &'static str, pin_accessor: &'b PinAccessor) -> Option<&'a Pin> {
+    fn gpio_pin<'a, 'b: 'a>(
+        &'a self,
+        key: &'static str,
+        pin_accessor: &'b PinAccessor,
+    ) -> Option<&'a Pin> {
         // Get the pin token
         let token = self.gpio_pin_token(key);
         if token.is_none() {
@@ -78,9 +83,11 @@ pub trait SigGpio: Sig {
 
     /// Get the GPIO pin with the given key as mutable.
     /// `None` is returned if there was no GPIO pin for the given `key`.
-    fn gpio_pin_mut<'a, 'b: 'a>(&'a mut self, key: &'static str, pin_accessor: &'b mut PinAccessor)
-        -> Option<&'a mut Pin>
-    {
+    fn gpio_pin_mut<'a, 'b: 'a>(
+        &'a mut self,
+        key: &'static str,
+        pin_accessor: &'b mut PinAccessor,
+    ) -> Option<&'a mut Pin> {
         // Get the pin token
         let token = self.gpio_pin_token(key);
         if token.is_none() {

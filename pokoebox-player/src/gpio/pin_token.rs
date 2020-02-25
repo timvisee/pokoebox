@@ -1,4 +1,4 @@
-#![cfg(feature = "rpi")]
+#![cfg(feature = "old-rpi")]
 
 use std::fmt::{Display, Formatter, Result};
 

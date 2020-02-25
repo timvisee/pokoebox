@@ -1,11 +1,11 @@
-#![cfg(feature = "rpi")]
+#![cfg(feature = "old-rpi")]
 
-use error::Error;
-use result::Result;
 use super::cupi::{CuPi, PinOptions};
 use super::gpio_manager::GpioManager;
-use super::pin_token::PinToken;
 use super::logic::Logic;
+use super::pin_token::PinToken;
+use error::Error;
+use result::Result;
 
 /// GPIO pin configuration.
 /// The pin number and io mode are required. The pull mode defaults to `None`.
@@ -31,7 +31,6 @@ pub struct PinConfig {
 }
 
 impl PinConfig {
-
     /// Construct a new configuration.
     pub fn new() -> Self {
         PinConfig {
@@ -173,9 +172,7 @@ impl PinConfig {
 
         // An input/output mode must have been configured
         if self.io_mode.is_none() {
-            return Err(
-                Error::new("Can't create GPIO pin, no io mode configured")
-            );
+            return Err(Error::new("Can't create GPIO pin, no io mode configured"));
         }
 
         // Create the pin options configuration
@@ -192,11 +189,11 @@ impl PinConfig {
         match self.pull_mode {
             PullMode::PullUp => {
                 options.pull_up();
-            },
+            }
             PullMode::PullDown => {
                 options.pull_down();
-            },
-            PullMode::None => {},
+            }
+            PullMode::None => {}
         }
 
         Ok(options)

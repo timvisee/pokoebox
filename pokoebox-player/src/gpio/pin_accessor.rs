@@ -1,8 +1,8 @@
-#![cfg(feature = "rpi")]
+#![cfg(feature = "old-rpi")]
 
 use std::collections::hash_map::{Values, ValuesMut};
-use std::sync::{Mutex, MutexGuard};
 use std::collections::HashMap;
+use std::sync::{Mutex, MutexGuard};
 
 use super::pin::Pin;
 use super::pin_token::PinToken;
@@ -18,9 +18,7 @@ pub struct PinAccessor<'a> {
 impl<'a> PinAccessor<'a> {
     /// Construct a new accessor.
     pub fn new(guard: MutexGuard<'a, HashMap<PinToken, Pin>>) -> Self {
-        PinAccessor {
-            guard,
-        }
+        PinAccessor { guard }
     }
 
     /// Create a pin accessor instance, that provides accessibility to the pins in a safe way.

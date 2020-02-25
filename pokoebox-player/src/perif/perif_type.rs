@@ -1,15 +1,14 @@
-#[cfg(feature = "rpi")]
+#[cfg(feature = "old-rpi")]
 use super::perif_gpio_button::PerifGpioButton;
-#[cfg(feature = "rpi")]
+#[cfg(feature = "old-rpi")]
 use super::perif_gpio_light::PerifGpioLight;
 
 pub enum PerifType {
-
     /// GPIO Light.
-    #[cfg(feature = "rpi")]
+    #[cfg(feature = "old-rpi")]
     GpioLight(PerifGpioLight),
 
     /// GPIO Button.
-    #[cfg(feature = "rpi")]
+    #[cfg(feature = "old-rpi")]
     GpioButton(PerifGpioButton),
 }

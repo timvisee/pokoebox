@@ -1,14 +1,14 @@
-#![cfg(feature = "rpi")]
+#![cfg(feature = "old-rpi")]
 
 use super::cupi::{PinInput, PinOutput};
 
-use result::Result;
 use super::event_manager::EventManager;
 use super::gpio_manager::GpioManager;
 use super::logic::Logic;
-use super::pin_config::{PinConfig, IoMode};
+use super::pin_config::{IoMode, PinConfig};
 use super::pin_token::PinToken;
 use super::trigger_edge::TriggerEdge;
+use result::Result;
 
 /// A GPIO pin instance.
 /// This allows you to use a GPIO pin as input or output depending on the
@@ -37,7 +37,6 @@ pub struct Pin {
 }
 
 impl Pin {
-
     /// Construct a new GPIO pin.
     ///
     /// The pin `config` must be given, to define how the pin should act.
@@ -67,7 +66,7 @@ impl Pin {
 
                 // Create the output pin instance
                 output = Some(pin_output);
-            },
+            }
         }
 
         // Generate a new unique token for the pin
@@ -139,9 +138,7 @@ impl Pin {
         }
 
         // Read the physical value
-        let mut phys_logic = Logic::from_cupi(
-            self.input.as_ref().unwrap().read()
-        );
+        let mut phys_logic = Logic::from_cupi(self.input.as_ref().unwrap().read());
 
         // Invert the physical logic if configured
         if self.config.inverted() {
@@ -242,13 +239,20 @@ impl Pin {
             } else {
                 input.as_inverted()
             },
-            input).unwrap();
+            input,
+        )
+        .unwrap();
 
         // Update the last known input state
         self.input_logic = Some(input);
 
         // TODO: Change this below to a debug message.
-        info!("Signal of input pin changed! (token: {}, edge: {}, signal: {})", self.token(), trigger_edge, input);
+        info!(
+            "Signal of input pin changed! (token: {}, edge: {}, signal: {})",
+            self.token(),
+            trigger_edge,
+            input
+        );
 
         // Fire the signal change event
         let _ = self.event_manager.fire(trigger_edge);

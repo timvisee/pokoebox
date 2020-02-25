@@ -1,4 +1,4 @@
-#![cfg(feature = "rpi")]
+#![cfg(feature = "old-rpi")]
 
 use std::fmt::{Display, Formatter, Result};
 
@@ -12,7 +12,6 @@ pub enum Logic {
 }
 
 impl Logic {
-
     /// Get the logic from the given boolean value.
     pub fn from_bool(logic: bool) -> Self {
         if logic {
@@ -26,7 +25,7 @@ impl Logic {
     pub fn from_cupi(logic: cupi::Logic) -> Self {
         match logic {
             cupi::Logic::High => Logic::High,
-            cupi::Logic::Low => Logic::Low
+            cupi::Logic::Low => Logic::Low,
         }
     }
 
@@ -34,7 +33,7 @@ impl Logic {
     pub fn as_bool(&self) -> bool {
         match *self {
             Logic::High => true,
-            Logic::Low => false
+            Logic::Low => false,
         }
     }
 
@@ -47,7 +46,7 @@ impl Logic {
     pub fn as_cupi(&self) -> cupi::Logic {
         match *self {
             Logic::High => cupi::Logic::High,
-            Logic::Low => cupi::Logic::Low
+            Logic::Low => cupi::Logic::Low,
         }
     }
 

@@ -1,19 +1,19 @@
-#![cfg(feature = "rpi")]
+#![cfg(feature = "old-rpi")]
 
-use gpio::gpio_manager::GpioManager;
-use gpio::pin_accessor::PinAccessor;
-use result::Result;
 use super::perif_type::PerifType;
+use super::signal::output_gpio_light::OutputGpioLight;
+use super::signal::sig_id::SigId;
+use super::signal::traits::sig_out::SigOut;
+use super::signal::traits::sig_out_gpio_light::SigOutGpioLight;
 use super::traits::gpio::Gpio;
 use super::traits::gpio_light::GpioLight;
 use super::traits::light::Light;
 use super::traits::perif::Perif;
-use super::traits::with_sig::WithSig;
 use super::traits::with_outputs::WithOutputs;
-use super::signal::sig_id::SigId;
-use super::signal::traits::sig_out::SigOut;
-use super::signal::traits::sig_out_gpio_light::SigOutGpioLight;
-use super::signal::output_gpio_light::OutputGpioLight;
+use super::traits::with_sig::WithSig;
+use gpio::gpio_manager::GpioManager;
+use gpio::pin_accessor::PinAccessor;
+use result::Result;
 
 /// Signal ID of the light.
 pub const SIG_LIGHT_ID: &'static str = "light";
@@ -25,35 +25,24 @@ pub const SIG_LIGHT_NAME: &'static str = "Light";
 /// This can be used to toggle a light such as a LED.
 pub struct PerifGpioLight {
     name: &'static str,
-    sig_light: OutputGpioLight
+    sig_light: OutputGpioLight,
 }
 
 impl PerifGpioLight {
     /// Construct a new GPIO light peripheral.
-    pub fn new(
-        name: &'static str,
-        pin: usize,
-        gpio_manager: &mut GpioManager
-    ) -> Result<Self> {
+    pub fn new(name: &'static str, pin: usize, gpio_manager: &mut GpioManager) -> Result<Self> {
         // Create a GPIO light signal instance, and add it to the outputs
-        let sig_light = OutputGpioLight::new(
-            SigId::new(SIG_LIGHT_ID),
-            SIG_LIGHT_NAME,
-            pin,
-            gpio_manager
-        )?;
+        let sig_light =
+            OutputGpioLight::new(SigId::new(SIG_LIGHT_ID), SIG_LIGHT_NAME, pin, gpio_manager)?;
 
-        Ok(PerifGpioLight {
-            name,
-            sig_light,
-        })
+        Ok(PerifGpioLight { name, sig_light })
     }
 
     /// Create a new wrapped GPIO light peripheral.
     pub fn new_wrapped(
         name: &'static str,
         pin: usize,
-        gpio_manager: &mut GpioManager
+        gpio_manager: &mut GpioManager,
     ) -> Result<PerifType> {
         // Create a new peripheral instance
         let perif = Self::new(name, pin, gpio_manager)?;
@@ -85,9 +74,7 @@ impl Gpio for PerifGpioLight {}
 /// This peripheral has outputs.
 impl WithOutputs for PerifGpioLight {
     fn list_outputs(&self) -> Vec<&SigOut> {
-        vec![
-            &self.sig_light
-        ]
+        vec![&self.sig_light]
     }
 }
 
