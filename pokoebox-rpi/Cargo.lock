@@ -27,6 +27,7 @@ dependencies = [
 name = "pokoebox-rpi"
 version = "0.1.0"
 dependencies = [
+ "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "rppal 0.11.3 (registry+https://github.com/rust-lang/crates.io-index)",
 ]

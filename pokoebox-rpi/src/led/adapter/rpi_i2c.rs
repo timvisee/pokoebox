@@ -7,18 +7,17 @@ use super::{Error, LedCmd};
 /// The address of the external LED controller.
 const CONTROLLER_I2C_ADDRESS: u16 = 8;
 
-/// Communicator. Talks to remote LED controller.
-pub struct Communicator {
+/// Adapter. Talks to remote LED controller.
+pub struct Adapter {
     /// i2c bus to send commands over.
     bus: Mutex<I2c>,
 }
 
-impl Communicator {
-    // TODO: propagate error
+impl Adapter {
     pub fn new() -> Result<Self, Error> {
-        let mut bus = I2c::new().map_err(|_| Error::Commnicate)?;
+        let mut bus = I2c::new().map_err(|_| Error::Adapter)?;
         bus.set_slave_address(CONTROLLER_I2C_ADDRESS)
-            .map_err(|_| Error::Commnicate)?;
+            .map_err(|_| Error::Adapter)?;
 
         Ok(Self {
             bus: Mutex::new(bus),
@@ -36,16 +35,16 @@ impl Communicator {
             .lock()
             .expect("failed to obtain i2c bus lock")
             .write(&bytes)
-            .map_err(|_| Error::Commnicate)?;
+            .map_err(|_| Error::Adapter)?;
         if written < bytes.len() {
-            Err(Error::Commnicate)
+            Err(Error::Adapter)
         } else {
             Ok(())
         }
     }
 }
 
-impl super::Communicator for Communicator {
+impl super::Adapter for Adapter {
     fn send_cmd(&self, cmd: LedCmd) -> Result<(), Error> {
         self.bus_send_raw(led_cmd_to_protocol(cmd))
     }

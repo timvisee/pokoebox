@@ -1,17 +1,17 @@
-use super::communicator::{self, Communicator};
+use super::adapter::{self, Adapter};
 use super::{Led, LedCmd};
 
 /// LED interface.
 pub struct Interface {
-    /// Communicator to send LED comamnds through.
-    communicator: Box<dyn Communicator>,
+    /// Adapter to send LED comamnds through.
+    adapter: Box<dyn Adapter>,
 }
 
 impl Interface {
     // TODO: propagate errors
     pub fn new() -> Result<Self, Error> {
         let interface = Self {
-            communicator: communicator::select_communicator().map_err(Error::Communicator)?,
+            adapter: adapter::select_adapter().map_err(Error::Adapter)?,
         };
 
         // Reset LEDs
@@ -22,21 +22,21 @@ impl Interface {
 
     // TODO: propagate errors
     pub fn led_set(&self, led: Led, level: bool) -> Result<(), Error> {
-        self.communicator
+        self.adapter
             .send_cmd(LedCmd::LedSet(led, level))
-            .map_err(Error::Communicator)
+            .map_err(Error::Adapter)
     }
 
     // TODO: propagate errors
     pub fn led_reset(&self) -> Result<(), Error> {
-        self.communicator
+        self.adapter
             .send_cmd(LedCmd::LedReset)
-            .map_err(Error::Communicator)
+            .map_err(Error::Adapter)
     }
 }
 
 #[derive(Debug)]
 pub enum Error {
-    /// Communicator error.
-    Communicator(communicator::Error),
+    /// Adapter error.
+    Adapter(adapter::Error),
 }

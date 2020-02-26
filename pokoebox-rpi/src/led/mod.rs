@@ -1,4 +1,4 @@
-mod communicator;
+mod adapter;
 mod interface;
 
 pub use interface::Interface;
