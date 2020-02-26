@@ -40,6 +40,7 @@ before_script:
     - cargo check --verbose
     - cargo check --no-default-features --verbose
     - cargo check --no-default-features --features bluetooth --verbose
+    - cargo check --no-default-features --features rpi --verbose
 check-stable:
   <<: *check-base
 check-beta:
