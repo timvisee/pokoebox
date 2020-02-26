@@ -6,7 +6,7 @@ use rppal::gpio::{self, Gpio, InputPin};
 use super::{ButtonConfig, Error, Event};
 
 /// Button debounce time.
-pub const BUTTON_DEBOUNCE_TIME: Duration = Duration::from_millis(1000 / (24 / 2));
+pub const BUTTON_DEBOUNCE_TIME: Duration = Duration::from_millis(1000 / 24);
 
 /// Adapter. Talks to buttons.
 pub struct Adapter {
