@@ -22,8 +22,13 @@ impl Adapter {
     }
 
     /// Allocate a GPIO input pin.
-    fn allocate_input(&self, pin: u8) -> Result<InputPin, Error> {
-        Ok(self.gpio.get(pin).map_err(|_| Error::Adapter)?.into_input())
+    fn allocate_input(&self, pin: u8, pullup: bool) -> Result<InputPin, Error> {
+        let pin = self.gpio.get(pin).map_err(|_| Error::Adapter)?;
+        Ok(if pullup {
+            pin.into_input_pullup()
+        } else {
+            pin.into_input()
+        })
     }
 }
 
@@ -39,7 +44,7 @@ impl super::Adapter for Adapter {
         // Set-up button
         match button {
             ButtonConfig::Push(pin) => {
-                let mut input = self.allocate_input(pin)?;
+                let mut input = self.allocate_input(pin, false)?;
                 let callback_state = state.clone();
                 input
                     .set_async_interrupt(gpio::Trigger::RisingEdge, move |level| match level {
@@ -56,8 +61,8 @@ impl super::Adapter for Adapter {
                 state.get_mut().pins.push(input);
             }
             ButtonConfig::Rotary(pin_a, pin_b) => {
-                let mut input_a = self.allocate_input(pin_a)?;
-                let input_b = self.allocate_input(pin_b)?;
+                let mut input_a = self.allocate_input(pin_a, true)?;
+                let input_b = self.allocate_input(pin_b, true)?;
                 let callback_state = state.clone();
                 input_a
                     .set_async_interrupt(gpio::Trigger::Both, move |level_a| {
