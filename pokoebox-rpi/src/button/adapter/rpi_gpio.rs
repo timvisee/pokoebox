@@ -67,11 +67,13 @@ impl super::Adapter for Adapter {
                 input_a
                     .set_async_interrupt(gpio::Trigger::Both, move |level_a| {
                         let level_b = callback_state.get_mut().pins[1].read();
-                        callback(if level_a == level_b {
-                            Event::Down
-                        } else {
-                            Event::Up
-                        });
+                        if callback_state.update_state(0) {
+                            callback(if level_a == level_b {
+                                Event::Down
+                            } else {
+                                Event::Up
+                            });
+                        }
                     })
                     .map_err(|_| Error::Adapter)?;
                 state.get_mut().pins.append(&mut vec![input_a, input_b]);
