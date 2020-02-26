@@ -136,6 +136,7 @@ impl InnerButtonState {
         }
 
         // Update state
+        self.last = Instant::now();
         self.state = state;
         true
     }
