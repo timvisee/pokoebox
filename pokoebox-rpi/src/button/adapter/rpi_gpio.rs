@@ -1,7 +1,7 @@
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, MutexGuard};
 use std::time::{Duration, Instant};
 
-use rppal::gpio::{self, Gpio};
+use rppal::gpio::{self, Gpio, InputPin};
 
 use super::{ButtonConfig, Error, Event};
 
@@ -21,17 +21,9 @@ impl Adapter {
         })
     }
 
-    /// Set-up a GPIO pin
-    fn setup_gpio_input<C>(&self, pin: u8, callback: C) -> Result<(), Error>
-    where
-        C: FnMut(gpio::Level) + Send + 'static,
-    {
-        self.gpio
-            .get(pin)
-            .map_err(|_| Error::Adapter)?
-            .into_input()
-            .set_async_interrupt(gpio::Trigger::Both, callback)
-            .map_err(|_| Error::Adapter)
+    /// Allocate a GPIO input pin.
+    fn allocate_input(&self, pin: u8) -> Result<InputPin, Error> {
+        Ok(self.gpio.get(pin).map_err(|_| Error::Adapter)?.into_input())
     }
 }
 
@@ -47,18 +39,38 @@ impl super::Adapter for Adapter {
         // Set-up button
         match button {
             ButtonConfig::Push(pin) => {
-                self.setup_gpio_input(pin, move |level| match level {
-                    gpio::Level::High => {
-                        if state.update_state(1) {
-                            callback(Event::Press);
+                let mut input = self.allocate_input(pin)?;
+                let callback_state = state.clone();
+                input
+                    .set_async_interrupt(gpio::Trigger::RisingEdge, move |level| match level {
+                        gpio::Level::High => {
+                            if callback_state.update_state(1) {
+                                callback(Event::Press);
+                            }
                         }
-                    }
-                    gpio::Level::Low => {
-                        state.update_state(0);
-                    }
-                })?;
+                        gpio::Level::Low => {
+                            callback_state.update_state(0);
+                        }
+                    })
+                    .map_err(|_| Error::Adapter)?;
+                state.get_mut().pins.push(input);
             }
-            ButtonConfig::Rotary(_, _) => todo!("implement rotary encoder button setup"),
+            ButtonConfig::Rotary(pin_a, pin_b) => {
+                let mut input_a = self.allocate_input(pin_a)?;
+                let input_b = self.allocate_input(pin_b)?;
+                let callback_state = state.clone();
+                input_a
+                    .set_async_interrupt(gpio::Trigger::Both, move |level_a| {
+                        let level_b = callback_state.get_mut().pins[1].read();
+                        callback(if level_a == level_b {
+                            Event::Down
+                        } else {
+                            Event::Up
+                        });
+                    })
+                    .map_err(|_| Error::Adapter)?;
+                state.get_mut().pins.append(&mut vec![input_a, input_b]);
+            }
         }
 
         Ok(())
@@ -72,17 +84,20 @@ pub struct ButtonState {
 }
 
 impl ButtonState {
+    /// Get the mutable inner button state.
+    pub fn get_mut(&self) -> MutexGuard<InnerButtonState> {
+        self.inner
+            .lock()
+            .expect("failed to lock inner button state")
+    }
+
     /// Update button state after debounce timer.
     ///
     /// This method updates the internal `state`, but only if the button debounce timer has passed.
     /// True is returned if the state was updated, false if it wasn't because of the debounce
     /// timer.
     fn update_state(&self, state: u8) -> bool {
-        let result = self
-            .inner
-            .lock()
-            .expect("failed to lock inner button state")
-            .update_state(state);
+        let result = self.get_mut().update_state(state);
 
         // TODO: remove after debugging
         debug!("Update button state: {} (debounced: {})", state, !result);
@@ -98,6 +113,9 @@ pub struct InnerButtonState {
 
     /// Last time button was triggered.
     last: Instant,
+
+    /// List of GPIO input pins.
+    pins: Vec<InputPin>,
 }
 
 impl InnerButtonState {
@@ -123,6 +141,7 @@ impl Default for InnerButtonState {
         Self {
             state: 0,
             last: Instant::now() - BUTTON_DEBOUNCE_TIME,
+            pins: Vec::new(),
         }
     }
 }
