@@ -57,8 +57,9 @@ impl Core {
             // TODO: propagate error
             #[cfg(feature = "bluetooth")]
             bluetooth: BluetoothManager::new().expect("failed to initialize bluetooth manager"),
+            // TODO: propagate error
             #[cfg(feature = "rpi")]
-            led: LedController::new(),
+            led: LedController::new().expect("failed to initialize LED controller"),
             pages: PageController::new(),
         })
     }
