@@ -6,7 +6,7 @@ use rppal::gpio::{self, Gpio, InputPin};
 use super::{ButtonConfig, Error, Event};
 
 /// Button debounce time.
-pub const BUTTON_DEBOUNCE_TIME: Duration = Duration::from_millis(1000 / 24);
+pub const BUTTON_DEBOUNCE_TIME: Duration = Duration::from_millis(1000 / (24 / 2));
 
 /// Adapter. Talks to buttons.
 pub struct Adapter {
@@ -66,8 +66,8 @@ impl super::Adapter for Adapter {
                 let callback_state = state.clone();
                 input_a
                     .set_async_interrupt(gpio::Trigger::Both, move |level_a| {
-                        let level_b = callback_state.get_mut().pins[1].read();
                         if callback_state.update_state(0) {
+                            let level_b = callback_state.get_mut().pins[1].read();
                             callback(if level_a == level_b {
                                 Event::Down
                             } else {
@@ -104,12 +104,7 @@ impl ButtonState {
     /// True is returned if the state was updated, false if it wasn't because of the debounce
     /// timer.
     fn update_state(&self, state: u8) -> bool {
-        let result = self.get_mut().update_state(state);
-
-        // TODO: remove after debugging
-        debug!("Update button state: {} (debounced: {})", state, !result);
-
-        result
+        self.get_mut().update_state(state)
     }
 }
 
