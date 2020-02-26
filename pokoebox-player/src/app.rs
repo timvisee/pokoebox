@@ -3,6 +3,8 @@ use std::sync::Arc;
 #[cfg(feature = "bluetooth")]
 use pokoebox_bluetooth::manager::Manager as BluetoothManager;
 #[cfg(feature = "rpi")]
+use pokoebox_rpi::button::Interface as ButtonInterface;
+#[cfg(feature = "rpi")]
 use pokoebox_rpi::led::Interface as LedInterface;
 
 use crate::action::ActionRuntime;
@@ -43,9 +45,13 @@ pub struct Core {
     #[cfg(feature = "bluetooth")]
     pub bluetooth: BluetoothManager,
 
-    /// LED manager.
+    /// LED interface.
     #[cfg(feature = "rpi")]
-    pub led: LedInterface,
+    pub leds: LedInterface,
+
+    /// Button interface.
+    #[cfg(feature = "rpi")]
+    pub buttons: ButtonInterface,
 
     pub pages: PageController,
 }
@@ -59,7 +65,10 @@ impl Core {
             bluetooth: BluetoothManager::new().expect("failed to initialize bluetooth manager"),
             // TODO: propagate error
             #[cfg(feature = "rpi")]
-            led: LedInterface::new().expect("failed to initialize LED interface"),
+            leds: LedInterface::new().expect("failed to initialize LED interface"),
+            // TODO: propagate error
+            #[cfg(feature = "rpi")]
+            buttons: ButtonInterface::new().expect("failed to initialize button interface"),
             pages: PageController::new(),
         })
     }

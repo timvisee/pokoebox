@@ -108,7 +108,7 @@ fn handle_bluetooth_events(
                     #[cfg(feature = "rpi")]
                     {
                         use pokoebox_rpi::led::Led;
-                        if let Err(err) = core.led.led_set(Led::Action1, true) {
+                        if let Err(err) = core.leds.led_set(Led::Action1, true) {
                             error!("Failed to set bluetooth status LED: {:?}", err);
                         }
                     }
@@ -121,7 +121,7 @@ fn handle_bluetooth_events(
                     #[cfg(feature = "rpi")]
                     {
                         use pokoebox_rpi::led::Led;
-                        if let Err(err) = core.led.led_set(Led::Action1, false) {
+                        if let Err(err) = core.leds.led_set(Led::Action1, false) {
                             error!("Failed to set bluetooth status LED: {:?}", err);
                         }
                     }
