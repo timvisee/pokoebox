@@ -1,23 +1,23 @@
 use super::communicator::{self, Communicator};
 use super::{Led, LedCmd};
 
-/// LED controller.
-pub struct Controller {
+/// LED interface.
+pub struct Interface {
     /// Communicator to send LED comamnds through.
     communicator: Box<dyn Communicator>,
 }
 
-impl Controller {
+impl Interface {
     // TODO: propagate errors
     pub fn new() -> Result<Self, Error> {
-        let controller = Self {
+        let interface = Self {
             communicator: communicator::select_communicator().map_err(Error::Communicator)?,
         };
 
         // Reset LEDs
-        controller.led_reset()?;
+        interface.led_reset()?;
 
-        Ok(controller)
+        Ok(interface)
     }
 
     // TODO: propagate errors

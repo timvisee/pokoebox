@@ -1,7 +1,7 @@
 mod communicator;
-mod controller;
+mod interface;
 
-pub use controller::Controller;
+pub use interface::Interface;
 
 /// List of available LEDs to control.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
