@@ -55,7 +55,7 @@ impl super::Communicator for Communicator {
 fn led_cmd_to_protocol(cmd: LedCmd) -> String {
     match cmd {
         LedCmd::LedReset => "led reset".into(),
-        LedCmd::LedSet(led, level) => format!("led set {} {}", led as u8, level as u8),
+        LedCmd::LedSet(led, level) => format!("led {} {}", led as u8, level as u8),
     }
 }
 
