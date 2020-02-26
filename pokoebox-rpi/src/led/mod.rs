@@ -29,13 +29,3 @@ pub enum LedCmd {
     LedReset,
     LedSet(Led, bool),
 }
-
-impl LedCmd {
-    /// Get protocol command for current controller command.
-    fn to_protocol_cmd(self) -> String {
-        match self {
-            Self::LedReset => "led reset".into(),
-            Self::LedSet(led, level) => format!("led set {} {}", led as u8, level as u8),
-        }
-    }
-}
