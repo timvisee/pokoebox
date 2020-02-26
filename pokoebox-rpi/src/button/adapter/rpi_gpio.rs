@@ -49,12 +49,12 @@ impl super::Adapter for Adapter {
                 input
                     .set_async_interrupt(gpio::Trigger::RisingEdge, move |level| match level {
                         gpio::Level::High => {
-                            if callback_state.update_state(1) {
+                            if callback_state.update_debounced(1) {
                                 callback(Event::Press);
                             }
                         }
                         gpio::Level::Low => {
-                            callback_state.update_state(0);
+                            callback_state.update_debounced(0);
                         }
                     })
                     .map_err(|_| Error::Adapter)?;
@@ -63,17 +63,23 @@ impl super::Adapter for Adapter {
             ButtonConfig::Rotary(pin_a, pin_b) => {
                 let mut input_a = self.allocate_input(pin_a, true)?;
                 let input_b = self.allocate_input(pin_b, true)?;
+                state.get_mut().state = input_a.is_high() as u8;
                 let callback_state = state.clone();
                 input_a
-                    .set_async_interrupt(gpio::Trigger::Both, move |level_a| {
-                        if callback_state.update_state(0) {
-                            let level_b = callback_state.get_mut().pins[1].read();
+                    .set_async_interrupt(gpio::Trigger::Both, move |_| {
+                        let mut state = callback_state.get_mut();
+                        let level_a = state.pins[0].is_high() as u8;
+                        let level_b = state.pins[1].is_high() as u8;
+
+                        if state.state != level_a && state.update_debounced(level_a) {
                             callback(if level_a == level_b {
                                 Event::Down
                             } else {
                                 Event::Up
                             });
                         }
+
+                        state.state = level_a;
                     })
                     .map_err(|_| Error::Adapter)?;
                 state.get_mut().pins.append(&mut vec![input_a, input_b]);
@@ -103,8 +109,8 @@ impl ButtonState {
     /// This method updates the internal `state`, but only if the button debounce timer has passed.
     /// True is returned if the state was updated, false if it wasn't because of the debounce
     /// timer.
-    fn update_state(&self, state: u8) -> bool {
-        self.get_mut().update_state(state)
+    fn update_debounced(&self, state: u8) -> bool {
+        self.get_mut().update_debounced(state)
     }
 }
 
@@ -126,7 +132,7 @@ impl InnerButtonState {
     /// This method updates the internal `state`, but only if the button debounce timer has passed.
     /// True is returned if the state was updated, false if it wasn't because of the debounce
     /// timer.
-    fn update_state(&mut self, state: u8) -> bool {
+    fn update_debounced(&mut self, state: u8) -> bool {
         // Button debounce timer must have passed
         if self.last.elapsed() < BUTTON_DEBOUNCE_TIME {
             return false;
