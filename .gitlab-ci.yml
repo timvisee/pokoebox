@@ -59,8 +59,7 @@ check-old:
 # Build using Rust stable
 build-x86_64-linux-gnu:
   stage: build
-  needs:
-    - check-stable
+  needs: []
   script:
     # Build
     - (cd ./pokoebox-player && cargo build --target=$RUST_TARGET --release --verbose)
@@ -103,8 +102,7 @@ build-x86_64-linux-gnu:
 # Build for Raspbarry Pi
 build-armv7-linux-gnueabihf:
   stage: build
-  needs:
-    - check-stable
+  needs: []
   variables:
     RUST_TARGET: armv7-unknown-linux-gnueabihf
     CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER: arm-linux-gnueabihf-gcc
