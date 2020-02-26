@@ -9,6 +9,8 @@ lazy_static! {
     pub static ref BUTTONS: HashMap<Button, ButtonConfig> = {
         let mut m = HashMap::new();
         m.insert(Button::Action1, ButtonConfig::Push(27));
+        m.insert(Button::Action2, ButtonConfig::Push(17));
+        m.insert(Button::Volume, ButtonConfig::Rotary(23, 24));
         m
     };
 }
@@ -28,6 +30,12 @@ pub enum Button {
 
     /// Maion action button 4.
     Action4,
+
+    /// Volume rotary encoder.
+    Volume,
+
+    /// Selection rotary encoder.
+    Select,
 
     /// LED in power button.
     Power,
