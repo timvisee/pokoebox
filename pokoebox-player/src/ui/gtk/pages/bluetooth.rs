@@ -100,13 +100,31 @@ fn handle_bluetooth_events(
             Err(mpsc::TryRecvError::Empty) => return glib::Continue(true),
             Err(mpsc::TryRecvError::Disconnected) => return glib::Continue(false),
             Ok(event) => match event {
-                Event::Discovering(true) => {
+                Event::Discoverable(true) => {
                     btn_discoverable.set_label("Discoverable...");
                     btn_discoverable.set_sensitive(false);
+
+                    // TODO: move this somewhere else
+                    #[cfg(feature = "rpi")]
+                    {
+                        use pokoebox_rpi::led::Led;
+                        if let Err(err) = core.led.led_set(Led::Action1, true) {
+                            error!("Failed to set bluetooth status LED: {:?}", err);
+                        }
+                    }
                 }
-                Event::Discovering(false) => {
+                Event::Discoverable(false) => {
                     btn_discoverable.set_label("Connect");
                     btn_discoverable.set_sensitive(true);
+
+                    // TODO: move this somewhere else
+                    #[cfg(feature = "rpi")]
+                    {
+                        use pokoebox_rpi::led::Led;
+                        if let Err(err) = core.led.led_set(Led::Action1, false) {
+                            error!("Failed to set bluetooth status LED: {:?}", err);
+                        }
+                    }
                 }
                 Event::DeviceConnected(_, devices)
                 | Event::DeviceDisconnected(_, devices)

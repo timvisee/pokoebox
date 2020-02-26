@@ -135,7 +135,7 @@ pub enum Event {
     Devices(DeviceList),
     DeviceConnected(Address, DeviceList),
     DeviceDisconnected(Address, DeviceList),
-    Discovering(bool),
+    Discoverable(bool),
     Power(bool),
 }
 
@@ -154,7 +154,7 @@ fn process_bluetooth_event(
         BlueZEvent::NewSettings { settings, .. } => {
             // TODO: only invoke if this specific setting changed
             events.push(Event::Power(settings.contains(ControllerSetting::Powered)));
-            events.push(Event::Discovering(
+            events.push(Event::Discoverable(
                 settings.contains(ControllerSetting::Discoverable),
             ));
         }
@@ -202,7 +202,7 @@ fn process_commands(
                 driver
                     .set_discoverable(discoverable)
                     .expect("failed to make bluetooth device discoverable");
-                let _ = events_tx.send(Event::Discovering(discoverable));
+                let _ = events_tx.send(Event::Discoverable(discoverable));
             }
             DriverCmd::EmitState => {
                 // Get state, update device list
@@ -217,7 +217,7 @@ fn process_commands(
                 let _ = events_tx.send(Event::Power(
                     info.current_settings.contains(ControllerSetting::Powered),
                 ));
-                let _ = events_tx.send(Event::Discovering(
+                let _ = events_tx.send(Event::Discoverable(
                     info.current_settings
                         .contains(ControllerSetting::Discoverable),
                 ));
