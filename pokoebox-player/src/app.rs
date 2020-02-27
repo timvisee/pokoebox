@@ -73,7 +73,8 @@ impl Core {
             // TODO: propagate error
             #[cfg(feature = "rpi")]
             buttons: ButtonInterface::new().expect("failed to initialize button interface"),
-            effecter: SoundEffecter::new(),
+            // TODO: propagate error
+            effecter: SoundEffecter::new().expect("failed to initialize sound effecter"),
             pages: PageController::new(),
         })
     }

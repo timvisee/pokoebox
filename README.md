@@ -19,6 +19,8 @@ Required libraries:
     * Apt: `sudo apt install libgtk-3-dev`
 * `at-spi2-core` (only with `rpi` feature)
     * Apt: `sudo apt install at-spi2-core`
+* `libasound2-dev`:
+    * Apt: `sudo apt install libasound2-dev`
 
 ## Build
 ### Compile features

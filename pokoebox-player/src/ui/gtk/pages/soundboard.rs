@@ -59,27 +59,23 @@ impl Page for Soundboard {
 
         // Add some buttons
         let btn_kick = gtk::Button::new_with_label("Kick 30Hz");
-        let closure_core = core.clone();
-        btn_kick.connect_clicked(move |_| closure_core.effecter.play(Sound::Kick));
+        btn_kick.connect_clicked(play(core.clone(), Sound::Kick));
         btns.attach(&btn_kick, 0, 0, 1, 1);
 
         let btn_guitar = gtk::Button::new_with_label("Guitar");
-        let closure_core = core.clone();
-        btn_guitar.connect_clicked(move |_| closure_core.effecter.play(Sound::Guitar));
+        btn_guitar.connect_clicked(play(core.clone(), Sound::Guitar));
         btns.attach(&btn_guitar, 1, 0, 1, 1);
 
         let btn_xp = gtk::Button::new_with_label("XP");
-        let closure_core = core.clone();
-        btn_xp.connect_clicked(move |_| closure_core.effecter.play(Sound::Xp));
+        btn_xp.connect_clicked(play(core.clone(), Sound::Xp));
         btns.attach(&btn_xp, 2, 0, 1, 1);
 
         let btn_jbl = gtk::Button::new_with_label("JBL");
-        let closure_core = core.clone();
-        btn_jbl.connect_clicked(move |_| closure_core.effecter.play(Sound::Jbl));
+        btn_jbl.connect_clicked(play(core.clone(), Sound::Jbl));
         btns.attach(&btn_jbl, 0, 1, 1, 1);
 
         let btn_car = gtk::Button::new_with_label("Mustang");
-        btn_car.connect_clicked(move |_| core.effecter.play(Sound::MustangStart));
+        btn_car.connect_clicked(play(core.clone(), Sound::MustangStart));
         btns.attach(&btn_car, 1, 1, 1, 1);
 
         let btn_f = gtk::Button::new_with_label("");
@@ -89,5 +85,14 @@ impl Page for Soundboard {
 
     fn gtk_widget(&self) -> &gtk::Grid {
         &self.container
+    }
+}
+
+/// Helper to easily play sounds from buttons.
+fn play(core: Arc<Core>, sound: Sound) -> impl Fn(&gtk::Button) + 'static {
+    move |_| {
+        if let Err(err) = core.effecter.play(sound) {
+            error!("Failed to play soundboard sound: {:?}", err);
+        }
     }
 }
