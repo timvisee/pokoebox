@@ -34,7 +34,7 @@ impl Adapter {
 
 impl super::Adapter for Adapter {
     fn setup_button(
-        &mut self,
+        &self,
         button: ButtonConfig,
         mut callback: Box<dyn FnMut(Event) + Send + 'static>,
     ) -> Result<(), Error> {

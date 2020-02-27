@@ -1,4 +1,5 @@
 use super::adapter::{self, Adapter};
+use super::{ButtonConfig, Event};
 
 /// Button interface.
 pub struct Interface {
@@ -9,31 +10,19 @@ pub struct Interface {
 impl Interface {
     /// Construct new interface.
     pub fn new() -> Result<Self, Error> {
-        let mut interface = Self {
+        Ok(Self {
             adapter: adapter::select_adapter().map_err(Error::Adapter)?,
-        };
-
-        // Set-up configured buttons
-        interface.setup_buttons()?;
-
-        Ok(interface)
+        })
     }
 
-    /// Set up all configured buttons.
-    fn setup_buttons(&mut self) -> Result<(), Error> {
-        // Loop through button list, set-up each one
-        for (button, config) in super::BUTTONS.iter() {
-            self.adapter
-                .setup_button(
-                    *config,
-                    Box::new(move |event| {
-                        info!("Button event: {:?} -> {:?}", button, event);
-                    }),
-                )
-                .map_err(Error::Adapter)?;
-        }
-
-        Ok(())
+    /// Set up the given button configuration.
+    pub fn setup_button<C>(&self, config: ButtonConfig, callback: C) -> Result<(), Error>
+    where
+        C: FnMut(Event) + Send + 'static,
+    {
+        self.adapter
+            .setup_button(config, Box::new(callback))
+            .map_err(Error::Adapter)
     }
 }
 

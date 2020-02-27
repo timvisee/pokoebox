@@ -23,6 +23,7 @@ impl App {
     pub fn new() -> Result<Self> {
         // Init app core
         let core = Arc::new(Core::new()?);
+        Core::setup_buttons(core.clone());
 
         Ok(Self {
             ui: Ui::new(core.clone())?,
@@ -77,5 +78,24 @@ impl Core {
             effecter: SoundEffecter::new().expect("failed to initialize sound effecter"),
             pages: PageController::new(),
         })
+    }
+
+    fn setup_buttons(core: Arc<Core>) -> std::result::Result<(), pokoebox_rpi::button::Error> {
+        // TODO: move imports somewhere else
+        use crate::action::actions::GotoPageAction;
+        use crate::pages::PageType;
+        use pokoebox_rpi::button::ButtonConfig;
+
+        // Set up buttons
+        let closure_core = core.clone();
+        core.buttons.setup_button(ButtonConfig::Push(27), |_| {
+            // let _ = closure_core.actions.invoke(
+            //     GotoPageAction::new(PageType::Launchpad),
+            //     closure_core.clone(),
+            // );
+            info!("Action1 button pressed!");
+        })?;
+
+        Ok(())
     }
 }
