@@ -2,6 +2,7 @@
 pub mod bluetooth;
 pub mod launchpad;
 pub mod player;
+pub mod soundboard;
 pub mod test;
 pub mod volume;
 
@@ -11,5 +12,6 @@ pub use super::page;
 pub use bluetooth::Bluetooth;
 pub use launchpad::Launchpad;
 pub use player::Player;
+pub use soundboard::Soundboard;
 pub use test::Test;
 pub use volume::Volume;

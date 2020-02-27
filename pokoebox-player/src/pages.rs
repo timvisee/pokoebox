@@ -9,6 +9,7 @@ pub enum PageType {
     Volume,
     #[cfg(feature = "bluetooth")]
     Bluetooth,
+    Soundboard,
     Test,
 }
 

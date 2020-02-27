@@ -67,6 +67,7 @@ impl Page for Launchpad {
                 .invoke(GotoPageAction::new(PageType::Player), closure_core.clone());
         });
         btns.attach(&btn_play, 0, 0, 1, 1);
+
         let btn_bluetooth = gtk::Button::new_with_label("Bluetooth");
         let closure_core = core.clone();
         #[cfg(feature = "bluetooth")]
@@ -80,15 +81,26 @@ impl Page for Launchpad {
         #[cfg(not(feature = "bluetooth"))]
         btn_bluetooth.set_sensitive(false);
         btns.attach(&btn_bluetooth, 1, 0, 1, 1);
-        let btn_c = gtk::Button::new_with_label("");
-        btn_c.set_sensitive(false);
-        btns.attach(&btn_c, 2, 0, 1, 1);
+
+        let btn_soundboard = gtk::Button::new_with_label("Soundboard");
+        let closure_core = core.clone();
+        btn_soundboard.connect_clicked(move |_| {
+            // TODO: handle result
+            let _ = closure_core.actions.invoke(
+                GotoPageAction::new(PageType::Soundboard),
+                closure_core.clone(),
+            );
+        });
+        btns.attach(&btn_soundboard, 2, 0, 1, 1);
+
         let btn_d = gtk::Button::new_with_label("");
         btn_d.set_sensitive(false);
         btns.attach(&btn_d, 0, 1, 1, 1);
+
         let btn_e = gtk::Button::new_with_label("");
         btn_e.set_sensitive(false);
         btns.attach(&btn_e, 1, 1, 1, 1);
+
         let btn_settings = gtk::Button::new_with_label("Settings");
         let closure_core = core;
         btn_settings.connect_clicked(move |_| {

@@ -53,6 +53,7 @@ impl PageManager {
             PageType::Bluetooth => Box::new(pages::Bluetooth::new(core)),
             PageType::Launchpad => Box::new(pages::Launchpad::new(core)),
             PageType::Player => Box::new(pages::Player::new(core)),
+            PageType::Soundboard => Box::new(pages::Soundboard::new(core)),
             PageType::Test => Box::new(pages::Test::new(core)),
             PageType::Volume => Box::new(pages::Volume::new(core)),
         };
