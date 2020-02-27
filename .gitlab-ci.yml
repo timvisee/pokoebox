@@ -23,7 +23,7 @@ cache:
 before_script:
   - apt-get update
   - apt-get upgrade -yqq
-  - apt-get install -y --no-install-recommends libgtk-3-dev
+  - apt-get install -y --no-install-recommends libgtk-3-dev libasound2-dev
   - |
     rustup install $RUST_VERSION
     rustup default $RUST_VERSION
@@ -113,7 +113,7 @@ build-armv7-linux-gnueabihf:
     - dpkg --add-architecture armhf
     - apt-get update
     - apt-get upgrade -yqq
-    - apt-get install -y --no-install-recommends gcc-arm-linux-gnueabihf libgtk-3-dev:armhf
+    - apt-get install -y --no-install-recommends gcc-arm-linux-gnueabihf libgtk-3-dev:armhf libasound2-dev:armhf
 
     # Build
     - (cd ./pokoebox-player && cargo build --target=$RUST_TARGET --release --verbose)
