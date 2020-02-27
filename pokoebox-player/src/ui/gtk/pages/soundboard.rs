@@ -1,6 +1,8 @@
+use std::io::Cursor;
 use std::sync::Arc;
 
 use gtk::prelude::*;
+use rodio::Source;
 
 use crate::app::Core;
 use crate::pages::PageType;
@@ -65,17 +67,17 @@ impl Page for Soundboard {
         btn_guitar.connect_clicked(|_| play(Sound::Guitar));
         btns.attach(&btn_guitar, 1, 0, 1, 1);
 
-        let btn_c = gtk::Button::new_with_label("");
-        btn_c.set_sensitive(false);
-        btns.attach(&btn_c, 2, 0, 1, 1);
+        let btn_xp = gtk::Button::new_with_label("XP");
+        btn_xp.connect_clicked(|_| play(Sound::Xp));
+        btns.attach(&btn_xp, 2, 0, 1, 1);
 
-        let btn_d = gtk::Button::new_with_label("");
-        btn_d.set_sensitive(false);
-        btns.attach(&btn_d, 0, 1, 1, 1);
+        let btn_jbl = gtk::Button::new_with_label("JBL");
+        btn_jbl.connect_clicked(|_| play(Sound::Jbl));
+        btns.attach(&btn_jbl, 0, 1, 1, 1);
 
-        let btn_e = gtk::Button::new_with_label("");
-        btn_e.set_sensitive(false);
-        btns.attach(&btn_e, 1, 1, 1, 1);
+        let btn_car = gtk::Button::new_with_label("Mustang");
+        btn_car.connect_clicked(|_| play(Sound::MustangStart));
+        btns.attach(&btn_car, 1, 1, 1, 1);
 
         let btn_f = gtk::Button::new_with_label("");
         btn_f.set_sensitive(false);
@@ -87,14 +89,14 @@ impl Page for Soundboard {
     }
 }
 
-use rodio::Source;
-use std::io::Cursor;
-
 /// Available sound types.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 enum Sound {
     Kick,
     Guitar,
+    Xp,
+    Jbl,
+    MustangStart,
 }
 
 fn play(sound: Sound) {
@@ -102,6 +104,9 @@ fn play(sound: Sound) {
     let sound: &[u8] = match sound {
         Sound::Kick => include_bytes!("../../../../../res/sounds/kick_30hz.ogg"),
         Sound::Guitar => include_bytes!("../../../../../res/sounds/guitar.ogg"),
+        Sound::Xp => include_bytes!("../../../../../res/sounds/xp.ogg"),
+        Sound::Jbl => include_bytes!("../../../../../res/sounds/jbl.ogg"),
+        Sound::MustangStart => include_bytes!("../../../../../res/sounds/mustang_start_long.ogg"),
     };
 
     // Select output device, create source, play audio
