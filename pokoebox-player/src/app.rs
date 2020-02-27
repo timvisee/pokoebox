@@ -9,6 +9,7 @@ use pokoebox_rpi::led::Interface as LedInterface;
 
 use crate::action::ActionRuntime;
 use crate::result::Result;
+use crate::soundeffecter::SoundEffecter;
 use crate::ui::gtk::Ui;
 
 use super::pages::PageController;
@@ -53,6 +54,9 @@ pub struct Core {
     #[cfg(feature = "rpi")]
     pub buttons: ButtonInterface,
 
+    /// Sound effecter.
+    pub effecter: SoundEffecter,
+
     pub pages: PageController,
 }
 
@@ -69,6 +73,7 @@ impl Core {
             // TODO: propagate error
             #[cfg(feature = "rpi")]
             buttons: ButtonInterface::new().expect("failed to initialize button interface"),
+            effecter: SoundEffecter::new(),
             pages: PageController::new(),
         })
     }

@@ -1,11 +1,10 @@
-use std::io::Cursor;
 use std::sync::Arc;
 
 use gtk::prelude::*;
-use rodio::Source;
 
 use crate::app::Core;
 use crate::pages::PageType;
+use crate::soundeffecter::Sound;
 
 use super::page::Helper;
 use super::page::Page;
@@ -44,7 +43,7 @@ impl Page for Soundboard {
         &PAGE_NAME
     }
 
-    fn build_page(&self, _core: Arc<Core>) {
+    fn build_page(&self, core: Arc<Core>) {
         // Configure the page
         self.container.set_halign(gtk::Align::Center);
         self.container.set_valign(gtk::Align::Center);
@@ -60,23 +59,27 @@ impl Page for Soundboard {
 
         // Add some buttons
         let btn_kick = gtk::Button::new_with_label("Kick 30Hz");
-        btn_kick.connect_clicked(|_| play(Sound::Kick));
+        let closure_core = core.clone();
+        btn_kick.connect_clicked(move |_| closure_core.effecter.play(Sound::Kick));
         btns.attach(&btn_kick, 0, 0, 1, 1);
 
         let btn_guitar = gtk::Button::new_with_label("Guitar");
-        btn_guitar.connect_clicked(|_| play(Sound::Guitar));
+        let closure_core = core.clone();
+        btn_guitar.connect_clicked(move |_| closure_core.effecter.play(Sound::Guitar));
         btns.attach(&btn_guitar, 1, 0, 1, 1);
 
         let btn_xp = gtk::Button::new_with_label("XP");
-        btn_xp.connect_clicked(|_| play(Sound::Xp));
+        let closure_core = core.clone();
+        btn_xp.connect_clicked(move |_| closure_core.effecter.play(Sound::Xp));
         btns.attach(&btn_xp, 2, 0, 1, 1);
 
         let btn_jbl = gtk::Button::new_with_label("JBL");
-        btn_jbl.connect_clicked(|_| play(Sound::Jbl));
+        let closure_core = core.clone();
+        btn_jbl.connect_clicked(move |_| closure_core.effecter.play(Sound::Jbl));
         btns.attach(&btn_jbl, 0, 1, 1, 1);
 
         let btn_car = gtk::Button::new_with_label("Mustang");
-        btn_car.connect_clicked(|_| play(Sound::MustangStart));
+        btn_car.connect_clicked(move |_| core.effecter.play(Sound::MustangStart));
         btns.attach(&btn_car, 1, 1, 1, 1);
 
         let btn_f = gtk::Button::new_with_label("");
@@ -87,30 +90,4 @@ impl Page for Soundboard {
     fn gtk_widget(&self) -> &gtk::Grid {
         &self.container
     }
-}
-
-/// Available sound types.
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
-enum Sound {
-    Kick,
-    Guitar,
-    Xp,
-    Jbl,
-    MustangStart,
-}
-
-fn play(sound: Sound) {
-    // Select sound
-    let sound: &[u8] = match sound {
-        Sound::Kick => include_bytes!("../../../../../res/sounds/kick_30hz.ogg"),
-        Sound::Guitar => include_bytes!("../../../../../res/sounds/guitar.ogg"),
-        Sound::Xp => include_bytes!("../../../../../res/sounds/xp.ogg"),
-        Sound::Jbl => include_bytes!("../../../../../res/sounds/jbl.ogg"),
-        Sound::MustangStart => include_bytes!("../../../../../res/sounds/mustang_start_long.ogg"),
-    };
-
-    // Select output device, create source, play audio
-    let device = rodio::default_output_device().unwrap();
-    let source = rodio::Decoder::new(Cursor::new(sound)).unwrap();
-    rodio::play_raw(&device, source.convert_samples());
 }

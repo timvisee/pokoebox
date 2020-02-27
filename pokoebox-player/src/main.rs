@@ -7,6 +7,7 @@ pub mod error;
 pub mod pages;
 pub mod perif;
 pub mod result;
+pub mod soundeffecter;
 pub mod ui;
 pub mod volume;
 
