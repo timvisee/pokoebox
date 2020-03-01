@@ -20,10 +20,31 @@ where
 {
     /// Send item through pipe.
     pub fn send(&self, item: T) -> Result<(), Error> {
-        let mut out = self.inner.out.lock().expect("failed to obtain pipe lock");
+        // Send through channels and callbacks
+        let result_channels = self.send_channels(item.clone());
+        let result_callbacks = self.send_callbacks(item);
 
-        // Send through all outs, collect indices of disconnected outs and remove them
-        out.iter()
+        match (result_channels, result_callbacks) {
+            (Err(Error::NoReceiver), Err(Error::NoReceiver)) => Err(Error::NoReceiver),
+            #[allow(unreachable_patterns)]
+            (Err(err), Err(Error::NoReceiver))
+            | (Err(Error::NoReceiver), Err(err))
+            | (Err(err), Ok(_))
+            | (Ok(_), Err(err)) => Err(err),
+            (Ok(_), Ok(_)) => Ok(()),
+        }
+    }
+
+    fn send_channels(&self, item: T) -> Result<(), Error> {
+        let mut receivers = self
+            .inner
+            .receivers
+            .lock()
+            .expect("failed to obtain pipe lock");
+
+        // Send through all channels, collect indices of disconnected channels and remove them
+        receivers
+            .iter()
             .enumerate()
             .filter_map(|(i, tx)| {
                 let result = tx.send(item.clone());
@@ -37,10 +58,29 @@ where
             .into_iter()
             .rev()
             .for_each(|i| {
-                out.remove(i);
+                receivers.remove(i);
             });
 
-        if out.is_empty() {
+        if receivers.is_empty() {
+            Err(Error::NoReceiver)
+        } else {
+            Ok(())
+        }
+    }
+
+    fn send_callbacks(&self, item: T) -> Result<(), Error> {
+        let mut callbacks = self
+            .inner
+            .callbacks
+            .lock()
+            .expect("failed to obtain pipe lock");
+
+        // Send through all callbacks
+        for callback in callbacks.iter_mut() {
+            callback(item.clone());
+        }
+
+        if callbacks.is_empty() {
             Err(Error::NoReceiver)
         } else {
             Ok(())
@@ -51,7 +91,7 @@ where
     pub fn listen(&self) -> Receiver<T> {
         let (tx, rx) = mpsc::channel();
         self.inner
-            .out
+            .receivers
             .lock()
             .expect("failed to obtain pipe lock")
             .push(tx);
@@ -60,6 +100,18 @@ where
         info!("Connected new pipe listener!");
 
         rx
+    }
+
+    /// Register a callback.
+    pub fn register_callback<C>(&self, callback: C)
+    where
+        C: FnMut(T) + Send + 'static,
+    {
+        self.inner
+            .callbacks
+            .lock()
+            .expect("failed to obtain pipe lock")
+            .push(Box::new(callback));
     }
 }
 
@@ -80,8 +132,11 @@ where
     T: Clone + Send,
     Self: Send + Sync,
 {
-    /// All channels going out.
-    out: Mutex<Vec<Sender<T>>>,
+    /// All receiving ends of allocated channels.
+    receivers: Mutex<Vec<Sender<T>>>,
+
+    /// Callbacks.
+    callbacks: Mutex<Vec<Box<dyn FnMut(T) + Send>>>,
 }
 
 impl<T> Default for InnerPipe<T>
@@ -91,7 +146,8 @@ where
 {
     fn default() -> Self {
         Self {
-            out: Mutex::new(Vec::new()),
+            receivers: Mutex::new(Vec::new()),
+            callbacks: Mutex::new(Vec::new()),
         }
     }
 }
@@ -99,6 +155,6 @@ where
 /// Pipe error.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Error {
-    /// No connected receiver, event was not sent at all.
+    /// No connected receiver (callback, channel), event was not sent at all.
     NoReceiver,
 }

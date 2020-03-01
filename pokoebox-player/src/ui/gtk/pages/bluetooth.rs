@@ -83,19 +83,9 @@ impl Page for Bluetooth {
         let event_rx = core.bluetooth.events.listen();
         let btn_discoverable = Rc::new(btn_discoverable);
         let store = Rc::new(store);
-        handle_bluetooth_events(
-            &event_rx,
-            core.clone(),
-            btn_discoverable.clone(),
-            store.clone(),
-        );
+        handle_bluetooth_events(&event_rx, btn_discoverable.clone(), store.clone());
         gtk::timeout_add_seconds(1, move || {
-            handle_bluetooth_events(
-                &event_rx,
-                core.clone(),
-                btn_discoverable.clone(),
-                store.clone(),
-            )
+            handle_bluetooth_events(&event_rx, btn_discoverable.clone(), store.clone())
         });
     }
 
@@ -106,7 +96,6 @@ impl Page for Bluetooth {
 
 fn handle_bluetooth_events(
     event_rx: &Receiver<Event>,
-    core: Arc<Core>,
     btn_discoverable: Rc<gtk::Button>,
     store: Rc<gtk::ListStore>,
 ) -> glib::Continue {
@@ -118,28 +107,10 @@ fn handle_bluetooth_events(
                 Event::Discoverable(true) => {
                     btn_discoverable.set_label("Discoverable...");
                     btn_discoverable.set_sensitive(false);
-
-                    // TODO: move this somewhere else
-                    #[cfg(feature = "rpi")]
-                    {
-                        use pokoebox_rpi::led::Led;
-                        if let Err(err) = core.leds.led_set(Led::Action1, true) {
-                            error!("Failed to set bluetooth status LED: {:?}", err);
-                        }
-                    }
                 }
                 Event::Discoverable(false) => {
                     btn_discoverable.set_label("Connect");
                     btn_discoverable.set_sensitive(true);
-
-                    // TODO: move this somewhere else
-                    #[cfg(feature = "rpi")]
-                    {
-                        use pokoebox_rpi::led::Led;
-                        if let Err(err) = core.leds.led_set(Led::Action1, false) {
-                            error!("Failed to set bluetooth status LED: {:?}", err);
-                        }
-                    }
                 }
                 Event::DeviceConnected(_, devices)
                 | Event::DeviceDisconnected(_, devices)
