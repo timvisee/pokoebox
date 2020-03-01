@@ -3,6 +3,7 @@ use std::sync::{
     {Arc, Mutex},
 };
 
+/// Flexible channel-like listener system.
 #[derive(Clone)]
 pub struct Pipe<T>
 where
@@ -17,7 +18,7 @@ where
     T: Clone + Send,
     Self: Send + Sync,
 {
-    /// Send given item through pipe.
+    /// Send item through pipe.
     pub fn send(&self, item: T) -> Result<(), Error> {
         let mut out = self.inner.out.lock().expect("failed to obtain pipe lock");
 
@@ -46,7 +47,7 @@ where
         }
     }
 
-    /// Register new listener.
+    /// Allocate new listener.
     pub fn listen(&self) -> Receiver<T> {
         let (tx, rx) = mpsc::channel();
         self.inner
@@ -95,8 +96,9 @@ where
     }
 }
 
+/// Pipe error.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Error {
-    /// There is no connected receiver.
+    /// No connected receiver, event was not sent at all.
     NoReceiver,
 }
