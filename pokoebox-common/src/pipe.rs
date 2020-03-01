@@ -19,23 +19,20 @@ where
     Self: Send + Sync,
 {
     /// Send item through pipe.
-    pub fn send(&self, item: T) -> Result<(), Error> {
+    ///
+    /// Returns number of receivers this was passed onto.
+    pub fn send(&self, item: T) -> Result<usize, Error> {
         // Send through channels and callbacks
-        let result_channels = self.send_channels(item.clone());
-        let result_callbacks = self.send_callbacks(item);
+        let receivers = self.send_channels(item.clone())? + self.send_callbacks(item)?;
 
-        match (result_channels, result_callbacks) {
-            (Err(Error::NoReceiver), Err(Error::NoReceiver)) => Err(Error::NoReceiver),
-            #[allow(unreachable_patterns)]
-            (Err(err), Err(Error::NoReceiver))
-            | (Err(Error::NoReceiver), Err(err))
-            | (Err(err), Ok(_))
-            | (Ok(_), Err(err)) => Err(err),
-            (Ok(_), Ok(_)) => Ok(()),
+        if receivers > 0 {
+            Ok(receivers)
+        } else {
+            Err(Error::NoReceiver)
         }
     }
 
-    fn send_channels(&self, item: T) -> Result<(), Error> {
+    fn send_channels(&self, item: T) -> Result<usize, Error> {
         let mut receivers = self
             .inner
             .receivers
@@ -61,14 +58,10 @@ where
                 receivers.remove(i);
             });
 
-        if receivers.is_empty() {
-            Err(Error::NoReceiver)
-        } else {
-            Ok(())
-        }
+        Ok(receivers.len())
     }
 
-    fn send_callbacks(&self, item: T) -> Result<(), Error> {
+    fn send_callbacks(&self, item: T) -> Result<usize, Error> {
         let mut callbacks = self
             .inner
             .callbacks
@@ -80,11 +73,7 @@ where
             callback(item.clone());
         }
 
-        if callbacks.is_empty() {
-            Err(Error::NoReceiver)
-        } else {
-            Ok(())
-        }
+        Ok(callbacks.len())
     }
 
     /// Allocate new listener.

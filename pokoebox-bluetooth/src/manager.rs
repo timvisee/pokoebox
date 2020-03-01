@@ -118,7 +118,10 @@ impl Manager {
     /// Poll the state from the bluetooth driver, and emit events for it.
     pub fn emit_state(&self) -> Result<(), ()> {
         // TODO: propagate errors?
-        self.cmds.send(DriverCmd::EmitState).map_err(|_| ())
+        self.cmds
+            .send(DriverCmd::EmitState)
+            .map(|_| ())
+            .map_err(|_| ())
     }
 
     /// Set discoverability of bluetooth controller.
@@ -129,6 +132,7 @@ impl Manager {
         // TODO: propagate errors?
         self.cmds
             .send(DriverCmd::Discoverable(discoverable))
+            .map(|_| ())
             .map_err(|_| ())
     }
 }
