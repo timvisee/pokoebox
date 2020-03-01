@@ -17,7 +17,7 @@ pub struct Ui {
     window: Window,
 
     /// Main app UI.
-    app_ui: App,
+    _app_ui: App,
 }
 
 impl Ui {
@@ -38,8 +38,8 @@ impl Ui {
         debug!("Successfully initialized GTK.");
 
         // Build UI
-        let (window, app_ui) = Self::build_ui(core);
-        let gui = Self { window, app_ui };
+        let (window, _app_ui) = Self::build_ui(core);
+        let gui = Self { window, _app_ui };
 
         // Show window
         info!("Showing master GUI frame...");

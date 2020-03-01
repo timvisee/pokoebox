@@ -1,19 +1,7 @@
 mod adapter;
 mod interface;
 
-use std::collections::HashMap;
-
-pub use interface::Interface;
-
-lazy_static! {
-    pub static ref BUTTONS: HashMap<Button, ButtonConfig> = {
-        let mut m = HashMap::new();
-        m.insert(Button::Action1, ButtonConfig::Push(27));
-        m.insert(Button::Action2, ButtonConfig::Push(17));
-        m.insert(Button::Volume, ButtonConfig::Rotary(23, 24));
-        m
-    };
-}
+pub use interface::{Error, Interface};
 
 /// List of available buttons.
 #[derive(Debug, Hash, Copy, Clone, PartialEq, Eq)]

@@ -1,5 +1,5 @@
 use std::error::Error;
-use std::sync::mpsc::{self, Receiver, Sender};
+use std::sync::mpsc::{self, Receiver};
 use std::thread;
 use std::time::Duration;
 
@@ -7,6 +7,7 @@ use bluez::interface::controller::ControllerSetting;
 use bluez::interface::event::Event as BlueZEvent;
 use bluez::Address;
 use futures::executor::block_on;
+use pokoebox_common::pipe::Pipe;
 use tokio_executor::park::ParkThread;
 use tokio_timer::timer::Timer;
 
@@ -18,17 +19,16 @@ use crate::util;
 ///
 /// Spawns a background worker thread to manage a bluetooth controller.
 pub struct Manager {
-    // TODO: create multi receiver/listener?
-    pub events: Receiver<Event>,
-    cmds: Sender<DriverCmd>,
+    pub events: Pipe<Event>,
+    cmds: Pipe<DriverCmd>,
 }
 
 impl Manager {
     pub fn new() -> Result<Self, Box<dyn Error>> {
-        let (event_rx, cmd_tx) = Self::spawn_worker();
+        let (pipe_event, pipe_cmd) = Self::spawn_worker();
         let manager = Self {
-            events: event_rx,
-            cmds: cmd_tx,
+            events: pipe_event,
+            cmds: pipe_cmd,
         };
 
         // Poll and emit bluetooth driver state
@@ -40,22 +40,25 @@ impl Manager {
     }
 
     /// Spawn single worker thread with bluetooth controller
-    fn spawn_worker() -> (Receiver<Event>, Sender<DriverCmd>) {
+    fn spawn_worker() -> (Pipe<Event>, Pipe<DriverCmd>) {
         // Channel for bluetooth events, driver commands
-        let (event_tx, event_rx) = mpsc::channel();
-        let (cmd_tx, cmd_rx) = mpsc::channel();
+        let event_pipe = Pipe::default();
+        let cmd_pipe = Pipe::default();
 
-        thread::spawn(|| {
+        let closure_event_pipe = event_pipe.clone();
+        let closure_cmd_pipe = cmd_pipe.clone();
+        thread::spawn(move || {
             // TODO: propagate error
-            Self::process_loop(event_tx, cmd_rx).expect("Bluetooth controller error");
+            Self::process_loop(closure_event_pipe, closure_cmd_pipe)
+                .expect("Bluetooth controller error");
         });
 
-        (event_rx, cmd_tx)
+        (event_pipe, cmd_pipe)
     }
 
     fn process_loop(
-        event_tx: Sender<Event>,
-        cmd_rx: Receiver<DriverCmd>,
+        pipe_event: Pipe<Event>,
+        pipe_cmd: Pipe<DriverCmd>,
     ) -> Result<(), Box<dyn Error>> {
         // Set up bluetooth controller
         let mut driver = Driver::new()?;
@@ -89,6 +92,9 @@ impl Manager {
             timer_rx.recv().expect("failed to set-up timer thread")
         };
 
+        // Allocate command listener
+        let cmd_rx = pipe_cmd.listen();
+
         loop {
             // Process bluetooth events with timeout
             // TODO: increase timeout if no events/commands for a while
@@ -98,12 +104,12 @@ impl Manager {
                 process_bluetooth_event(
                     response.expect("failed to process bluetooth"),
                     &mut devices,
-                    &event_tx,
+                    &pipe_event,
                 );
             }
 
             // Process commands
-            process_commands(&cmd_rx, &event_tx, &mut driver, &mut devices);
+            process_commands(&cmd_rx, &pipe_event, &mut driver, &mut devices);
 
             // TODO: break if bluetooth manager was dropped
         }
@@ -143,7 +149,7 @@ pub enum Event {
 fn process_bluetooth_event(
     response: bluez::interface::response::Response,
     devices: &mut DeviceList,
-    event_tx: &Sender<Event>,
+    pipe_event: &Pipe<Event>,
 ) {
     // TODO: remove this debug print
     eprintln!(">>> EVENT: {:?}", &response.event);
@@ -185,14 +191,14 @@ fn process_bluetooth_event(
         _ => {}
     };
     for event in events {
-        event_tx.send(event).unwrap();
+        pipe_event.send(event).unwrap();
     }
 }
 
 #[inline]
 fn process_commands(
     cmd_rx: &Receiver<DriverCmd>,
-    events_tx: &Sender<Event>,
+    pipe_event: &Pipe<Event>,
     driver: &mut Driver,
     devices: &mut DeviceList,
 ) {
@@ -202,7 +208,7 @@ fn process_commands(
                 driver
                     .set_discoverable(discoverable)
                     .expect("failed to make bluetooth device discoverable");
-                let _ = events_tx.send(Event::Discoverable(discoverable));
+                let _ = pipe_event.send(Event::Discoverable(discoverable));
             }
             DriverCmd::EmitState => {
                 // Get state, update device list
@@ -214,14 +220,14 @@ fn process_commands(
                 }
 
                 // Emit events
-                let _ = events_tx.send(Event::Power(
+                let _ = pipe_event.send(Event::Power(
                     info.current_settings.contains(ControllerSetting::Powered),
                 ));
-                let _ = events_tx.send(Event::Discoverable(
+                let _ = pipe_event.send(Event::Discoverable(
                     info.current_settings
                         .contains(ControllerSetting::Discoverable),
                 ));
-                let _ = events_tx.send(Event::Devices(devices.clone()));
+                let _ = pipe_event.send(Event::Devices(devices.clone()));
             }
         }
     }

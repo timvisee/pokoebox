@@ -1,7 +1,7 @@
 use super::{Error, LedCmd};
 
 /// A generic adapter to control LEDs.
-pub trait Adapter {
+pub trait Adapter: Send + Sync {
     /// Send command to remote controller.
     fn send_cmd(&self, cmd: LedCmd) -> Result<(), Error>;
 }

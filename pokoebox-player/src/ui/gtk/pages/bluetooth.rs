@@ -1,5 +1,8 @@
 use std::rc::Rc;
-use std::sync::{mpsc, Arc};
+use std::sync::{
+    mpsc::{self, Receiver},
+    Arc,
+};
 
 use gtk::prelude::*;
 use pokoebox_bluetooth::device::DeviceList;
@@ -77,11 +80,22 @@ impl Page for Bluetooth {
 
         // Handle bluetooth manager events
         // TODO: find better way to handle events
+        let event_rx = core.bluetooth.events.listen();
         let btn_discoverable = Rc::new(btn_discoverable);
         let store = Rc::new(store);
-        handle_bluetooth_events(core.clone(), btn_discoverable.clone(), store.clone());
+        handle_bluetooth_events(
+            &event_rx,
+            core.clone(),
+            btn_discoverable.clone(),
+            store.clone(),
+        );
         gtk::timeout_add_seconds(1, move || {
-            handle_bluetooth_events(core.clone(), btn_discoverable.clone(), store.clone())
+            handle_bluetooth_events(
+                &event_rx,
+                core.clone(),
+                btn_discoverable.clone(),
+                store.clone(),
+            )
         });
     }
 
@@ -91,12 +105,13 @@ impl Page for Bluetooth {
 }
 
 fn handle_bluetooth_events(
+    event_rx: &Receiver<Event>,
     core: Arc<Core>,
     btn_discoverable: Rc<gtk::Button>,
     store: Rc<gtk::ListStore>,
 ) -> glib::Continue {
     loop {
-        match core.bluetooth.events.try_recv() {
+        match event_rx.try_recv() {
             Err(mpsc::TryRecvError::Empty) => return glib::Continue(true),
             Err(mpsc::TryRecvError::Disconnected) => return glib::Continue(false),
             Ok(event) => match event {
