@@ -25,6 +25,8 @@ impl App {
     pub fn new() -> Result<Self> {
         // Init app core
         let core = Arc::new(Core::new()?);
+
+        #[cfg(feature = "rpi")]
         Core::setup_buttons(core.clone()).expect("Failed to set-up app buttons");
 
         Ok(Self {
@@ -82,6 +84,7 @@ impl Core {
         })
     }
 
+    #[cfg(feature = "rpi")]
     fn setup_buttons(core: Arc<Core>) -> std::result::Result<(), pokoebox_rpi::button::Error> {
         // Set up buttons
         let closure_core = core.clone();
