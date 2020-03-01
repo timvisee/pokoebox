@@ -5,7 +5,7 @@ use pokoebox_bluetooth::manager::Manager as BluetoothManager;
 #[cfg(feature = "rpi")]
 use pokoebox_rpi::{
     button::{ButtonConfig, Interface as ButtonInterface},
-    led::Interface as LedInterface,
+    led::{Interface as LedInterface, Led},
 };
 
 use crate::action::{actions::GotoPageAction, ActionRuntime};
@@ -102,20 +102,17 @@ impl Core {
             })?;
 
         // TODO: move somewhere else
-        #[cfg(feature = "rpi")]
-        {
-            use pokoebox_rpi::led::Led;
-            core.clone()
-                .bluetooth
-                .events
-                .register_callback(move |event| {
-                    if let pokoebox_bluetooth::manager::Event::Discoverable(status) = event {
-                        if let Err(err) = core.leds.led_set(Led::Action1, status) {
-                            error!("Failed to set bluetooth status LED: {:?}", err);
-                        }
+        #[cfg(feature = "bluetooth")]
+        core.clone()
+            .bluetooth
+            .events
+            .register_callback(move |event| {
+                if let pokoebox_bluetooth::manager::Event::Discoverable(status) = event {
+                    if let Err(err) = core.leds.led_set(Led::Action1, status) {
+                        error!("Failed to set bluetooth status LED: {:?}", err);
                     }
-                });
-        }
+                }
+            });
 
         Ok(())
     }
