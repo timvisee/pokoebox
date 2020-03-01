@@ -5,6 +5,5 @@ authors = ["Tim Visée <3a4fb3964f@sinenomine.email>"]
 edition = "2018"
 
 [dependencies]
-lazy_static = "1.4"
 log = "0.4"
 rppal = "0.11"

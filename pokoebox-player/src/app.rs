@@ -3,11 +3,13 @@ use std::sync::Arc;
 #[cfg(feature = "bluetooth")]
 use pokoebox_bluetooth::manager::Manager as BluetoothManager;
 #[cfg(feature = "rpi")]
-use pokoebox_rpi::button::Interface as ButtonInterface;
-#[cfg(feature = "rpi")]
-use pokoebox_rpi::led::Interface as LedInterface;
+use pokoebox_rpi::{
+    button::{ButtonConfig, Interface as ButtonInterface},
+    led::Interface as LedInterface,
+};
 
-use crate::action::ActionRuntime;
+use crate::action::{actions::GotoPageAction, ActionRuntime};
+use crate::pages::PageType;
 use crate::result::Result;
 use crate::soundeffecter::SoundEffecter;
 use crate::ui::gtk::Ui;
@@ -23,7 +25,7 @@ impl App {
     pub fn new() -> Result<Self> {
         // Init app core
         let core = Arc::new(Core::new()?);
-        Core::setup_buttons(core.clone());
+        Core::setup_buttons(core.clone()).expect("Failed to set-up app buttons");
 
         Ok(Self {
             ui: Ui::new(core.clone())?,
@@ -81,20 +83,20 @@ impl Core {
     }
 
     fn setup_buttons(core: Arc<Core>) -> std::result::Result<(), pokoebox_rpi::button::Error> {
-        // TODO: move imports somewhere else
-        use crate::action::actions::GotoPageAction;
-        use crate::pages::PageType;
-        use pokoebox_rpi::button::ButtonConfig;
-
         // Set up buttons
         let closure_core = core.clone();
-        core.buttons.setup_button(ButtonConfig::Push(27), |_| {
-            // let _ = closure_core.actions.invoke(
-            //     GotoPageAction::new(PageType::Launchpad),
-            //     closure_core.clone(),
-            // );
-            info!("Action1 button pressed!");
-        })?;
+        core.buttons
+            .setup_button(ButtonConfig::Push(27), move |_| {
+                if let Err(err) = closure_core.actions.invoke(
+                    GotoPageAction::new(PageType::Launchpad),
+                    closure_core.clone(),
+                ) {
+                    error!(
+                        "Failed to goto launchpad page after button press: {:?}",
+                        err
+                    );
+                }
+            })?;
 
         Ok(())
     }

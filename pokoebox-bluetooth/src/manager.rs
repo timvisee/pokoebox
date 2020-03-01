@@ -1,5 +1,5 @@
 use std::error::Error;
-use std::sync::mpsc::{self, Receiver, Sender};
+use std::sync::mpsc::{self, Receiver};
 use std::thread;
 use std::time::Duration;
 
