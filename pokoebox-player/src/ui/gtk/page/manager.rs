@@ -79,6 +79,7 @@ impl PageManager {
         label.set_margin_bottom(TAB_LABEL_MARGIN);
         self.container
             .set_tab_label(page.gtk_widget(), Some(&label));
+        self.container.set_tab_reorderable(page.gtk_widget(), false);
 
         // Update GTK notebook tabs
         self.container.show_all();
