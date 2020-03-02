@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use pokoebox_audio::volume::VolumeManager;
 #[cfg(feature = "bluetooth")]
 use pokoebox_bluetooth::manager::Manager as BluetoothManager;
 #[cfg(feature = "rpi")]
@@ -47,6 +48,9 @@ pub struct Core {
     /// Action manager
     pub actions: ActionRuntime,
 
+    /// Volume manager.
+    pub volume: VolumeManager,
+
     /// Bluetooth manager.
     #[cfg(feature = "bluetooth")]
     pub bluetooth: BluetoothManager,
@@ -69,6 +73,7 @@ impl Core {
     pub fn new() -> Result<Self> {
         Ok(Self {
             actions: ActionRuntime::default(),
+            volume: VolumeManager::new(),
             // TODO: propagate error
             #[cfg(feature = "bluetooth")]
             bluetooth: BluetoothManager::new().expect("failed to initialize bluetooth manager"),

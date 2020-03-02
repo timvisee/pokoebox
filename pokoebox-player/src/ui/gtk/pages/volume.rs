@@ -1,6 +1,10 @@
-use std::sync::Arc;
+use std::sync::{
+    mpsc::{self, Receiver},
+    Arc,
+};
 
 use gtk::{prelude::*, PositionType};
+use pokoebox_audio::volume::{Cmd, ControlHandle, Event};
 
 use crate::app::Core;
 use crate::pages::PageType;
@@ -10,6 +14,8 @@ use super::page::Page;
 
 const PAGE_TYPE: PageType = PageType::Volume;
 const PAGE_NAME: &str = "Volume";
+const SPACING: i32 = 8;
+const CONTROL_SPACING: i32 = 32;
 
 /// Volume page.
 pub struct Volume {
@@ -41,17 +47,80 @@ impl Page for Volume {
         &PAGE_NAME
     }
 
-    fn build_page(&self, _core: Arc<Core>) {
+    fn build_page(&self, core: Arc<Core>) {
+        // Set up page
+        self.container.set_halign(gtk::Align::Center);
+
+        // Query list of controls
+        let mut controls = core
+            .volume
+            .query_controls()
+            .expect("Failed to get list of audio control");
+        controls.truncate(2);
+
+        let gbox = gtk::BoxBuilder::new()
+            .orientation(gtk::Orientation::Horizontal)
+            .spacing(CONTROL_SPACING)
+            .margin(SPACING)
+            .build();
+
         // Add a volume slider
-        let slider = gtk::Scale::new_with_range(gtk::Orientation::Vertical, 0f64, 100f64, 0.1f64);
-        slider.add_mark(50f64, PositionType::Right, Some("M"));
-        slider.set_vexpand(true);
-        slider.set_value_pos(PositionType::Right);
-        slider.set_inverted(true);
-        self.container.add(&slider);
+        for control in controls {
+            let slider = build_volume_control(core.clone(), control);
+            gbox.add(&slider);
+        }
+
+        self.container.add(&gbox);
+
+        // Handle volume manager events
+        // TODO: find better way to handle events
+        let event_rx = core.volume.mixer.events.listen();
+        handle_volume_events(&event_rx);
+        gtk::timeout_add_seconds(1, move || handle_volume_events(&event_rx));
     }
 
     fn gtk_widget(&self) -> &gtk::Grid {
         &self.container
     }
+}
+
+fn handle_volume_events(event_rx: &Receiver<Event>) -> glib::Continue {
+    loop {
+        match event_rx.try_recv() {
+            Err(mpsc::TryRecvError::Empty) => return glib::Continue(true),
+            Err(mpsc::TryRecvError::Disconnected) => return glib::Continue(false),
+            Ok(event) => match event {
+                Event::Volume(_control, volume) => {
+                    println!("Volume change event: {}", volume);
+                }
+                _ => {}
+            },
+        }
+    }
+}
+
+fn build_volume_control(core: Arc<Core>, control: ControlHandle) -> gtk::Box {
+    let gbox = gtk::Box::new(gtk::Orientation::Vertical, SPACING);
+
+    let slider = gtk::Scale::new_with_range(gtk::Orientation::Vertical, 0f64, 100f64, 1f64);
+    slider.add_mark(20f64, PositionType::Right, Some("*"));
+    slider.set_vexpand(true);
+    slider.set_value_pos(PositionType::Bottom);
+    slider.set_inverted(true);
+    let closure_control = control.clone();
+    // TODO: do not clone here, use cow in control?
+    slider.connect_value_changed(move |slider| {
+        if let Err(err) = core.volume.send_cmd(Cmd::SetVolume(
+            closure_control.clone(),
+            slider.get_value() as i64,
+        )) {
+            error!("Failed to set volume: {:?}", err);
+        }
+    });
+    gbox.add(&slider);
+
+    let label = gtk::Label::new(control.name());
+    gbox.add(&label);
+
+    gbox
 }

@@ -1,0 +1,10 @@
+[package]
+name = "pokoebox-audio"
+version = "0.1.0"
+authors = ["Tim Visée <3a4fb3964f@sinenomine.email>"]
+edition = "2018"
+
+[dependencies]
+alsa = "0.3"
+log = "0.4"
+pokoebox-common = { version = "*", path = "../pokoebox-common" }

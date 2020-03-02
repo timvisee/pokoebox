@@ -17,6 +17,7 @@ chrono = "0.4"
 glib = { version = "0.9", features = ["v2_44"] }
 gtk = { version = "0.8", features = ["v3_16"] }
 log = "0.4"
+pokoebox-audio = { version = "*", path = "../pokoebox-audio" }
 pokoebox-bluetooth = { version = "*", path = "../pokoebox-bluetooth", optional = true }
 pokoebox-rpi = { version = "*", path = "../pokoebox-rpi", optional = true }
 rodio = "0.10"

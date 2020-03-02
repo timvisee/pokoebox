@@ -101,15 +101,15 @@ impl Page for Launchpad {
         });
         btns.attach(&btn_soundboard, 1, 1, 1, 1);
 
-        let btn_settings = gtk::Button::new_with_label("Settings");
+        let btn_volume = gtk::Button::new_with_label("Volume");
         let closure_core = core;
-        btn_settings.connect_clicked(move |_| {
+        btn_volume.connect_clicked(move |_| {
             // TODO: handle result
             let _ = closure_core
                 .actions
                 .invoke(GotoPageAction::new(PageType::Volume), closure_core.clone());
         });
-        btns.attach(&btn_settings, 2, 1, 1, 1);
+        btns.attach(&btn_volume, 2, 1, 1, 1);
     }
 
     fn gtk_widget(&self) -> &gtk::Grid {
