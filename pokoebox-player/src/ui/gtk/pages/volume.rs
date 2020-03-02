@@ -48,16 +48,16 @@ impl Page for Volume {
     }
 
     fn build_page(&self, core: Arc<Core>) {
-        // Set up page
-        self.container.set_halign(gtk::Align::Center);
-
         // Query list of controls
         let controls = core
             .volume
             .query_controls()
             .expect("Failed to get list of audio control");
 
+        let scroll_window = gtk::ScrolledWindowBuilder::new().expand(true).build();
+
         let gbox = gtk::BoxBuilder::new()
+            .expand(true)
             .orientation(gtk::Orientation::Horizontal)
             .spacing(CONTROL_SPACING)
             .margin(SPACING)
@@ -69,7 +69,8 @@ impl Page for Volume {
             gbox.add(&slider);
         }
 
-        self.container.add(&gbox);
+        scroll_window.add(&gbox);
+        self.container.add(&scroll_window);
 
         // Handle volume manager events
         // TODO: find better way to handle events

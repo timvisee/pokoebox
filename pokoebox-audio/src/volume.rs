@@ -121,8 +121,6 @@ impl InnerDeviceMixer {
             .filter_map(|e| Selem::new(e))
             .filter(|e| e.has_playback_volume())
             .map(Control::from_selem)
-            // TODO: do not use take here!
-            .take(1)
             .collect();
 
         Self {
@@ -163,7 +161,7 @@ impl InnerDeviceMixer {
                     if let Err(err) = self.events.send(Event::Controls(
                         self.controls
                             .iter()
-                            .map(|c| (c.handle(), c.props().clone()))
+                            .map(|c| (c.handle().clone(), c.props().clone()))
                             .collect(),
                     )) {
                         error!("Failed to send event for control list: {:?}", err);
@@ -194,13 +192,13 @@ impl InnerDeviceMixer {
     fn control(&self, handle: &ControlHandle) -> &Control {
         self.controls
             .iter()
-            .find(|c| c.index == handle.0)
+            .find(|c| c.handle() == handle)
             .expect("invalid control handle, doesn't correspond to real control")
     }
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-pub struct ControlHandle(u32);
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct ControlHandle(u32, Option<String>);
 
 #[derive(Clone, Debug)]
 pub struct ControlProps {
@@ -215,8 +213,8 @@ pub struct ControlProps {
 }
 
 struct Control {
-    /// Control index.
-    index: u32,
+    /// Handle.
+    handle: ControlHandle,
 
     /// Alsa element ID.
     selem: SelemId,
@@ -237,16 +235,18 @@ impl Control {
             range: selem.get_playback_volume_range(),
         };
 
+        let handle = ControlHandle(id.get_index(), id.get_name().map(|n| n.into()).ok());
+
         Self {
-            index: id.get_index(),
+            handle,
             selem: id,
             props,
         }
     }
 
     /// Get handle to this control.
-    pub fn handle(&self) -> ControlHandle {
-        ControlHandle(self.index)
+    pub fn handle(&self) -> &ControlHandle {
+        &self.handle
     }
 
     /// Get control properties.
