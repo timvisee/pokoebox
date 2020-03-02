@@ -20,10 +20,17 @@ pub struct VolumeManager {
 
 impl VolumeManager {
     pub fn new() -> Self {
-        Self {
+        let mut mixer = Self {
             mixer: DeviceMixer::new(),
             control_props: HashMap::new(),
-        }
+        };
+
+        // List Alsa mixer controls
+        mixer.control_props = mixer
+            .query_controls()
+            .expect("Failed to query Alsa mixer controls");
+
+        mixer
     }
 
     /// Send command to the mixer.
@@ -45,6 +52,25 @@ impl VolumeManager {
             }
         }
     }
+
+    /// Find the master control.
+    // TODO: propagate errors here
+    pub fn get_master_control(&self) -> (&ControlHandle, &ControlProps) {
+        self.control_props
+            .iter()
+            .find(|(_, p)| {
+                p.name
+                    .as_ref()
+                    .map(|n| n.contains("Digital"))
+                    .unwrap_or(false)
+            })
+            .unwrap_or_else(|| {
+                self.control_props
+                    .iter()
+                    .next()
+                    .expect("Could not find master volume control")
+            })
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -60,6 +86,9 @@ pub enum Cmd {
 
     /// Set volume of given control.
     SetVolume(ControlHandle, i64),
+
+    /// Adjust volume of given control.
+    AdjustVolume(ControlHandle, i64),
 }
 
 #[derive(Clone, Debug)]
@@ -178,6 +207,15 @@ impl InnerDeviceMixer {
                 }
                 Cmd::SetVolume(control, volume) => {
                     info!("Setting Alsa volume to: {}", volume);
+                    if let Err(err) = self.control(&control).set_volume(&self.mixer, volume) {
+                        error!("Failed to set playback volume: {:?}", err);
+                    } else if let Err(err) = self.events.send(Event::Volume(control, volume)) {
+                        error!("Failed to send event for volume change: {:?}", err);
+                    }
+                }
+                Cmd::AdjustVolume(control, amount) => {
+                    let volume = self.control(&control).get_volume(&self.mixer) + amount;
+                    info!("Adjusting Alsa volume by {} to: {}", amount, volume);
                     if let Err(err) = self.control(&control).set_volume(&self.mixer, volume) {
                         error!("Failed to set playback volume: {:?}", err);
                     } else if let Err(err) = self.events.send(Event::Volume(control, volume)) {

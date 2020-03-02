@@ -5,11 +5,14 @@ use pokoebox_audio::volume::VolumeManager;
 use pokoebox_bluetooth::manager::Manager as BluetoothManager;
 #[cfg(feature = "rpi")]
 use pokoebox_rpi::{
-    button::{ButtonConfig, Interface as ButtonInterface},
+    button::{ButtonConfig, Event as ButtonEvent, Interface as ButtonInterface},
     led::{Interface as LedInterface, Led},
 };
 
-use crate::action::{actions::GotoPageAction, ActionRuntime};
+use crate::action::{
+    actions::{AdjustVolume, GotoPageAction},
+    ActionRuntime,
+};
 use crate::pages::PageType;
 use crate::result::Result;
 use crate::soundeffecter::SoundEffecter;
@@ -103,6 +106,18 @@ impl Core {
                         "Failed to goto launchpad page after button press: {:?}",
                         err
                     );
+                }
+            })?;
+        let closure_core = core.clone();
+        core.buttons
+            .setup_button(ButtonConfig::Rotary(23, 24), move |event| {
+                let action = match event {
+                    ButtonEvent::Up => AdjustVolume::up(),
+                    ButtonEvent::Down => AdjustVolume::down(),
+                    _ => return,
+                };
+                if let Err(err) = closure_core.actions.invoke(action, closure_core.clone()) {
+                    error!("Failed to change volume: {:?}", err);
                 }
             })?;
 
