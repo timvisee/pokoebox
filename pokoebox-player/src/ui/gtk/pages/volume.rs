@@ -91,6 +91,7 @@ fn handle_volume_events(event_rx: &Receiver<Event>) -> glib::Continue {
             Err(mpsc::TryRecvError::Disconnected) => return glib::Continue(false),
             Ok(event) => match event {
                 Event::Volume(_control, volume) => {
+                    // TODO: set volume GUI control value
                     println!("Volume change event: {}", volume);
                 }
                 _ => {}
@@ -100,7 +101,11 @@ fn handle_volume_events(event_rx: &Receiver<Event>) -> glib::Continue {
 }
 
 fn build_volume_control(core: Arc<Core>, control: ControlHandle, props: ControlProps) -> gtk::Box {
-    let gbox = gtk::Box::new(gtk::Orientation::Vertical, SPACING);
+    let gbox = gtk::BoxBuilder::new()
+        .orientation(gtk::Orientation::Vertical)
+        .spacing(SPACING)
+        .width_request(50)
+        .build();
 
     let slider = gtk::Scale::new_with_range(
         gtk::Orientation::Vertical,
@@ -125,7 +130,12 @@ fn build_volume_control(core: Arc<Core>, control: ControlHandle, props: ControlP
     });
     gbox.add(&slider);
 
-    let label = gtk::Label::new(props.name.as_deref());
+    let label = gtk::LabelBuilder::new()
+        .label(props.name.as_deref().unwrap_or("?"))
+        .justify(gtk::Justification::Center)
+        .single_line_mode(false)
+        .wrap(true)
+        .build();
     gbox.add(&label);
 
     gbox
