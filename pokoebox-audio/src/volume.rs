@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::thread;
 
 use alsa::mixer::{Mixer, Selem, SelemChannelId, SelemId};
@@ -10,14 +11,18 @@ const DEFAULT_CHANNEL: SelemChannelId = SelemChannelId::FrontLeft;
 
 /// Volume manager.
 pub struct VolumeManager {
-    // Device mixer.
+    /// Device mixer.
     pub mixer: DeviceMixer,
+
+    /// Control properties.
+    pub control_props: HashMap<ControlHandle, ControlProps>,
 }
 
 impl VolumeManager {
     pub fn new() -> Self {
         Self {
             mixer: DeviceMixer::new(),
+            control_props: HashMap::new(),
         }
     }
 
@@ -27,7 +32,7 @@ impl VolumeManager {
     }
 
     /// Query list of controls, this is blocking.
-    pub fn query_controls(&self) -> Result<Vec<ControlHandle>, PipeError> {
+    pub fn query_controls(&self) -> Result<HashMap<ControlHandle, ControlProps>, PipeError> {
         let event_rx = self.mixer.events.listen();
         self.send_cmd(Cmd::GetControls)?;
         loop {
@@ -59,8 +64,8 @@ pub enum Cmd {
 
 #[derive(Clone, Debug)]
 pub enum Event {
-    /// List of all control handles.
-    Controls(Vec<ControlHandle>),
+    /// List of all control handles and properties.
+    Controls(HashMap<ControlHandle, ControlProps>),
 
     /// Current volume for control.
     Volume(ControlHandle, i64),
@@ -115,7 +120,9 @@ impl InnerDeviceMixer {
             .iter()
             .filter_map(|e| Selem::new(e))
             .filter(|e| e.has_playback_volume())
-            .map(Control::new)
+            .map(Control::from_selem)
+            // TODO: do not use take here!
+            .take(1)
             .collect();
 
         Self {
@@ -154,7 +161,10 @@ impl InnerDeviceMixer {
             match cmd {
                 Cmd::GetControls => {
                     if let Err(err) = self.events.send(Event::Controls(
-                        self.controls.iter().map(Control::handle).collect(),
+                        self.controls
+                            .iter()
+                            .map(|c| (c.handle(), c.props().clone()))
+                            .collect(),
                     )) {
                         error!("Failed to send event for control list: {:?}", err);
                     }
@@ -163,10 +173,7 @@ impl InnerDeviceMixer {
                     todo!("Reset volume");
                 }
                 Cmd::GetVolume(control) => {
-                    let volume = self
-                        .control(&control)
-                        .get_volume(&self.mixer)
-                        .expect("failed to get playback volume");
+                    let volume = self.control(&control).get_volume(&self.mixer);
                     if let Err(err) = self.events.send(Event::Volume(control, volume)) {
                         error!("Failed to send event for volume change: {:?}", err);
                     }
@@ -187,56 +194,64 @@ impl InnerDeviceMixer {
     fn control(&self, handle: &ControlHandle) -> &Control {
         self.controls
             .iter()
-            .find(|c| c.index == handle.index)
+            .find(|c| c.index == handle.0)
             .expect("invalid control handle, doesn't correspond to real control")
     }
 }
 
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+pub struct ControlHandle(u32);
+
 #[derive(Clone, Debug)]
-pub struct ControlHandle {
-    /// Control index.
-    index: u32,
-
+pub struct ControlProps {
     /// Control name.
-    name: Option<String>,
-}
+    pub name: Option<String>,
 
-impl ControlHandle {
-    /// Get control name.
-    pub fn name(&self) -> Option<&str> {
-        self.name.as_deref()
-    }
+    /// The value at initialization.
+    pub init_value: i64,
+
+    /// Control range.
+    pub range: (i64, i64),
 }
 
 struct Control {
     /// Control index.
     index: u32,
 
-    /// Control name.
-    name: Option<String>,
-
     /// Alsa element ID.
     selem: SelemId,
+
+    /// Control properties.
+    props: ControlProps,
 }
 
 impl Control {
     /// Create control from Alsa Selem.
-    pub fn new<'a>(selem: Selem<'a>) -> Self {
-        let selem = selem.get_id();
+    pub fn from_selem<'a>(selem: Selem<'a>) -> Self {
+        let id = selem.get_id();
+        let props = ControlProps {
+            name: id.get_name().ok().map(|n| n.into()),
+            init_value: selem
+                .get_playback_volume(DEFAULT_CHANNEL)
+                .expect("failed to query Alsa control volume"),
+            range: selem.get_playback_volume_range(),
+        };
 
         Self {
-            index: selem.get_index(),
-            name: selem.get_name().ok().map(|n| n.into()),
-            selem,
+            index: id.get_index(),
+            selem: id,
+            props,
         }
     }
 
     /// Get handle to this control.
     pub fn handle(&self) -> ControlHandle {
-        ControlHandle {
-            index: self.index,
-            name: self.name.clone(),
-        }
+        ControlHandle(self.index)
+    }
+
+    /// Get control properties.
+    pub fn props(&self) -> &ControlProps {
+        &self.props
     }
 
     /// Get reference to Alsa Selem.
@@ -248,8 +263,10 @@ impl Control {
     }
 
     /// Get current volume.
-    pub fn get_volume(&self, mixer: &Mixer) -> AlsaResult<i64> {
-        self.selem(mixer).get_playback_volume(DEFAULT_CHANNEL)
+    pub fn get_volume(&self, mixer: &Mixer) -> i64 {
+        self.selem(mixer)
+            .get_playback_volume(DEFAULT_CHANNEL)
+            .expect("failed to set Alsa control volume")
     }
 
     /// Set current volume.

@@ -4,7 +4,7 @@ use std::sync::{
 };
 
 use gtk::{prelude::*, PositionType};
-use pokoebox_audio::volume::{Cmd, ControlHandle, Event};
+use pokoebox_audio::volume::{Cmd, ControlHandle, ControlProps, Event};
 
 use crate::app::Core;
 use crate::pages::PageType;
@@ -52,11 +52,10 @@ impl Page for Volume {
         self.container.set_halign(gtk::Align::Center);
 
         // Query list of controls
-        let mut controls = core
+        let controls = core
             .volume
             .query_controls()
             .expect("Failed to get list of audio control");
-        controls.truncate(2);
 
         let gbox = gtk::BoxBuilder::new()
             .orientation(gtk::Orientation::Horizontal)
@@ -65,8 +64,8 @@ impl Page for Volume {
             .build();
 
         // Add a volume slider
-        for control in controls {
-            let slider = build_volume_control(core.clone(), control);
+        for (control, props) in controls {
+            let slider = build_volume_control(core.clone(), control, props);
             gbox.add(&slider);
         }
 
@@ -99,10 +98,16 @@ fn handle_volume_events(event_rx: &Receiver<Event>) -> glib::Continue {
     }
 }
 
-fn build_volume_control(core: Arc<Core>, control: ControlHandle) -> gtk::Box {
+fn build_volume_control(core: Arc<Core>, control: ControlHandle, props: ControlProps) -> gtk::Box {
     let gbox = gtk::Box::new(gtk::Orientation::Vertical, SPACING);
 
-    let slider = gtk::Scale::new_with_range(gtk::Orientation::Vertical, 0f64, 100f64, 1f64);
+    let slider = gtk::Scale::new_with_range(
+        gtk::Orientation::Vertical,
+        props.range.0 as f64,
+        props.range.1 as f64,
+        1f64,
+    );
+    slider.set_value(props.init_value as f64);
     slider.add_mark(20f64, PositionType::Right, Some("*"));
     slider.set_vexpand(true);
     slider.set_value_pos(PositionType::Bottom);
@@ -119,7 +124,7 @@ fn build_volume_control(core: Arc<Core>, control: ControlHandle) -> gtk::Box {
     });
     gbox.add(&slider);
 
-    let label = gtk::Label::new(control.name());
+    let label = gtk::Label::new(props.name.as_deref());
     gbox.add(&label);
 
     gbox
