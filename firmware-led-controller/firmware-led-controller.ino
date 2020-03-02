@@ -1,7 +1,7 @@
 #include <Wire.h>
 
 const int I2C_ADDR = 8;
-const int LED_PINS [] = { 8, 9, 10, 11, 12 };
+const int LED_PINS [] = { 8, 9, 10, 11, 12, 13 };
 const int LED_COUNT = sizeof(LED_PINS) / sizeof(int);
 
 // Input buffers
@@ -20,7 +20,9 @@ void setup() {
     Wire.begin(I2C_ADDR);
     Wire.onReceive(onI2cReceive);
 
-    // Initialize LEDs
+    // LED startup procedure
+    setLeds(HIGH);
+    delay(500);
     setLeds(LOW);
 }
 
