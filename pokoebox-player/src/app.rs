@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use pokoebox_audio::volume::VolumeManager;
+use pokoebox_audio::volume::Manager as VolumeManager;
 #[cfg(feature = "bluetooth")]
 use pokoebox_bluetooth::manager::Manager as BluetoothManager;
 #[cfg(feature = "rpi")]
