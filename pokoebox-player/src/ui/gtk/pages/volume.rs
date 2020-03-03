@@ -153,7 +153,7 @@ fn build_volume_control(
         let diff = range_max - range_min;
 
         // Show yes/no
-        if diff as i64 == 2 {
+        if diff as i64 == 1 {
             if value == range_min {
                 return "No".into();
             } else {
