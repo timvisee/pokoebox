@@ -206,7 +206,7 @@ impl InnerDeviceMixer {
                     }
                 }
                 Cmd::SetVolume(control, volume) => {
-                    info!("Setting Alsa volume to: {}", volume);
+                    // TODO: use return value on set?
                     if let Err(err) = self.control(&control).set_volume(&self.mixer, volume) {
                         error!("Failed to set playback volume: {:?}", err);
                     } else if let Err(err) = self.events.send(Event::Volume(control, volume)) {
@@ -214,8 +214,8 @@ impl InnerDeviceMixer {
                     }
                 }
                 Cmd::AdjustVolume(control, amount) => {
+                    // TODO: use return value on set?
                     let volume = self.control(&control).get_volume(&self.mixer) + amount;
-                    info!("Adjusting Alsa volume by {} to: {}", amount, volume);
                     if let Err(err) = self.control(&control).set_volume(&self.mixer, volume) {
                         error!("Failed to set playback volume: {:?}", err);
                     } else if let Err(err) = self.events.send(Event::Volume(control, volume)) {

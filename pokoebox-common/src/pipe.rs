@@ -43,14 +43,7 @@ where
         receivers
             .iter()
             .enumerate()
-            .filter_map(|(i, tx)| {
-                let result = tx.send(item.clone());
-
-                // TODO: remove this after debugging
-                info!("InnerPipe send result: {:?}", result);
-
-                result.err().map(|_| i)
-            })
+            .filter_map(|(i, tx)| tx.send(item.clone()).err().map(|_| i))
             .collect::<Vec<_>>()
             .into_iter()
             .rev()

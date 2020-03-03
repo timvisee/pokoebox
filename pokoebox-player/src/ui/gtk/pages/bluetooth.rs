@@ -1,8 +1,5 @@
 use std::rc::Rc;
-use std::sync::{
-    mpsc::{self, Receiver},
-    Arc,
-};
+use std::sync::Arc;
 
 use gtk::prelude::*;
 use pokoebox_bluetooth::device::DeviceList;

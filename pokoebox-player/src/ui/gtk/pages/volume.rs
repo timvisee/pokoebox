@@ -1,7 +1,5 @@
-use std::sync::{
-    mpsc::{self, Receiver},
-    Arc,
-};
+use std::collections::HashMap;
+use std::sync::Arc;
 
 use gtk::{prelude::*, PositionType};
 use pokoebox_audio::volume::{Cmd, ControlHandle, ControlProps, Event};
@@ -63,20 +61,29 @@ impl Page for Volume {
             .margin(SPACING)
             .build();
 
+        let mut sliders = HashMap::new();
+
         // Add a volume slider
         for (control, props) in controls {
-            let slider = build_volume_control(core.clone(), control, props);
-            gbox.add(&slider);
+            gbox.add(&build_volume_control(
+                core.clone(),
+                control,
+                props,
+                &mut sliders,
+            ));
         }
 
         scroll_window.add(&gbox);
         self.container.add(&scroll_window);
 
         // Handle volume manager events
-        // TODO: find better way to handle events
-        let event_rx = core.volume.mixer.events.listen();
-        handle_volume_events(&event_rx);
-        gtk::timeout_add_seconds(1, move || handle_volume_events(&event_rx));
+        let (tx, rx) = glib::MainContext::channel(glib::PRIORITY_DEFAULT_IDLE);
+        core.volume.mixer.events.register_callback(move |event| {
+            if let Err(err) = tx.send(event) {
+                error!("Failed to send volume manager event to Glib: {:?}", err);
+            }
+        });
+        rx.attach(None, move |event| handle_volume_event(event, &sliders));
     }
 
     fn gtk_widget(&self) -> &gtk::Grid {
@@ -84,23 +91,31 @@ impl Page for Volume {
     }
 }
 
-fn handle_volume_events(event_rx: &Receiver<Event>) -> glib::Continue {
-    loop {
-        match event_rx.try_recv() {
-            Err(mpsc::TryRecvError::Empty) => return glib::Continue(true),
-            Err(mpsc::TryRecvError::Disconnected) => return glib::Continue(false),
-            Ok(event) => match event {
-                Event::Volume(_control, volume) => {
-                    // TODO: set volume GUI control value
-                    println!("Volume change event: {}", volume);
-                }
-                _ => {}
-            },
+fn handle_volume_event(
+    event: Event,
+    sliders: &HashMap<ControlHandle, (gtk::Scale, glib::signal::SignalHandlerId)>,
+) -> glib::Continue {
+    match event {
+        // Update volume slider on volume change
+        Event::Volume(control, volume) => {
+            if let Some((slider, change_handler)) = sliders.get(&control) {
+                slider.block_signal(change_handler);
+                slider.set_value(volume as f64);
+                slider.unblock_signal(change_handler);
+            }
         }
+        _ => {}
     }
+
+    glib::Continue(true)
 }
 
-fn build_volume_control(core: Arc<Core>, control: ControlHandle, props: ControlProps) -> gtk::Box {
+fn build_volume_control(
+    core: Arc<Core>,
+    control: ControlHandle,
+    props: ControlProps,
+    sliders: &mut HashMap<ControlHandle, (gtk::Scale, glib::signal::SignalHandlerId)>,
+) -> gtk::Box {
     let gbox = gtk::BoxBuilder::new()
         .orientation(gtk::Orientation::Vertical)
         .spacing(SPACING)
@@ -118,9 +133,12 @@ fn build_volume_control(core: Arc<Core>, control: ControlHandle, props: ControlP
     slider.set_vexpand(true);
     slider.set_value_pos(PositionType::Bottom);
     slider.set_inverted(true);
-    let closure_control = control.clone();
+    gbox.add(&slider);
+
+    // Update volume on slider change
     // TODO: do not clone here, use cow in control?
-    slider.connect_value_changed(move |slider| {
+    let closure_control = control.clone();
+    let changed_handler = slider.connect_value_changed(move |slider| {
         if let Err(err) = core.volume.send_cmd(Cmd::SetVolume(
             closure_control.clone(),
             slider.get_value() as i64,
@@ -128,8 +146,29 @@ fn build_volume_control(core: Arc<Core>, control: ControlHandle, props: ControlP
             error!("Failed to set volume: {:?}", err);
         }
     });
-    gbox.add(&slider);
 
+    // Nicly format slider label
+    let (range_min, range_max) = (props.range.0 as f64, props.range.1 as f64);
+    slider.connect_format_value(move |_, value| {
+        let diff = range_max - range_min;
+
+        // Show yes/no
+        if diff as i64 == 2 {
+            if value == range_min {
+                return "No".into();
+            } else {
+                return "Yes".into();
+            }
+        }
+
+        // Show percentage
+        let value = ((100f64 / diff) * value).round();
+        format!("{}%", value as i64)
+    });
+
+    sliders.insert(control, (slider, changed_handler));
+
+    // Add slider name label
     let label = gtk::LabelBuilder::new()
         .label(props.name.as_deref().unwrap_or("?"))
         .justify(gtk::Justification::Center)
