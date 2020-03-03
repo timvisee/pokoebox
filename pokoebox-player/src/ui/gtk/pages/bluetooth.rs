@@ -79,13 +79,16 @@ impl Page for Bluetooth {
         scroll_view.add(&treeview);
 
         // Handle bluetooth manager events
-        // TODO: find better way to handle events
-        let event_rx = core.bluetooth.events.listen();
+        let (tx, rx) = glib::MainContext::channel(glib::PRIORITY_DEFAULT_IDLE);
+        core.bluetooth.events.register_callback(move |event| {
+            if let Err(err) = tx.send(event) {
+                error!("Failed to send bluetooth manager event to Glib: {:?}", err);
+            }
+        });
         let btn_discoverable = Rc::new(btn_discoverable);
         let store = Rc::new(store);
-        handle_bluetooth_events(&event_rx, btn_discoverable.clone(), store.clone());
-        gtk::timeout_add_seconds(1, move || {
-            handle_bluetooth_events(&event_rx, btn_discoverable.clone(), store.clone())
+        rx.attach(None, move |event| {
+            handle_bluetooth_event(event, btn_discoverable.clone(), store.clone())
         });
     }
 
@@ -94,33 +97,29 @@ impl Page for Bluetooth {
     }
 }
 
-fn handle_bluetooth_events(
-    event_rx: &Receiver<Event>,
+fn handle_bluetooth_event(
+    event: Event,
     btn_discoverable: Rc<gtk::Button>,
     store: Rc<gtk::ListStore>,
 ) -> glib::Continue {
-    loop {
-        match event_rx.try_recv() {
-            Err(mpsc::TryRecvError::Empty) => return glib::Continue(true),
-            Err(mpsc::TryRecvError::Disconnected) => return glib::Continue(false),
-            Ok(event) => match event {
-                Event::Discoverable(true) => {
-                    btn_discoverable.set_label("Discoverable...");
-                    btn_discoverable.set_sensitive(false);
-                }
-                Event::Discoverable(false) => {
-                    btn_discoverable.set_label("Connect");
-                    btn_discoverable.set_sensitive(true);
-                }
-                Event::DeviceConnected(_, devices)
-                | Event::DeviceDisconnected(_, devices)
-                | Event::Devices(devices) => {
-                    update_list(&store, devices);
-                }
-                _ => {}
-            },
+    match event {
+        Event::Discoverable(true) => {
+            btn_discoverable.set_label("Discoverable...");
+            btn_discoverable.set_sensitive(false);
         }
+        Event::Discoverable(false) => {
+            btn_discoverable.set_label("Connect");
+            btn_discoverable.set_sensitive(true);
+        }
+        Event::DeviceConnected(_, devices)
+        | Event::DeviceDisconnected(_, devices)
+        | Event::Devices(devices) => {
+            update_list(&store, devices);
+        }
+        _ => {}
     }
+
+    glib::Continue(true)
 }
 
 #[repr(i32)]
