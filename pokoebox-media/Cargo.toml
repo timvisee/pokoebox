@@ -1,0 +1,10 @@
+[package]
+name = "pokoebox-media"
+version = "0.1.0"
+authors = ["Tim Visée <3a4fb3964f@sinenomine.email>"]
+edition = "2018"
+
+[dependencies]
+log = "0.4"
+mpris = "2.0.0-rc2"
+pokoebox-common = { version = "*", path = "../pokoebox-common" }

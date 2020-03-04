@@ -20,6 +20,7 @@ log = "0.4"
 pokoebox-audio = { version = "*", path = "../pokoebox-audio" }
 pokoebox-bluetooth = { version = "*", path = "../pokoebox-bluetooth", optional = true }
 pokoebox-rpi = { version = "*", path = "../pokoebox-rpi", optional = true }
+pokoebox-media = { version = "*", path = "../pokoebox-media" }
 rodio = "0.10"
 simple_logger = "1.0"
 version-compare = "0.0.10"

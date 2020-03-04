@@ -80,7 +80,7 @@ where
             .push(tx);
 
         // TODO: remove after debugging
-        info!("Connected new pipe listener!");
+        debug!("Connected new pipe listener!");
 
         rx
     }

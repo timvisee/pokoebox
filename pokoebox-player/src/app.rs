@@ -3,6 +3,7 @@ use std::sync::Arc;
 use pokoebox_audio::volume::Manager as VolumeManager;
 #[cfg(feature = "bluetooth")]
 use pokoebox_bluetooth::manager::Manager as BluetoothManager;
+use pokoebox_media::mpris::Manager as MprisManager;
 #[cfg(feature = "rpi")]
 use pokoebox_rpi::{
     button::{ButtonConfig, Event as ButtonEvent, Interface as ButtonInterface},
@@ -54,6 +55,9 @@ pub struct Core {
     /// Volume manager.
     pub volume: VolumeManager,
 
+    /// MPRIS manager.
+    pub mpris: MprisManager,
+
     /// Bluetooth manager.
     #[cfg(feature = "bluetooth")]
     pub bluetooth: BluetoothManager,
@@ -77,6 +81,7 @@ impl Core {
         Ok(Self {
             actions: ActionRuntime::default(),
             volume: VolumeManager::new(),
+            mpris: MprisManager::new(),
             // TODO: propagate error
             #[cfg(feature = "bluetooth")]
             bluetooth: BluetoothManager::new().expect("failed to initialize bluetooth manager"),

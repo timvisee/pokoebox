@@ -1,0 +1,193 @@
+use std::collections::HashMap;
+use std::sync::mpsc::{self, Sender};
+use std::thread;
+
+use mpris::PlayerFinder;
+use pokoebox_common::pipe::Pipe;
+
+#[derive(Debug, Clone)]
+enum Event {
+    AddPlayer(PlayerHandle),
+    RemovePlayer(PlayerHandle),
+}
+
+#[derive(Debug, Clone)]
+enum Cmd {
+    FindPlayers,
+}
+
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+pub struct PlayerHandle(String);
+
+pub struct Player {
+    /// Player handle.
+    pub handle: PlayerHandle,
+}
+
+/// MPRIS manager.
+pub struct Manager {
+    /// MPRIS client.
+    client: Client,
+}
+
+impl Manager {
+    pub fn new() -> Self {
+        // Create MPRIS client
+        let client = Client::new();
+
+        // Submit command to find players
+        if let Err(err) = client.cmds.send(Cmd::FindPlayers) {
+            error!(
+                "Failed to submit command to MPRIS client to find players: {:?}",
+                err
+            );
+        }
+
+        Self { client }
+    }
+}
+
+struct Client
+where
+    Self: Send + Sync,
+{
+    pub events: Pipe<Event>,
+    pub(crate) cmds: Pipe<Cmd>,
+}
+
+impl Client {
+    /// Construct new MPRIS client.
+    pub fn new() -> Self {
+        let (pipe_event, pipe_cmd) = InnerClient::spawn_thread();
+
+        Self {
+            events: pipe_event,
+            cmds: pipe_cmd,
+        }
+    }
+}
+
+struct InnerClient {
+    /// Events pipe, from inner client.
+    events: Pipe<Event>,
+
+    /// Commands pipe, to inner client.
+    cmds: Pipe<Cmd>,
+
+    /// Finder, to find new players.
+    finder: PlayerFinder,
+
+    /// List of MPRIS players.
+    mpris_players: HashMap<PlayerHandle, mpris::Player<'static>>,
+}
+
+impl InnerClient {
+    fn new(events: Pipe<Event>, cmds: Pipe<Cmd>) -> Self {
+        // TODO: propagate error
+        Self {
+            events,
+            cmds,
+            finder: PlayerFinder::new().expect("failed to connect to DBus for MPRIS"),
+            mpris_players: HashMap::new(),
+        }
+    }
+
+    fn spawn_thread() -> (Pipe<Event>, Pipe<Cmd>) {
+        let events = Pipe::default();
+        let cmds = Pipe::default();
+        let out_events = events.clone();
+        let out_cmds = cmds.clone();
+
+        let (ready_tx, ready) = mpsc::channel();
+
+        // Control mixer in thread
+        thread::spawn(move || {
+            // Construct inner device mixer
+            let mut inner = Self::new(events, cmds);
+
+            inner.run(ready_tx);
+        });
+
+        // Wait for readyness
+        ready
+            .recv()
+            .expect("Failed to wait for MPRIS worker thread to become ready");
+
+        (out_events, out_cmds)
+    }
+
+    fn run(&mut self, ready: Sender<()>) {
+        let cmd_rx = self.cmds.listen();
+
+        // Notify parent that we're ready
+        ready
+            .send(())
+            .expect("Failed to signal readyness state of MPRIS worker thread");
+
+        loop {
+            // Get new command
+            // TODO: add timeout, periodically poll for new MPRIS players
+            let cmd = match cmd_rx.recv() {
+                Err(_) => break,
+                Ok(cmd) => cmd,
+            };
+
+            // Handle command
+            match cmd {
+                Cmd::FindPlayers => {
+                    // Find players, put in hashmap
+                    let mut players: HashMap<PlayerHandle, _> = match self.finder.find_all() {
+                        Ok(players) => players
+                            .into_iter()
+                            .map(|p| (PlayerHandle(p.unique_name().into()), p))
+                            .collect(),
+                        Err(err) => {
+                            error!("Failed to find MPRIS players: {:?}", err);
+                            continue;
+                        }
+                    };
+
+                    // Find diff with current list
+                    let (add, remove) = iter_diff(
+                        self.mpris_players.keys().cloned().collect(),
+                        &players.keys().cloned().collect(),
+                    );
+
+                    // Update list, emit change events
+                    for handle in add {
+                        self.mpris_players
+                            .insert(handle.clone(), players.remove(&handle).unwrap());
+
+                        if let Err(err) = self.events.send(Event::AddPlayer(handle.clone())) {
+                            error!("Failed to send AddPlayer event: {:?}", err);
+                        }
+                    }
+                    for handle in remove {
+                        if let Err(err) = self.events.send(Event::RemovePlayer(handle.clone())) {
+                            error!("Failed to send RemovePlayer event: {:?}", err);
+                        }
+
+                        self.mpris_players.remove(&handle);
+                    }
+
+                    // TODO: remove this after debugging
+                    dbg!(&self.mpris_players);
+                }
+            }
+        }
+    }
+}
+
+/// Finds difference between old and new iterator.
+///
+/// Returns two lists with `(added, removed)` items.
+fn iter_diff<T>(old: Vec<T>, new: &Vec<T>) -> (Vec<T>, Vec<T>)
+where
+    T: PartialEq + Eq + Clone,
+{
+    // Find diffs
+    (
+        new.iter().filter(|i| !old.contains(i)).cloned().collect(),
+        old.into_iter().filter(|i| !new.contains(i)).collect(),
+    )
+}
