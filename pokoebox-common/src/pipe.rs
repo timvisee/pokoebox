@@ -25,11 +25,12 @@ where
         // Send through channels and callbacks
         let receivers = self.send_channels(item.clone())? + self.send_callbacks(item)?;
 
-        if receivers > 0 {
-            Ok(receivers)
-        } else {
-            Err(Error::NoReceiver)
+        // Show warning when sending through pipe with no receivers
+        if receivers == 0 {
+            warn!("Sending through pipe, but there is no receiver");
         }
+
+        Ok(receivers)
     }
 
     fn send_channels(&self, item: T) -> Result<usize, Error> {
@@ -138,5 +139,6 @@ where
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Error {
     /// No connected receiver (callback, channel), event was not sent at all.
+    // TODO: make this obsolete?
     NoReceiver,
 }
