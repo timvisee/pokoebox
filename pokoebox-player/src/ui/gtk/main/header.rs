@@ -64,9 +64,13 @@ impl Header {
         time_tick();
         gtk::timeout_add_seconds(1, time_tick);
 
-        // Create a temperature label
-        let temp_label = gtk::Label::new(Some("56°C"));
-        container.pack_end(&temp_label, false, false, 10);
+        // Create a name label
+        let header = gtk::LabelBuilder::new()
+            .label("<b>PokoeBox</b>")
+            .use_markup(true)
+            .build();
+        // container.pack_end(&header, false, false, 10);
+        container.set_center_widget(Some(&header));
     }
 
     /// Get the GTK widget for this header.
