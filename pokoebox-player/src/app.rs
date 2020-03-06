@@ -177,17 +177,38 @@ impl Core {
 
         // TODO: move somewhere else
         #[cfg(feature = "bluetooth")]
+        {
+            let closure_core = core.clone();
+            closure_core
+                .clone()
+                .bluetooth
+                .events
+                .register_callback(move |event| {
+                    if let pokoebox_bluetooth::manager::Event::Discoverable(status) = event {
+                        if let Err(err) = closure_core.leds.led_set(Led::Action4, status) {
+                            error!("Failed to set bluetooth status LED: {:?}", err);
+                        }
+                        if let Err(err) = closure_core.leds.led_set(Led::PowerButton, status) {
+                            error!("Failed to set bluetooth status LED: {:?}", err);
+                        }
+                    }
+                });
+        }
+
+        // TODO: move somewhere else
+        #[cfg(feature = "bluetooth")]
         core.clone()
             .bluetooth
             .events
             .register_callback(move |event| {
-                if let pokoebox_bluetooth::manager::Event::Discoverable(status) = event {
-                    if let Err(err) = core.leds.led_set(Led::Action4, status) {
-                        error!("Failed to set bluetooth status LED: {:?}", err);
-                    }
-                    if let Err(err) = core.leds.led_set(Led::PowerButton, status) {
-                        error!("Failed to set bluetooth status LED: {:?}", err);
-                    }
+                use pokoebox_bluetooth::manager::Event;
+                if let Event::DeviceConnected(_, _) | Event::DeviceDisconnected(_, _) = event {
+                if let Err(err) = core
+                    .mpris
+                    .send_cmd(pokoebox_media::mpris::Cmd::FindPlayers)
+                {
+                    error!("Failed to send command to MPRIS manager to find available players: {:?}", err);
+                }
                 }
             });
 

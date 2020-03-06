@@ -173,6 +173,8 @@ impl InnerClient {
             // Handle command
             match cmd {
                 Cmd::FindPlayers => {
+                    debug!("Refreshing list of available MPRIS players...");
+
                     // Find players, put in hashmap
                     let mut players: HashMap<PlayerHandle, _> = match self.finder.find_all() {
                         Ok(players) => players
