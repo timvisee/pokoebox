@@ -1,4 +1,4 @@
 mod manager;
 
 // Re-export
-pub use manager::Manager;
+pub use manager::{Cmd, Event, Manager};

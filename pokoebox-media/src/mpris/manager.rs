@@ -3,17 +3,29 @@ use std::sync::mpsc::{self, Sender};
 use std::thread;
 
 use mpris::PlayerFinder;
-use pokoebox_common::pipe::Pipe;
+use pokoebox_common::pipe::{Error as PipeError, Pipe};
 
 #[derive(Debug, Clone)]
-enum Event {
+pub enum Event {
     AddPlayer(PlayerHandle),
     RemovePlayer(PlayerHandle),
 }
 
 #[derive(Debug, Clone)]
-enum Cmd {
+pub enum Cmd {
     FindPlayers,
+
+    /// Play on current player.
+    Play,
+
+    /// Pause on current player.
+    Pause,
+
+    /// Next on current player.
+    Next,
+
+    /// Previous on current player.
+    Previous,
 }
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
@@ -44,6 +56,11 @@ impl Manager {
         }
 
         Self { client }
+    }
+
+    /// Send command to the client.
+    pub fn send_cmd(&self, cmd: Cmd) -> Result<(), PipeError> {
+        self.client.cmds.send(cmd).map(|_| ())
     }
 }
 
@@ -172,6 +189,34 @@ impl InnerClient {
 
                     // TODO: remove this after debugging
                     dbg!(&self.mpris_players);
+                }
+                Cmd::Play => {
+                    if let Some((_handle, player)) = self.mpris_players.iter().next() {
+                        if let Err(err) = player.play() {
+                            error!("Failed send play signal to MPRIS player: {:?}", err);
+                        }
+                    }
+                }
+                Cmd::Pause => {
+                    if let Some((_handle, player)) = self.mpris_players.iter().next() {
+                        if let Err(err) = player.pause() {
+                            error!("Failed send pause signal to MPRIS player: {:?}", err);
+                        }
+                    }
+                }
+                Cmd::Next => {
+                    if let Some((_handle, player)) = self.mpris_players.iter().next() {
+                        if let Err(err) = player.next() {
+                            error!("Failed send next signal to MPRIS player: {:?}", err);
+                        }
+                    }
+                }
+                Cmd::Previous => {
+                    if let Some((_handle, player)) = self.mpris_players.iter().next() {
+                        if let Err(err) = player.previous() {
+                            error!("Failed send previous signal to MPRIS player: {:?}", err);
+                        }
+                    }
                 }
             }
         }

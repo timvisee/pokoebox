@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use gtk::prelude::*;
+use pokoebox_media::mpris::Cmd;
 
 use crate::app::Core;
 use crate::pages::PageType;
@@ -43,7 +44,7 @@ impl Page for Player {
         &PAGE_NAME
     }
 
-    fn build_page(&self, _core: Arc<Core>) {
+    fn build_page(&self, core: Arc<Core>) {
         // Configure the page
         self.container.set_halign(gtk::Align::Center);
         self.container.set_valign(gtk::Align::Center);
@@ -56,18 +57,34 @@ impl Page for Player {
         btns.set_column_homogeneous(true);
         self.container.add(&btns);
 
-        let btn_back = gtk::Button::new_from_icon_name(
+        let btn_prev = gtk::Button::new_from_icon_name(
             Some("media-skip-backward"),
             gtk::IconSize::LargeToolbar,
         );
-        btn_back.set_size_request(BUTTON_SIZE.0, BUTTON_SIZE.1);
-        btns.add(&btn_back);
+        btn_prev.set_size_request(BUTTON_SIZE.0, BUTTON_SIZE.1);
+        let closure_core = core.clone();
+        btn_prev.connect_clicked(move |_| {
+            // TODO: handle result
+            closure_core
+                .mpris
+                .send_cmd(Cmd::Previous)
+                .expect("failed to send signal");
+        });
+        btns.add(&btn_prev);
 
         let btn_play = gtk::Button::new_from_icon_name(
             Some("media-playback-start"),
             gtk::IconSize::LargeToolbar,
         );
         btn_play.set_size_request(BUTTON_SIZE.0, BUTTON_SIZE.1);
+        let closure_core = core.clone();
+        btn_play.connect_clicked(move |_| {
+            // TODO: handle result
+            closure_core
+                .mpris
+                .send_cmd(Cmd::Play)
+                .expect("failed to send signal");
+        });
         btns.add(&btn_play);
 
         let btn_stop = gtk::Button::new_from_icon_name(
@@ -75,6 +92,14 @@ impl Page for Player {
             gtk::IconSize::LargeToolbar,
         );
         btn_stop.set_size_request(BUTTON_SIZE.0, BUTTON_SIZE.1);
+        let closure_core = core.clone();
+        btn_stop.connect_clicked(move |_| {
+            // TODO: handle result
+            closure_core
+                .mpris
+                .send_cmd(Cmd::Pause)
+                .expect("failed to send signal");
+        });
         btns.add(&btn_stop);
 
         let btn_fwd = gtk::Button::new_from_icon_name(
@@ -82,6 +107,14 @@ impl Page for Player {
             gtk::IconSize::LargeToolbar,
         );
         btn_fwd.set_size_request(BUTTON_SIZE.0, BUTTON_SIZE.1);
+        let closure_core = core.clone();
+        btn_fwd.connect_clicked(move |_| {
+            // TODO: handle result
+            closure_core
+                .mpris
+                .send_cmd(Cmd::Next)
+                .expect("failed to send signal");
+        });
         btns.add(&btn_fwd);
     }
 
