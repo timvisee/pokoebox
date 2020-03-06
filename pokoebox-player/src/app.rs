@@ -141,7 +141,7 @@ impl Core {
         #[cfg(feature = "bluetooth")]
         {
             let closure_core = core.clone();
-            core.buttons.setup_button(ButtonConfig::Push(5), move |_| {
+            core.buttons.setup_button(ButtonConfig::Push(6), move |_| {
                 if let Err(err) = closure_core.actions.invoke(
                     GotoPageAction::new(PageType::Bluetooth),
                     closure_core.clone(),
