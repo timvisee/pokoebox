@@ -1,9 +1,13 @@
 use std::collections::HashMap;
 use std::sync::mpsc::{self, Sender};
 use std::thread;
+use std::time::{Duration, Instant};
 
 use mpris::PlayerFinder;
 use pokoebox_common::pipe::{Error as PipeError, Pipe};
+
+/// Automatically refresh MPRIS players at this interval.
+const MPRIS_PLAYER_REFRESH_INTERVAL: Duration = Duration::from_secs(10);
 
 #[derive(Debug, Clone)]
 pub enum Event {
@@ -96,6 +100,9 @@ struct InnerClient {
 
     /// List of MPRIS players.
     mpris_players: HashMap<PlayerHandle, mpris::Player<'static>>,
+
+    /// Last time the MPRIS player list was refreshed.
+    last_player_refresh: Instant,
 }
 
 impl InnerClient {
@@ -106,6 +113,7 @@ impl InnerClient {
             cmds,
             finder: PlayerFinder::new().expect("failed to connect to DBus for MPRIS"),
             mpris_players: HashMap::new(),
+            last_player_refresh: Instant::now(),
         }
     }
 
@@ -144,8 +152,18 @@ impl InnerClient {
         loop {
             // Get new command
             // TODO: add timeout, periodically poll for new MPRIS players
-            let cmd = match cmd_rx.recv() {
-                Err(_) => break,
+            let cmd = match cmd_rx.recv_timeout(MPRIS_PLAYER_REFRESH_INTERVAL) {
+                Err(_) => {
+                    // Queue command to find new players on interval
+                    if self.last_player_refresh.elapsed() >= MPRIS_PLAYER_REFRESH_INTERVAL {
+                        if let Err(err) = self.cmds.send(Cmd::FindPlayers) {
+                            error!("Failed to queue command to find new MPRIS players at interval: {:?}", err);
+                        }
+                    }
+
+                    // TODO: break on disconnect, continue on timeout
+                    continue;
+                }
                 Ok(cmd) => cmd,
             };
 
@@ -187,8 +205,8 @@ impl InnerClient {
                         self.mpris_players.remove(&handle);
                     }
 
-                    // TODO: remove this after debugging
-                    dbg!(&self.mpris_players);
+                    // Update refresh time
+                    self.last_player_refresh = Instant::now();
                 }
                 Cmd::Play => {
                     if let Some((_handle, player)) = self.mpris_players.iter().next() {
