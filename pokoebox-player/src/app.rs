@@ -102,17 +102,63 @@ impl Core {
         // Set up buttons
         let closure_core = core.clone();
         core.buttons
-            .setup_button(ButtonConfig::Push(27), move |_| {
-                if let Err(err) = closure_core.actions.invoke(
-                    GotoPageAction::new(PageType::Launchpad),
-                    closure_core.clone(),
-                ) {
+            .setup_button(ButtonConfig::Push(17), move |_| {
+                if let Err(err) = closure_core
+                    .mpris
+                    .send_cmd(pokoebox_media::mpris::Cmd::PlayPause)
+                {
                     error!(
-                        "Failed to goto launchpad page after button press: {:?}",
+                        "Failed to send play/pause signal to MPRIS player: {:?}",
                         err
                     );
                 }
             })?;
+
+        let closure_core = core.clone();
+        core.buttons
+            .setup_button(ButtonConfig::Push(27), move |_| {
+                if let Err(err) = closure_core
+                    .mpris
+                    .send_cmd(pokoebox_media::mpris::Cmd::Next)
+                {
+                    error!("Failed to send next signal to MPRIS player: {:?}", err);
+                }
+            })?;
+
+        let closure_core = core.clone();
+        core.buttons.setup_button(ButtonConfig::Push(5), move |_| {
+            if let Err(err) = closure_core.actions.invoke(
+                GotoPageAction::new(PageType::Launchpad),
+                closure_core.clone(),
+            ) {
+                error!(
+                    "Failed to goto launchpad page after button press: {:?}",
+                    err
+                );
+            }
+        })?;
+
+        let closure_core = core.clone();
+        core.buttons.setup_button(ButtonConfig::Push(5), move |_| {
+            if let Err(err) = closure_core.actions.invoke(
+                GotoPageAction::new(PageType::Bluetooth),
+                closure_core.clone(),
+            ) {
+                error!(
+                    "Failed to goto bluetooth page after button press: {:?}",
+                    err
+                );
+            }
+        })?;
+
+        let closure_core = core.clone();
+        core.buttons
+            .setup_button(ButtonConfig::Push(13), move |_| {
+                if let Err(err) = closure_core.bluetooth.set_discoverable(true) {
+                    error!("Failed to send bluetooth discover command: {:?}", err);
+                }
+            })?;
+
         let closure_core = core.clone();
         core.buttons
             .setup_button(ButtonConfig::Rotary(23, 24), move |event| {
@@ -133,7 +179,10 @@ impl Core {
             .events
             .register_callback(move |event| {
                 if let pokoebox_bluetooth::manager::Event::Discoverable(status) = event {
-                    if let Err(err) = core.leds.led_set(Led::Action1, status) {
+                    if let Err(err) = core.leds.led_set(Led::Action4, status) {
+                        error!("Failed to set bluetooth status LED: {:?}", err);
+                    }
+                    if let Err(err) = core.leds.led_set(Led::PowerButton, status) {
                         error!("Failed to set bluetooth status LED: {:?}", err);
                     }
                 }

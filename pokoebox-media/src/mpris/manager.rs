@@ -25,6 +25,9 @@ pub enum Cmd {
     /// Pause on current player.
     Pause,
 
+    /// Play/pause on current player.
+    PlayPause,
+
     /// Next on current player.
     Next,
 
@@ -219,6 +222,13 @@ impl InnerClient {
                     if let Some((_handle, player)) = self.mpris_players.iter().next() {
                         if let Err(err) = player.pause() {
                             error!("Failed send pause signal to MPRIS player: {:?}", err);
+                        }
+                    }
+                }
+                Cmd::PlayPause => {
+                    if let Some((_handle, player)) = self.mpris_players.iter().next() {
+                        if let Err(err) = player.play_pause() {
+                            error!("Failed send play/pause signal to MPRIS player: {:?}", err);
                         }
                     }
                 }
