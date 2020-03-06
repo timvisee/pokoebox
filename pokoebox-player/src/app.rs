@@ -138,26 +138,29 @@ impl Core {
             }
         })?;
 
-        let closure_core = core.clone();
-        core.buttons.setup_button(ButtonConfig::Push(5), move |_| {
-            if let Err(err) = closure_core.actions.invoke(
-                GotoPageAction::new(PageType::Bluetooth),
-                closure_core.clone(),
-            ) {
-                error!(
-                    "Failed to goto bluetooth page after button press: {:?}",
-                    err
-                );
-            }
-        })?;
-
-        let closure_core = core.clone();
-        core.buttons
-            .setup_button(ButtonConfig::Push(13), move |_| {
-                if let Err(err) = closure_core.bluetooth.set_discoverable(true) {
-                    error!("Failed to send bluetooth discover command: {:?}", err);
+        #[cfg(feature = "bluetooth")]
+        {
+            let closure_core = core.clone();
+            core.buttons.setup_button(ButtonConfig::Push(5), move |_| {
+                if let Err(err) = closure_core.actions.invoke(
+                    GotoPageAction::new(PageType::Bluetooth),
+                    closure_core.clone(),
+                ) {
+                    error!(
+                        "Failed to goto bluetooth page after button press: {:?}",
+                        err
+                    );
                 }
             })?;
+
+            let closure_core = core.clone();
+            core.buttons
+                .setup_button(ButtonConfig::Push(13), move |_| {
+                    if let Err(err) = closure_core.bluetooth.set_discoverable(true) {
+                        error!("Failed to send bluetooth discover command: {:?}", err);
+                    }
+                })?;
+        }
 
         let closure_core = core.clone();
         core.buttons
