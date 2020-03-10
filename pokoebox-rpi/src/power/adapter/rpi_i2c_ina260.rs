@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use bytes::{Buf, Bytes, BytesMut};
+use bytes::{Buf, Bytes};
 use rppal::i2c::I2c;
 
 use super::{Cmd, Error};
@@ -67,17 +67,17 @@ impl Adapter {
 
     /// Read current in amperes (signed).
     fn bus_read_current(&self) -> Result<f32, Error> {
-        Ok(self.bus_read_raw(INA260_REG_CURRENT)?.get_i16_le() as f32 * 1.25 * 1000.0)
+        Ok(self.bus_read_raw(INA260_REG_CURRENT)?.get_i16() as f32 * 1.25 * 1000.0)
     }
 
     /// Read bus voltage in volts.
     fn bus_read_bus_voltage(&self) -> Result<f32, Error> {
-        Ok(self.bus_read_raw(INA260_REG_BUSVOLTAGE)?.get_u16_le() as f32 * 1.25 * 1000.0)
+        Ok(self.bus_read_raw(INA260_REG_BUSVOLTAGE)?.get_i16() as f32 * 1.25 * 1000.0)
     }
 
     /// Read power in watts (unsigned).
     fn bus_read_power(&self) -> Result<f32, Error> {
-        Ok(self.bus_read_raw(INA260_REG_POWER)?.get_u16_le() as f32 * 1.25 * 1.25 * 1000.0)
+        Ok(self.bus_read_raw(INA260_REG_POWER)?.get_i16() as f32 * 1.25 * 1.25 * 1000.0)
     }
 }
 
