@@ -65,23 +65,38 @@ impl Header {
         time_tick();
         gtk::timeout_add_seconds(1, time_tick);
 
+        // Create a power label
         #[cfg(feature = "rpi")]
         {
-            // Create a power label
-            let power_label = gtk::Label::new(None);
+            let power_label = gtk::Label::new(Some("Power: ?"));
             container.pack_end(&power_label, false, false, 10);
-            let power_tick = move || {
-                power_label.set_text("20.0V");
 
+            // Update label on power events
+            let (tx, rx) = glib::MainContext::channel(glib::PRIORITY_DEFAULT_IDLE);
+            core.power.events.register_callback(move |event| {
+                if let Err(err) = tx.send(event) {
+                    error!("Failed to send power event to Glib: {:?}", err);
+                }
+            });
+            rx.attach(None, move |event| {
+                if let pokoebox_rpi::power::Event::Power(current, voltage, power) = event {
+                    power_label.set_text(&format!("{:.2}A {:.2}V {:.2}W", current, voltage, power));
+                }
+
+                gtk::prelude::Continue(true)
+            });
+
+            // Poll power interface
+            // TODO: do this in power manager, not here
+            let power_poll = move || {
                 // Poll power interface
                 if let Err(err) = core.power.send_cmd(pokoebox_rpi::power::Cmd::Poll) {
                     error!("Failed to poll power interface: {:?}", err);
                 }
-
                 gtk::prelude::Continue(true)
             };
-            power_tick();
-            gtk::timeout_add_seconds(5, power_tick);
+            power_poll();
+            gtk::timeout_add_seconds(5, power_poll);
         }
 
         // Create header label

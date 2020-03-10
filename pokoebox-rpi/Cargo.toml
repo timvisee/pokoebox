@@ -7,4 +7,5 @@ edition = "2018"
 [dependencies]
 bytes = "0.5"
 log = "0.4"
+pokoebox-common = { version = "*", path = "../pokoebox-common" }
 rppal = "0.11"

@@ -1,9 +1,10 @@
 use std::sync::{Arc, Mutex};
 
 use bytes::{Buf, Bytes};
+use pokoebox_common::pipe::Pipe;
 use rppal::i2c::I2c;
 
-use super::{Cmd, Error};
+use super::{Cmd, Error, Event};
 use crate::rpi::Rpi;
 
 /// The address of the external INA260 controller.
@@ -42,12 +43,18 @@ const INA260_REG_DIE_UID: u8 = 0xFF;
 pub struct Adapter {
     /// i2c bus to send commands over.
     bus: Arc<Mutex<I2c>>,
+
+    /// Events pipe.
+    events: Pipe<Event>,
 }
 
 impl Adapter {
     /// Construct new adapter.
-    pub fn new(rpi: &mut Rpi) -> Result<Self, Error> {
-        Ok(Self { bus: rpi.get_i2c() })
+    pub fn new(rpi: &mut Rpi, events: Pipe<Event>) -> Result<Self, Error> {
+        Ok(Self {
+            bus: rpi.get_i2c(),
+            events,
+        })
     }
 
     /// Read raw data from controller registry.
@@ -85,12 +92,18 @@ impl super::Adapter for Adapter {
     fn send_cmd(&self, cmd: Cmd) -> Result<(), Error> {
         match cmd {
             Cmd::Poll => {
-                // TODO: return these values
-                dbg!(
+                // Read power values, emit event
+                let (current, voltage, power) = (
                     self.bus_read_current()?,
                     self.bus_read_bus_voltage()?,
-                    self.bus_read_power()?
+                    self.bus_read_power()?,
                 );
+                if let Err(err) = self.events.send(Event::Power(current, voltage, power)) {
+                    error!(
+                        "Failed to read power state from power controller: {:?}",
+                        err
+                    );
+                }
             }
         }
 
