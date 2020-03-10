@@ -42,11 +42,12 @@ impl Header {
             gtk::Button::new_from_icon_name(Some("view-grid"), IconSize::LargeToolbar);
         home_button.set_relief(ReliefStyle::None);
         home_button.set_focus_on_click(false);
+        let closure_core = core.clone();
         home_button.connect_clicked(move |_| {
             // TODO: handle result
-            let _ = core
+            let _ = closure_core
                 .actions
-                .invoke(GotoPageAction::new_home(), core.clone());
+                .invoke(GotoPageAction::new_home(), closure_core.clone());
         });
         container.pack_start(&home_button, false, false, 10);
 
@@ -64,15 +65,24 @@ impl Header {
         time_tick();
         gtk::timeout_add_seconds(1, time_tick);
 
-        // Create a charge label
-        let charge_label = gtk::Label::new(None);
-        container.pack_end(&charge_label, false, false, 10);
-        let charge_tick = move || {
-            charge_label.set_text("20.0V");
-            gtk::prelude::Continue(true)
-        };
-        charge_tick();
-        gtk::timeout_add_seconds(5, charge_tick);
+        #[cfg(feature = "rpi")]
+        {
+            // Create a power label
+            let power_label = gtk::Label::new(None);
+            container.pack_end(&power_label, false, false, 10);
+            let power_tick = move || {
+                power_label.set_text("20.0V");
+
+                // Poll power interface
+                if let Err(err) = core.power.send_cmd(pokoebox_rpi::power::Cmd::Poll) {
+                    error!("Failed to poll power interface: {:?}", err);
+                }
+
+                gtk::prelude::Continue(true)
+            };
+            power_tick();
+            gtk::timeout_add_seconds(5, power_tick);
+        }
 
         // Create header label
         let label_header = gtk::LabelBuilder::new()
