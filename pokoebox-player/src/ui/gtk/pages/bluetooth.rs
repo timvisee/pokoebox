@@ -87,6 +87,14 @@ impl Page for Bluetooth {
         rx.attach(None, move |event| {
             handle_bluetooth_event(event, btn_discoverable.clone(), store.clone())
         });
+
+        // Request to emit current bluetooth state events
+        if let Err(err) = core.bluetooth.emit_state() {
+            error!(
+                "Failed to invoke command to emit bluetooht state: {:?}",
+                err
+            );
+        }
     }
 
     fn gtk_widget(&self) -> &gtk::Grid {

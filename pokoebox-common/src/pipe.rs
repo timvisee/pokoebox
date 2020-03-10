@@ -138,7 +138,7 @@ where
 /// Pipe error.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Error {
-    /// No connected receiver (callback, channel), event was not sent at all.
-    // TODO: make this obsolete?
-    NoReceiver,
+    // /// No connected receiver (callback, channel), event was not sent at all.
+// TODO: make this obsolete?
+// _NoReceiver,
 }

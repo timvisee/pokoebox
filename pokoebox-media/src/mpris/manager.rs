@@ -7,7 +7,7 @@ use mpris::PlayerFinder;
 use pokoebox_common::pipe::{Error as PipeError, Pipe};
 
 /// Automatically refresh MPRIS players at this interval.
-const MPRIS_PLAYER_REFRESH_INTERVAL: Duration = Duration::from_secs(10);
+const MPRIS_PLAYER_REFRESH_INTERVAL: Duration = Duration::from_secs(30);
 
 #[derive(Debug, Clone)]
 pub enum Event {

@@ -203,12 +203,12 @@ impl Core {
             .register_callback(move |event| {
                 use pokoebox_bluetooth::manager::Event;
                 if let Event::DeviceConnected(_, _) | Event::DeviceDisconnected(_, _) = event {
-                if let Err(err) = core
-                    .mpris
-                    .send_cmd(pokoebox_media::mpris::Cmd::FindPlayers)
-                {
-                    error!("Failed to send command to MPRIS manager to find available players: {:?}", err);
-                }
+                    if let Err(err) = core
+                        .mpris
+                        .send_cmd(pokoebox_media::mpris::Cmd::FindPlayers)
+                    {
+                        error!("Failed to send command to MPRIS manager to find available players: {:?}", err);
+                    }
                 }
             });
 

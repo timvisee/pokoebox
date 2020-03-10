@@ -155,9 +155,6 @@ fn process_bluetooth_event(
     devices: &mut DeviceList,
     pipe_event: &Pipe<Event>,
 ) {
-    // TODO: remove this debug print
-    eprintln!(">>> EVENT: {:?}", &response.event);
-
     // Parse bluetooth events, send over channel
     let mut events = vec![];
     match &response.event {
