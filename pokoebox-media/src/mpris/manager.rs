@@ -13,10 +13,12 @@ const MPRIS_PLAYER_REFRESH_INTERVAL: Duration = Duration::from_secs(30);
 pub enum Event {
     AddPlayer(PlayerHandle, Player),
     RemovePlayer(PlayerHandle),
+    Players(Vec<Player>),
 }
 
 #[derive(Debug, Clone)]
 pub enum Cmd {
+    /// Update MPRIS player list.
     FindPlayers,
 
     /// Play on current player.
@@ -113,9 +115,19 @@ impl Manager {
         Self { client }
     }
 
+    /// Get events pipe.
+    pub fn events<'a>(&'a self) -> &'a Pipe<Event> {
+        &self.client.events
+    }
+
     /// Send command to the client.
     pub fn send_cmd(&self, cmd: Cmd) -> Result<(), PipeError> {
         self.client.cmds.send(cmd).map(|_| ())
+    }
+
+    /// Find currently available MPRIS players.
+    pub fn find_players(&self) -> Result<(), PipeError> {
+        self.send_cmd(Cmd::FindPlayers)
     }
 }
 
@@ -265,6 +277,14 @@ impl InnerClient {
 
                         self.mpris_players.remove(&handle);
                         self.players.remove(&handle);
+                    }
+
+                    // Emit last list of players
+                    if let Err(err) = self
+                        .events
+                        .send(Event::Players(self.players.values().cloned().collect()))
+                    {
+                        error!("Failed to send Players event: {:?}", err);
                     }
 
                     // Update refresh time

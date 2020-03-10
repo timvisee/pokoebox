@@ -49,13 +49,21 @@ impl Page for Player {
         self.container.set_halign(gtk::Align::Center);
         self.container.set_valign(gtk::Align::Center);
 
+        // Main container
+        let container = gtk::Box::new(gtk::Orientation::Vertical, BUTTON_SPACING as i32);
+        self.container.add(&container);
+
+        // Add source label
+        let source_label = gtk::Label::new(Some("Source: ?"));
+        container.add(&source_label);
+
         // Create a button grid
         let btns = gtk::Grid::new();
         btns.set_row_spacing(BUTTON_SPACING);
         btns.set_column_spacing(BUTTON_SPACING);
         btns.set_row_homogeneous(true);
         btns.set_column_homogeneous(true);
-        self.container.add(&btns);
+        container.add(&btns);
 
         let btn_prev = gtk::Button::new_from_icon_name(
             Some("media-skip-backward"),
@@ -116,6 +124,34 @@ impl Page for Player {
                 .expect("failed to send signal");
         });
         btns.add(&btn_fwd);
+
+        // Handle MPRIS manager events
+        let (tx, rx) = glib::MainContext::channel(glib::PRIORITY_DEFAULT_IDLE);
+        core.mpris.events().register_callback(move |event| {
+            if let Err(err) = tx.send(event) {
+                error!("Failed to send MPRIS manager event to Glib: {:?}", err);
+            }
+        });
+        // let btn_discoverable = Rc::new(btn_discoverable);
+        // let store = Rc::new(store);
+        rx.attach(None, move |event| {
+            if let pokoebox_media::mpris::Event::Players(players) = event {
+                if !players.is_empty() {
+                    source_label.set_label(&format!("Source: {}", players[0].name));
+                } else {
+                    source_label.set_label("Source: ?");
+                }
+            }
+            glib::Continue(true)
+        });
+
+        // Request to find new MPRIS players.
+        if let Err(err) = core.mpris.find_players() {
+            error!(
+                "Failed to invoke command to find available MPRIS players: {:?}",
+                err
+            );
+        }
     }
 
     fn gtk_widget(&self) -> &gtk::Grid {
