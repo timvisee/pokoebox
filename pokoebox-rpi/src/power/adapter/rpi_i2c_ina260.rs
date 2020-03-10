@@ -58,7 +58,7 @@ impl Adapter {
             .map_err(|_| Error::Adapter)?;
 
         // Allocate output buffer, write and read
-        let mut buff = BytesMut::with_capacity(2);
+        let mut buff = vec![0; 2];
         bus.write_read(&[reg], &mut buff)
             .map_err(|_| Error::Adapter)?;
 
