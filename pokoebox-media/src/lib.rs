@@ -2,3 +2,4 @@
 extern crate log;
 
 pub mod mpris;
+pub mod player;

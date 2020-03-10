@@ -11,7 +11,7 @@ const MPRIS_PLAYER_REFRESH_INTERVAL: Duration = Duration::from_secs(30);
 
 #[derive(Debug, Clone)]
 pub enum Event {
-    AddPlayer(PlayerHandle),
+    AddPlayer(PlayerHandle, Player),
     RemovePlayer(PlayerHandle),
 }
 
@@ -38,9 +38,56 @@ pub enum Cmd {
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct PlayerHandle(String);
 
+impl PlayerHandle {
+    pub fn from(mpris_player: &mpris::Player) -> Self {
+        Self(mpris_player.unique_name().into())
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct Player {
     /// Player handle.
     pub handle: PlayerHandle,
+
+    /// Player name.
+    pub name: String,
+
+    /// Player capabilities.
+    pub capabilities: PlayerCapabilities,
+}
+
+impl Player {
+    /// Construct player from MPRIS player.
+    pub fn from(mpris_player: &mpris::Player) -> Result<Self, mpris::DBusError> {
+        Ok(Self {
+            handle: PlayerHandle::from(mpris_player),
+            name: mpris_player.identity().into(),
+            capabilities: PlayerCapabilities::from(mpris_player)?,
+        })
+    }
+}
+
+/// List of player capabilities.
+#[derive(Debug, Clone)]
+pub struct PlayerCapabilities {
+    pub can_play: bool,
+    pub can_pause: bool,
+    pub can_next: bool,
+    pub can_previous: bool,
+    pub can_control: bool,
+}
+
+impl PlayerCapabilities {
+    /// Construct player capabilities list from MPRIS player.
+    fn from(mpris_player: &mpris::Player) -> Result<Self, mpris::DBusError> {
+        Ok(Self {
+            can_play: mpris_player.can_play()?,
+            can_pause: mpris_player.can_pause()?,
+            can_next: mpris_player.can_go_next()?,
+            can_previous: mpris_player.can_go_previous()?,
+            can_control: mpris_player.can_control()?,
+        })
+    }
 }
 
 /// MPRIS manager.
@@ -50,6 +97,7 @@ pub struct Manager {
 }
 
 impl Manager {
+    /// Construct new manager.
     pub fn new() -> Self {
         // Create MPRIS client
         let client = Client::new();
@@ -101,8 +149,11 @@ struct InnerClient {
     /// Finder, to find new players.
     finder: PlayerFinder,
 
-    /// List of MPRIS players.
+    /// List of players, with internal MPRIS players.
     mpris_players: HashMap<PlayerHandle, mpris::Player<'static>>,
+
+    /// List of players, with external player state.
+    players: HashMap<PlayerHandle, Player>,
 
     /// Last time the MPRIS player list was refreshed.
     last_player_refresh: Instant,
@@ -116,6 +167,7 @@ impl InnerClient {
             cmds,
             finder: PlayerFinder::new().expect("failed to connect to DBus for MPRIS"),
             mpris_players: HashMap::new(),
+            players: HashMap::new(),
             last_player_refresh: Instant::now(),
         }
     }
@@ -179,7 +231,7 @@ impl InnerClient {
                     let mut players: HashMap<PlayerHandle, _> = match self.finder.find_all() {
                         Ok(players) => players
                             .into_iter()
-                            .map(|p| (PlayerHandle(p.unique_name().into()), p))
+                            .map(|p| (PlayerHandle::from(&p), p))
                             .collect(),
                         Err(err) => {
                             error!("Failed to find MPRIS players: {:?}", err);
@@ -190,15 +242,19 @@ impl InnerClient {
                     // Find diff with current list
                     let (add, remove) = iter_diff(
                         self.mpris_players.keys().cloned().collect(),
-                        &players.keys().cloned().collect(),
+                        &players.keys().cloned().collect::<Vec<_>>(),
                     );
 
                     // Update list, emit change events
                     for handle in add {
-                        self.mpris_players
-                            .insert(handle.clone(), players.remove(&handle).unwrap());
+                        let mpris_player = players.remove(&handle).unwrap();
+                        let player = Player::from(&mpris_player)
+                            .expect("Failed to abstract player from MPRIS player");
+                        self.mpris_players.insert(handle.clone(), mpris_player);
+                        self.players.insert(handle.clone(), player.clone());
 
-                        if let Err(err) = self.events.send(Event::AddPlayer(handle.clone())) {
+                        if let Err(err) = self.events.send(Event::AddPlayer(handle.clone(), player))
+                        {
                             error!("Failed to send AddPlayer event: {:?}", err);
                         }
                     }
@@ -208,6 +264,7 @@ impl InnerClient {
                         }
 
                         self.mpris_players.remove(&handle);
+                        self.players.remove(&handle);
                     }
 
                     // Update refresh time
@@ -256,7 +313,7 @@ impl InnerClient {
 /// Finds difference between old and new iterator.
 ///
 /// Returns two lists with `(added, removed)` items.
-fn iter_diff<T>(old: Vec<T>, new: &Vec<T>) -> (Vec<T>, Vec<T>)
+fn iter_diff<T>(old: Vec<T>, new: &[T]) -> (Vec<T>, Vec<T>)
 where
     T: PartialEq + Eq + Clone,
 {
