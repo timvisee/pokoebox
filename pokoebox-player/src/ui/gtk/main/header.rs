@@ -79,9 +79,8 @@ impl Header {
                 }
             });
             rx.attach(None, move |event| {
-                if let pokoebox_rpi::power::Event::Power(current, voltage, power) = event {
-                    power_label.set_text(&format!("{:.2}A {:.2}V {:.2}W", current, voltage, power));
-                }
+                let pokoebox_rpi::power::Event::Power(current, voltage, power) = event;
+                power_label.set_text(&format!("{:.2}A {:.2}V {:.2}W", current, voltage, power));
 
                 gtk::prelude::Continue(true)
             });
@@ -96,7 +95,7 @@ impl Header {
                 gtk::prelude::Continue(true)
             };
             power_poll();
-            gtk::timeout_add_seconds(5, power_poll);
+            gtk::timeout_add_seconds(2, power_poll);
         }
 
         // Create header label
