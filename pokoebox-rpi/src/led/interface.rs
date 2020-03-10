@@ -1,5 +1,6 @@
 use super::adapter::{self, Adapter};
 use super::{Led, LedCmd};
+use crate::rpi::Rpi;
 
 /// LED interface.
 pub struct Interface {
@@ -9,9 +10,9 @@ pub struct Interface {
 
 impl Interface {
     // TODO: propagate errors
-    pub fn new() -> Result<Self, Error> {
+    pub fn new(rpi: &mut Rpi) -> Result<Self, Error> {
         let interface = Self {
-            adapter: adapter::select_adapter().map_err(Error::Adapter)?,
+            adapter: adapter::select_adapter(rpi).map_err(Error::Adapter)?,
         };
 
         // Reset LEDs

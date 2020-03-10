@@ -9,6 +9,7 @@ use pokoebox_rpi::{
     button::{ButtonConfig, Event as ButtonEvent, Interface as ButtonInterface},
     led::{Interface as LedInterface, Led},
     power::Interface as PowerInterface,
+    rpi::Rpi,
 };
 
 use crate::action::{
@@ -83,6 +84,10 @@ pub struct Core {
 
 impl Core {
     pub fn new() -> Result<Self> {
+        // Construct RPi base to share resources
+        #[cfg(feature = "rpi")]
+        let mut rpi = Rpi::default();
+
         Ok(Self {
             actions: ActionRuntime::default(),
             volume: VolumeManager::new(),
@@ -92,13 +97,13 @@ impl Core {
             bluetooth: BluetoothManager::new().expect("failed to initialize bluetooth manager"),
             // TODO: propagate error
             #[cfg(feature = "rpi")]
-            leds: LedInterface::new().expect("failed to initialize LED interface"),
+            leds: LedInterface::new(&mut rpi).expect("failed to initialize LED interface"),
             // TODO: propagate error
             #[cfg(feature = "rpi")]
             buttons: ButtonInterface::new().expect("failed to initialize button interface"),
             // TODO: propagate error
             #[cfg(feature = "rpi")]
-            power: PowerInterface::new().expect("failed to initialize power interface"),
+            power: PowerInterface::new(&mut rpi).expect("failed to initialize power interface"),
             // TODO: propagate error
             effecter: SoundEffecter::new().expect("failed to initialize sound effecter"),
             pages: PageController::new(),

@@ -1,8 +1,9 @@
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 
 use rppal::i2c::I2c;
 
 use super::{Error, LedCmd};
+use crate::rpi::Rpi;
 
 /// The address of the external LED controller.
 const CONTROLLER_I2C_ADDRESS: u16 = 8;
@@ -10,32 +11,28 @@ const CONTROLLER_I2C_ADDRESS: u16 = 8;
 /// Adapter. Talks to remote LED controller.
 pub struct Adapter {
     /// i2c bus to send commands over.
-    bus: Mutex<I2c>,
+    bus: Arc<Mutex<I2c>>,
 }
 
 impl Adapter {
-    pub fn new() -> Result<Self, Error> {
-        let mut bus = I2c::new().map_err(|_| Error::Adapter)?;
+    /// Construct new adapter.
+    pub fn new(rpi: &mut Rpi) -> Result<Self, Error> {
+        Ok(Self { bus: rpi.get_i2c() })
+    }
+
+    /// Send raw data over the bus.
+    fn bus_send_raw(&self, cmd: String) -> Result<(), Error> {
+        // Get bus lock, set slave address
+        let mut bus = self.bus.lock().expect("failed to obtain i2c bus lock");
         bus.set_slave_address(CONTROLLER_I2C_ADDRESS)
             .map_err(|_| Error::Adapter)?;
 
-        Ok(Self {
-            bus: Mutex::new(bus),
-        })
-    }
-
-    fn bus_send_raw(&self, cmd: String) -> Result<(), Error> {
         // Build byte buffer to send
         let mut bytes = cmd.into_bytes();
         bytes.push(b'\n');
 
         // Write bytes
-        let written = self
-            .bus
-            .lock()
-            .expect("failed to obtain i2c bus lock")
-            .write(&bytes)
-            .map_err(|_| Error::Adapter)?;
+        let written = bus.write(&bytes).map_err(|_| Error::Adapter)?;
         if written < bytes.len() {
             Err(Error::Adapter)
         } else {

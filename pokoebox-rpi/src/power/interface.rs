@@ -1,4 +1,5 @@
 use super::adapter::{self, Adapter};
+use crate::rpi::Rpi;
 
 /// Power interface.
 pub struct Interface {
@@ -8,9 +9,9 @@ pub struct Interface {
 
 impl Interface {
     /// Construct new interface.
-    pub fn new() -> Result<Self, Error> {
+    pub fn new(rpi: &mut Rpi) -> Result<Self, Error> {
         Ok(Self {
-            _adapter: adapter::select_adapter().map_err(Error::Adapter)?,
+            _adapter: adapter::select_adapter(rpi).map_err(Error::Adapter)?,
         })
     }
 }
