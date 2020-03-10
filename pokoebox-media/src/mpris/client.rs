@@ -14,6 +14,9 @@ use super::{
 /// Automatically refresh MPRIS players at this interval.
 const MPRIS_PLAYER_REFRESH_INTERVAL: Duration = Duration::from_secs(30);
 
+/// Interval between MPRIS player updates.
+const MPRIS_PLAYER_UPDATE_INTERVAL: Duration = Duration::from_secs(2);
+
 pub(crate) struct Client
 where
     Self: Send + Sync,
@@ -100,9 +103,13 @@ impl InnerClient {
             .expect("Failed to signal readyness state of MPRIS worker thread");
 
         loop {
-            // Get new command
-            // TODO: add timeout, periodically poll for new MPRIS players
-            let cmd = match cmd_rx.recv_timeout(MPRIS_PLAYER_REFRESH_INTERVAL) {
+            // Handle new commands
+            match cmd_rx
+                .recv_timeout(MPRIS_PLAYER_REFRESH_INTERVAL.min(MPRIS_PLAYER_UPDATE_INTERVAL))
+            {
+                Ok(cmd) => {
+                    self.handle_command(cmd);
+                }
                 Err(_) => {
                     // Queue command to find new players on interval
                     if self.last_player_refresh.elapsed() >= MPRIS_PLAYER_REFRESH_INTERVAL {
@@ -110,105 +117,120 @@ impl InnerClient {
                             error!("Failed to queue command to find new MPRIS players at interval: {:?}", err);
                         }
                     }
-
-                    // TODO: break on disconnect, continue on timeout
-                    continue;
                 }
-                Ok(cmd) => cmd,
-            };
+            }
 
-            // Handle command
-            match cmd {
-                Cmd::FindPlayers => {
-                    debug!("Refreshing list of available MPRIS players...");
+            // Handle MRPIS progress
+            self.handle_mpris_progress();
+        }
+    }
 
-                    // Find players, put in hashmap
-                    let mut players: HashMap<PlayerHandle, _> = match self.finder.find_all() {
-                        Ok(players) => players
-                            .into_iter()
-                            .map(|p| (PlayerHandle::from(&p), p))
-                            .collect(),
-                        Err(err) => {
-                            error!("Failed to find MPRIS players: {:?}", err);
-                            continue;
-                        }
-                    };
+    // TODO: propagate errors
+    fn handle_command(&mut self, cmd: Cmd) {
+        // Handle command
+        match cmd {
+            Cmd::FindPlayers => {
+                debug!("Refreshing list of available MPRIS players...");
 
-                    // Find diff with current list
-                    let (add, remove) = util::iter_diff(
-                        self.mpris_players.keys().cloned().collect(),
-                        &players.keys().cloned().collect::<Vec<_>>(),
-                    );
-
-                    // Update list, emit change events
-                    for handle in add {
-                        let mpris_player = players.remove(&handle).unwrap();
-                        let player = Player::from(&mpris_player)
-                            .expect("Failed to abstract player from MPRIS player");
-                        self.mpris_players.insert(handle.clone(), mpris_player);
-                        self.players.insert(handle.clone(), player.clone());
-
-                        if let Err(err) = self.events.send(Event::AddPlayer(handle.clone(), player))
-                        {
-                            error!("Failed to send AddPlayer event: {:?}", err);
-                        }
+                // Find players, put in hashmap
+                let mut players: HashMap<PlayerHandle, _> = match self.finder.find_all() {
+                    Ok(players) => players
+                        .into_iter()
+                        .map(|p| (PlayerHandle::from(&p), p))
+                        .collect(),
+                    Err(err) => {
+                        error!("Failed to find MPRIS players: {:?}", err);
+                        return;
                     }
-                    for handle in remove {
-                        if let Err(err) = self.events.send(Event::RemovePlayer(handle.clone())) {
-                            error!("Failed to send RemovePlayer event: {:?}", err);
-                        }
+                };
 
-                        self.mpris_players.remove(&handle);
-                        self.players.remove(&handle);
-                    }
+                // Find diff with current list
+                let (add, remove) = util::iter_diff(
+                    self.mpris_players.keys().cloned().collect(),
+                    &players.keys().cloned().collect::<Vec<_>>(),
+                );
 
-                    // Emit last list of players
-                    if let Err(err) = self
-                        .events
-                        .send(Event::Players(self.players.values().cloned().collect()))
-                    {
-                        error!("Failed to send Players event: {:?}", err);
-                    }
+                // Update list, emit change events
+                for handle in add {
+                    let mpris_player = players.remove(&handle).unwrap();
+                    let player = Player::from(&mpris_player)
+                        .expect("Failed to abstract player from MPRIS player");
+                    self.mpris_players.insert(handle.clone(), mpris_player);
+                    self.players.insert(handle.clone(), player.clone());
 
-                    // Update refresh time
-                    self.last_player_refresh = Instant::now();
-                }
-                Cmd::Play => {
-                    if let Some((_handle, player)) = self.mpris_players.iter().next() {
-                        if let Err(err) = player.play() {
-                            error!("Failed send play signal to MPRIS player: {:?}", err);
-                        }
+                    if let Err(err) = self.events.send(Event::AddPlayer(handle.clone(), player)) {
+                        error!("Failed to send AddPlayer event: {:?}", err);
                     }
                 }
-                Cmd::Pause => {
-                    if let Some((_handle, player)) = self.mpris_players.iter().next() {
-                        if let Err(err) = player.pause() {
-                            error!("Failed send pause signal to MPRIS player: {:?}", err);
-                        }
+                for handle in remove {
+                    if let Err(err) = self.events.send(Event::RemovePlayer(handle.clone())) {
+                        error!("Failed to send RemovePlayer event: {:?}", err);
                     }
+
+                    self.mpris_players.remove(&handle);
+                    self.players.remove(&handle);
                 }
-                Cmd::PlayPause => {
-                    if let Some((_handle, player)) = self.mpris_players.iter().next() {
-                        if let Err(err) = player.play_pause() {
-                            error!("Failed send play/pause signal to MPRIS player: {:?}", err);
-                        }
-                    }
+
+                // Emit last list of players
+                if let Err(err) = self
+                    .events
+                    .send(Event::Players(self.players.values().cloned().collect()))
+                {
+                    error!("Failed to send Players event: {:?}", err);
                 }
-                Cmd::Next => {
-                    if let Some((_handle, player)) = self.mpris_players.iter().next() {
-                        if let Err(err) = player.next() {
-                            error!("Failed send next signal to MPRIS player: {:?}", err);
-                        }
-                    }
-                }
-                Cmd::Previous => {
-                    if let Some((_handle, player)) = self.mpris_players.iter().next() {
-                        if let Err(err) = player.previous() {
-                            error!("Failed send previous signal to MPRIS player: {:?}", err);
-                        }
+
+                // Update refresh time
+                self.last_player_refresh = Instant::now();
+            }
+            Cmd::Play => {
+                if let Some((_handle, player)) = self.mpris_players.iter().next() {
+                    if let Err(err) = player.play() {
+                        error!("Failed send play signal to MPRIS player: {:?}", err);
                     }
                 }
             }
+            Cmd::Pause => {
+                if let Some((_handle, player)) = self.mpris_players.iter().next() {
+                    if let Err(err) = player.pause() {
+                        error!("Failed send pause signal to MPRIS player: {:?}", err);
+                    }
+                }
+            }
+            Cmd::PlayPause => {
+                if let Some((_handle, player)) = self.mpris_players.iter().next() {
+                    if let Err(err) = player.play_pause() {
+                        error!("Failed send play/pause signal to MPRIS player: {:?}", err);
+                    }
+                }
+            }
+            Cmd::Next => {
+                if let Some((_handle, player)) = self.mpris_players.iter().next() {
+                    if let Err(err) = player.next() {
+                        error!("Failed send next signal to MPRIS player: {:?}", err);
+                    }
+                }
+            }
+            Cmd::Previous => {
+                if let Some((_handle, player)) = self.mpris_players.iter().next() {
+                    if let Err(err) = player.previous() {
+                        error!("Failed send previous signal to MPRIS player: {:?}", err);
+                    }
+                }
+            }
+        }
+    }
+
+    fn handle_mpris_progress(&self) {
+        // Update progress of MPRIS players
+        for (_handle, player) in self.mpris_players.iter() {
+            // Get tracker
+            let mut tracker = player
+                .track_progress(0)
+                .expect("Failed to get progress tracker for MPRIS player");
+
+            let tick = tracker.tick();
+
+            // TODO: do something with tick data
         }
     }
 }

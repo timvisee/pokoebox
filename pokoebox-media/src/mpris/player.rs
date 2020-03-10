@@ -37,6 +37,7 @@ impl Player {
 pub struct PlayerCapabilities {
     pub can_play: bool,
     pub can_pause: bool,
+    pub can_stop: bool,
     pub can_next: bool,
     pub can_previous: bool,
     pub can_control: bool,
@@ -48,6 +49,7 @@ impl PlayerCapabilities {
         Ok(Self {
             can_play: mpris_player.can_play()?,
             can_pause: mpris_player.can_pause()?,
+            can_stop: mpris_player.can_stop()?,
             can_next: mpris_player.can_go_next()?,
             can_previous: mpris_player.can_go_previous()?,
             can_control: mpris_player.can_control()?,
