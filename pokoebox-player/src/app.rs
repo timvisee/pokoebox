@@ -8,6 +8,7 @@ use pokoebox_media::mpris::Manager as MprisManager;
 use pokoebox_rpi::{
     button::{ButtonConfig, Event as ButtonEvent, Interface as ButtonInterface},
     led::{Interface as LedInterface, Led},
+    power::Interface as PowerInterface,
 };
 
 use crate::action::{
@@ -70,6 +71,10 @@ pub struct Core {
     #[cfg(feature = "rpi")]
     pub buttons: ButtonInterface,
 
+    /// Power interface.
+    #[cfg(feature = "rpi")]
+    pub power: PowerInterface,
+
     /// Sound effecter.
     pub effecter: SoundEffecter,
 
@@ -91,6 +96,9 @@ impl Core {
             // TODO: propagate error
             #[cfg(feature = "rpi")]
             buttons: ButtonInterface::new().expect("failed to initialize button interface"),
+            // TODO: propagate error
+            #[cfg(feature = "rpi")]
+            power: PowerInterface::new().expect("failed to initialize power interface"),
             // TODO: propagate error
             effecter: SoundEffecter::new().expect("failed to initialize sound effecter"),
             pages: PageController::new(),
