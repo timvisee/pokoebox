@@ -54,7 +54,7 @@ struct InnerClient {
     players: HashMap<PlayerHandle, Player>,
 
     /// Last time the MPRIS player list was refreshed.
-    last_player_refresh: Instant,
+    last_refresh: Instant,
 }
 
 impl InnerClient {
@@ -66,7 +66,7 @@ impl InnerClient {
             finder: PlayerFinder::new().expect("failed to connect to DBus for MPRIS"),
             mpris_players: HashMap::new(),
             players: HashMap::new(),
-            last_player_refresh: Instant::now(),
+            last_refresh: Instant::now(),
         }
     }
 
@@ -112,7 +112,7 @@ impl InnerClient {
                 }
                 Err(_) => {
                     // Queue command to find new players on interval
-                    if self.last_player_refresh.elapsed() >= MPRIS_PLAYER_REFRESH_INTERVAL {
+                    if self.last_refresh.elapsed() >= MPRIS_PLAYER_REFRESH_INTERVAL {
                         if let Err(err) = self.cmds.send(Cmd::FindPlayers) {
                             error!("Failed to queue command to find new MPRIS players at interval: {:?}", err);
                         }
@@ -180,7 +180,7 @@ impl InnerClient {
                 }
 
                 // Update refresh time
-                self.last_player_refresh = Instant::now();
+                self.last_refresh = Instant::now();
             }
             Cmd::Play => {
                 if let Some((_handle, player)) = self.mpris_players.iter().next() {
@@ -224,11 +224,15 @@ impl InnerClient {
         // Update progress of MPRIS players
         for (_handle, player) in self.mpris_players.iter() {
             // Get tracker
-            let mut tracker = player
-                .track_progress(0)
-                .expect("Failed to get progress tracker for MPRIS player");
-
-            let tick = tracker.tick();
+            // TODO: crashes on some incomplete players
+            match player.track_progress(0) {
+                Ok(mut tracker) => {
+                    dbg!(tracker.tick());
+                }
+                Err(err) => {
+                    error!("Failed to get progress tracker: {:?}", err);
+                }
+            }
 
             // TODO: do something with tick data
         }
