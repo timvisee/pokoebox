@@ -9,7 +9,6 @@ pub mod perif;
 pub mod result;
 pub mod soundeffecter;
 pub mod ui;
-pub mod util;
 pub mod volume;
 
 use crate::app::App;

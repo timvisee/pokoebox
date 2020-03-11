@@ -4,7 +4,6 @@ use gtk::prelude::*;
 
 use crate::app::Core;
 use crate::pages::PageType;
-use crate::util;
 
 use super::page::Helper;
 use super::page::Page;
@@ -57,7 +56,7 @@ impl Page for Power {
         let header = gtk::LabelBuilder::new()
             .label("<b>Power stats:</b>")
             .use_markup(true)
-            .halign(gtk::Align::Start)
+            .halign(gtk::Align::Center)
             .build();
         grid.attach(&header, 0, 0, 2, 1);
 
@@ -137,9 +136,9 @@ impl Page for Power {
                     x if x < 0.0 => "Charging",
                     _ => "<i>Idle</i>",
                 });
-                label_voltage.set_label(&format!("{} V", util::format_num_sig(voltage, 4)));
-                label_power.set_label(&format!("{} W", util::format_num_sig(power, 4)));
-                label_current.set_label(&format!("{} A", util::format_num_sig(current.abs(), 4)));
+                label_voltage.set_label(&format!("{:.2} V", voltage,));
+                label_power.set_label(&format!("{:.2} W", power));
+                label_current.set_label(&format!("{:.3} A", current.abs()));
 
                 gtk::prelude::Continue(true)
             });

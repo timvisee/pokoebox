@@ -114,10 +114,9 @@ impl Page for About {
                  -   CPU: Quad-core A53 64-bit @ 1.4GHz\n\
                  -   RAM: 1GB LPDDR2 SDRAM\n\
                  -   Bluetooth: 4.2, LE\n\
-                 -   Wi-Fi: 2.4GHz & 5GHz 802.11b/g/n/ac\n\
+                 -   Wi-Fi: 2.4GHz &amp; 5GHz 802.11b/g/n/ac\n\
                  -   Ethernet: 1Gbit\n\
-                 -   Battery: 24V 220Wh\
-                 ",
+                 -   Battery: 24V 220Wh",
             )
             .use_markup(true)
             .halign(gtk::Align::Start)

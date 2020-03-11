@@ -5,7 +5,6 @@ use gtk::{prelude::*, IconSize, ReliefStyle};
 use crate::action::actions::GotoPageAction;
 use crate::app::Core;
 use crate::pages::PageType;
-use crate::util;
 
 /// Main UI header in the application.
 pub struct Header {
@@ -43,6 +42,7 @@ impl Header {
         let header_btn = gtk::ButtonBuilder::new()
             .relief(gtk::ReliefStyle::None)
             .build();
+        header_btn.set_focus_on_click(false);
         let header_lbl = gtk::LabelBuilder::new()
             .label("<b>PokoeBox</b>")
             .use_markup(true)
@@ -81,6 +81,7 @@ impl Header {
         let time_label = gtk::ButtonBuilder::new()
             .relief(gtk::ReliefStyle::None)
             .build();
+        time_label.set_focus_on_click(false);
         container.pack_end(&time_label, false, false, 0);
 
         // Go to clock page on click
@@ -108,6 +109,7 @@ impl Header {
                 .label("Power: ?")
                 .relief(gtk::ReliefStyle::None)
                 .build();
+            power_label.set_focus_on_click(false);
             container.pack_end(&power_label, false, false, 0);
 
             // Go to power page on click
@@ -128,7 +130,7 @@ impl Header {
             });
             rx.attach(None, move |event| {
                 let pokoebox_rpi::power::Event::Power(_, voltage, _) = event;
-                power_label.set_label(&format!("{}V", util::format_num_sig(voltage, 3),));
+                power_label.set_label(&format!("{:.1} V", voltage,));
 
                 gtk::prelude::Continue(true)
             });
