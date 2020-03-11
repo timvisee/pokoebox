@@ -17,6 +17,7 @@ chrono = "0.4"
 log = "0.4"
 pokoebox-audio = { version = "*", path = "../pokoebox-audio" }
 pokoebox-bluetooth = { version = "*", path = "../pokoebox-bluetooth", optional = true }
+pokoebox-common = { version = "*", path = "../pokoebox-common" }
 pokoebox-media = { version = "*", path = "../pokoebox-media" }
 pokoebox-rpi = { version = "*", path = "../pokoebox-rpi", optional = true }
 rodio = "0.10"

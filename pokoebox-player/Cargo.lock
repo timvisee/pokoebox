@@ -1198,6 +1198,7 @@ dependencies = [
  "pango 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "pokoebox-audio 0.1.0",
  "pokoebox-bluetooth 0.1.0",
+ "pokoebox-common 0.1.0",
  "pokoebox-media 0.1.0",
  "pokoebox-rpi 0.1.0",
  "rodio 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)",

@@ -1,6 +1,11 @@
+use std::sync::Arc;
+
+use glib::clone;
 use gtk::{prelude::*, Inhibit};
 
 use super::main::App;
+use crate::app::Core;
+use crate::message::Message;
 
 const TITLE: &str = "PokoeBox Player";
 const WIDTH: i32 = 1024;
@@ -8,15 +13,18 @@ const HEIGHT: i32 = 600;
 
 /// The main window.
 pub struct Window {
-    pub window: gtk::Window,
+    window: gtk::Window,
 }
 
 impl Window {
     /// Create new window.
-    pub fn new() -> Self {
-        Self {
+    pub fn new(core: Arc<Core>) -> Self {
+        // Build window, set up message handler
+        let window = Self {
             window: Self::build_window(),
-        }
+        };
+        window.setup_message_handler(core);
+        window
     }
 
     /// Build the window UI.
@@ -40,6 +48,39 @@ impl Window {
         });
 
         window
+    }
+
+    /// Set up the message pipe handler.
+    ///
+    /// This shows visual dialogs for each message.
+    fn setup_message_handler(&self, core: Arc<Core>) {
+        // Handle message pipe packets
+        let (tx, rx) = glib::MainContext::channel(glib::PRIORITY_DEFAULT_IDLE);
+        core.messages.register_callback(move |msg| {
+            if let Err(err) = tx.send(msg) {
+                error!("Failed to send message to Glib: {:?}", err);
+            }
+        });
+        rx.attach(
+            None,
+            clone!(@strong self.window as window => move |msg| {
+                // Build message dialog
+                let Message::Error(msg) = msg;
+                let dialog = gtk::MessageDialog::new(
+                    Some(&window),
+                    gtk::DialogFlags::MODAL,
+                    gtk::MessageType::Error,
+                    gtk::ButtonsType::Close,
+                    &msg,
+                );
+
+                // Show dialog, destroy on close
+                dialog.run();
+                dialog.destroy();
+
+                glib::Continue(true)
+            }),
+        );
     }
 
     /// Set the app UI in the window.

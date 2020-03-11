@@ -3,6 +3,7 @@ use std::sync::Arc;
 use pokoebox_audio::volume::Manager as VolumeManager;
 #[cfg(feature = "bluetooth")]
 use pokoebox_bluetooth::manager::Manager as BluetoothManager;
+use pokoebox_common::pipe::Pipe;
 use pokoebox_media::mpris::Manager as MprisManager;
 #[cfg(feature = "rpi")]
 use pokoebox_rpi::{
@@ -16,6 +17,7 @@ use crate::action::{
     actions::{AdjustVolume, GotoPageAction},
     ActionRuntime,
 };
+use crate::message::Message;
 use crate::pages::PageType;
 use crate::result::Result;
 use crate::soundeffecter::SoundEffecter;
@@ -36,10 +38,12 @@ impl App {
         #[cfg(feature = "rpi")]
         Core::setup_buttons(core.clone()).expect("Failed to set-up app buttons");
 
-        Ok(Self {
+        let app = Self {
             ui: Ui::new(core.clone())?,
             core,
-        })
+        };
+
+        Ok(app)
     }
 
     pub fn run(self) -> Self {
@@ -51,6 +55,9 @@ impl App {
 }
 
 pub struct Core {
+    /// Messages pipe.
+    pub messages: Pipe<Message>,
+
     /// Action manager
     pub actions: ActionRuntime,
 
@@ -83,12 +90,14 @@ pub struct Core {
 }
 
 impl Core {
+    /// Construct a new core.
     pub fn new() -> Result<Self> {
         // Construct RPi base to share resources
         #[cfg(feature = "rpi")]
         let mut rpi = Rpi::default();
 
         Ok(Self {
+            messages: Pipe::default(),
             actions: ActionRuntime::default(),
             volume: VolumeManager::new(),
             mpris: MprisManager::new(),
@@ -226,5 +235,10 @@ impl Core {
             });
 
         Ok(())
+    }
+
+    /// Show a message to the user.
+    pub fn show_message(&self, msg: Message) {
+        self.messages.send(msg).expect("Failed to send message");
     }
 }

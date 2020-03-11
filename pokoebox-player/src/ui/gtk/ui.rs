@@ -45,24 +45,6 @@ impl Ui {
         info!("Showing master GUI frame...");
         gui.window.show();
 
-        // --
-        // TODO: remove after testing
-
-        use gtk::prelude::*;
-
-        let dialog = gtk::MessageDialog::new(
-            Some(&gui.window.window),
-            gtk::DialogFlags::MODAL,
-            gtk::MessageType::Info,
-            gtk::ButtonsType::Close,
-            "Dialog at startup, used for testing.",
-        );
-
-        let _ret = dialog.run();
-        dialog.destroy();
-
-        // --
-
         Ok(gui)
     }
 
@@ -71,7 +53,7 @@ impl Ui {
     /// Nothing happens if a master frame is already available.
     fn build_ui(core: Arc<Core>) -> (Window, App) {
         // Create window and app UI
-        let window = Window::new();
+        let window = Window::new(core.clone());
         let app = App::new(core.clone());
 
         // Put app UI in window

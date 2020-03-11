@@ -4,6 +4,7 @@ extern crate log;
 pub mod action;
 pub mod app;
 pub mod error;
+pub mod message;
 pub mod pages;
 pub mod perif;
 pub mod result;
