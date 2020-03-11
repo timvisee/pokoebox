@@ -28,9 +28,11 @@ impl Action for GotoPageAction {
     }
 
     fn invoke(&self, core: Arc<Core>) -> Result<bool> {
-        core.pages
-            .goto_page(self.0)
-            .map(|_| true)
-            .map_err(|_err| Error::new("Selecting requested page through page manager failed."))
+        core.pages.goto_page(self.0).map(|_| true).map_err(|err| {
+            Error::new(format!(
+                "Selecting requested page through page manager failed: {:?}",
+                err,
+            ))
+        })
     }
 }

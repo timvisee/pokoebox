@@ -5,17 +5,19 @@ use std::fmt::{Display, Formatter};
 /// Main application error structure.
 #[derive(Debug)]
 pub struct Error {
-    description: &'static str,
+    description: String,
 }
 
 impl Error {
-
     /// Create a new application error instance.
     /// A brief description of the error must be passed to the `description`
     /// parameter.
-    pub fn new(description: &'static str) -> Self {
+    pub fn new<S>(description: S) -> Self
+    where
+        S: Into<String>,
+    {
         Error {
-            description,
+            description: description.into(),
         }
     }
 
@@ -30,16 +32,14 @@ impl Error {
 
 /// Implement the `Error` trait, to define this structure as error.
 impl error::Error for Error {
-
     /// Get the error description.
     fn description(&self) -> &str {
-        self.description
+        &self.description
     }
 }
 
 /// Implement the `Display` trait, required by the `Error` trait.
 impl Display for Error {
-
     /// Format the error, to make it displayable in the console.
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         write!(f, "{}", self.description)
