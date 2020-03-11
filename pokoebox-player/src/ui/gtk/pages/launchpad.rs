@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use glib::clone;
 use gtk::prelude::*;
 
 use crate::action::actions::GotoPageAction;
@@ -59,25 +60,21 @@ impl Page for Launchpad {
 
         // Add some buttons
         let btn_play = gtk::Button::new_with_label("Play");
-        let closure_core = core.clone();
-        btn_play.connect_clicked(move |_| {
-            // TODO: handle result
-            let _ = closure_core
+        btn_play.connect_clicked(clone!(@weak core => move |_| {
+            core
                 .actions
-                .invoke(GotoPageAction::new(PageType::Player), closure_core.clone());
-        });
+                .invoke(GotoPageAction::new(PageType::Player), core.clone());
+        }));
         btns.attach(&btn_play, 0, 0, 1, 1);
 
         let btn_bluetooth = gtk::Button::new_with_label("Bluetooth");
-        let closure_core = core.clone();
         #[cfg(feature = "bluetooth")]
-        btn_bluetooth.connect_clicked(move |_| {
-            // TODO: handle result
-            let _ = closure_core.actions.invoke(
+        btn_bluetooth.connect_clicked(clone!(@weak core => move |_| {
+            core.actions.invoke(
                 GotoPageAction::new(PageType::Bluetooth),
-                closure_core.clone(),
+                core.clone(),
             );
-        });
+        }));
         #[cfg(not(feature = "bluetooth"))]
         btn_bluetooth.set_sensitive(false);
         btns.attach(&btn_bluetooth, 1, 0, 1, 1);
@@ -91,24 +88,20 @@ impl Page for Launchpad {
         btns.attach(&btn_d, 0, 1, 1, 1);
 
         let btn_soundboard = gtk::Button::new_with_label("Soundboard");
-        let closure_core = core.clone();
-        btn_soundboard.connect_clicked(move |_| {
-            // TODO: handle result
-            let _ = closure_core.actions.invoke(
+        btn_soundboard.connect_clicked(clone!(@weak core => move |_| {
+            core.actions.invoke(
                 GotoPageAction::new(PageType::Soundboard),
-                closure_core.clone(),
+                core.clone(),
             );
-        });
+        }));
         btns.attach(&btn_soundboard, 1, 1, 1, 1);
 
         let btn_volume = gtk::Button::new_with_label("Volume");
-        let closure_core = core;
-        btn_volume.connect_clicked(move |_| {
-            // TODO: handle result
-            let _ = closure_core
+        btn_volume.connect_clicked(clone!(@weak core => move |_| {
+            core
                 .actions
-                .invoke(GotoPageAction::new(PageType::Volume), closure_core.clone());
-        });
+                .invoke(GotoPageAction::new(PageType::Volume), core.clone());
+        }));
         btns.attach(&btn_volume, 2, 1, 1, 1);
     }
 

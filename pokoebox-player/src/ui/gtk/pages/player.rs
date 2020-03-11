@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use glib::clone;
 use gtk::prelude::*;
 use pokoebox_media::mpris::Cmd;
 
@@ -70,14 +71,12 @@ impl Page for Player {
             gtk::IconSize::LargeToolbar,
         );
         btn_prev.set_size_request(BUTTON_SIZE.0, BUTTON_SIZE.1);
-        let closure_core = core.clone();
-        btn_prev.connect_clicked(move |_| {
-            // TODO: handle result
-            closure_core
+        btn_prev.connect_clicked(clone!(@weak core => move |_| {
+            core
                 .mpris
                 .send_cmd(Cmd::Previous)
                 .expect("failed to send signal");
-        });
+        }));
         btns.add(&btn_prev);
 
         let btn_play = gtk::Button::new_from_icon_name(
@@ -85,14 +84,11 @@ impl Page for Player {
             gtk::IconSize::LargeToolbar,
         );
         btn_play.set_size_request(BUTTON_SIZE.0, BUTTON_SIZE.1);
-        let closure_core = core.clone();
-        btn_play.connect_clicked(move |_| {
-            // TODO: handle result
-            closure_core
-                .mpris
+        btn_play.connect_clicked(clone!(@weak core => move |_| {
+            core.mpris
                 .send_cmd(Cmd::Play)
                 .expect("failed to send signal");
-        });
+        }));
         btns.add(&btn_play);
 
         let btn_stop = gtk::Button::new_from_icon_name(
@@ -100,14 +96,11 @@ impl Page for Player {
             gtk::IconSize::LargeToolbar,
         );
         btn_stop.set_size_request(BUTTON_SIZE.0, BUTTON_SIZE.1);
-        let closure_core = core.clone();
-        btn_stop.connect_clicked(move |_| {
-            // TODO: handle result
-            closure_core
-                .mpris
+        btn_stop.connect_clicked(clone!(@weak core => move |_| {
+            core.mpris
                 .send_cmd(Cmd::Pause)
                 .expect("failed to send signal");
-        });
+        }));
         btns.add(&btn_stop);
 
         let btn_fwd = gtk::Button::new_from_icon_name(
@@ -115,14 +108,11 @@ impl Page for Player {
             gtk::IconSize::LargeToolbar,
         );
         btn_fwd.set_size_request(BUTTON_SIZE.0, BUTTON_SIZE.1);
-        let closure_core = core.clone();
-        btn_fwd.connect_clicked(move |_| {
-            // TODO: handle result
-            closure_core
-                .mpris
+        btn_fwd.connect_clicked(clone!(@weak core => move |_| {
+            core.mpris
                 .send_cmd(Cmd::Next)
                 .expect("failed to send signal");
-        });
+        }));
         btns.add(&btn_fwd);
 
         // Handle MPRIS manager events
@@ -132,8 +122,6 @@ impl Page for Player {
                 error!("Failed to send MPRIS manager event to Glib: {:?}", err);
             }
         });
-        // let btn_discoverable = Rc::new(btn_discoverable);
-        // let store = Rc::new(store);
         rx.attach(None, move |event| {
             if let pokoebox_media::mpris::Event::Players(players) = event {
                 if !players.is_empty() {

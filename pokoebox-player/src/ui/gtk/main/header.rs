@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use glib::clone;
 use gtk::{prelude::*, IconSize, ReliefStyle};
 
 use crate::action::actions::GotoPageAction;
@@ -51,26 +52,20 @@ impl Header {
         container.set_center_widget(Some(&header_btn));
 
         // Go to about page on click
-        let closure_core = core.clone();
-        header_btn.connect_clicked(move |_| {
-            // TODO: handle result
-            let _ = closure_core
-                .actions
-                .invoke(GotoPageAction::new(PageType::About), closure_core.clone());
-        });
+        header_btn.connect_clicked(clone!(@weak core => move |_| {
+            core.actions
+                .invoke(GotoPageAction::new(PageType::About), core.clone());
+        }));
 
         // Create a home button
         let home_button =
             gtk::Button::new_from_icon_name(Some("view-grid"), IconSize::LargeToolbar);
         home_button.set_relief(ReliefStyle::None);
         home_button.set_focus_on_click(false);
-        let closure_core = core.clone();
-        home_button.connect_clicked(move |_| {
-            // TODO: handle result
-            let _ = closure_core
-                .actions
-                .invoke(GotoPageAction::new_home(), closure_core.clone());
-        });
+        home_button.connect_clicked(clone!(@weak core => move |_| {
+            core.actions
+                .invoke(GotoPageAction::new_home(), core.clone());
+        }));
         container.pack_start(&home_button, false, false, 10);
 
         // Create a volume button
@@ -85,13 +80,10 @@ impl Header {
         container.pack_end(&time_label, false, false, 0);
 
         // Go to clock page on click
-        let closure_core = core.clone();
-        time_label.connect_clicked(move |_| {
-            // TODO: handle result
-            let _ = closure_core
-                .actions
-                .invoke(GotoPageAction::new(PageType::Clock), closure_core.clone());
-        });
+        time_label.connect_clicked(clone!(@weak core => move |_| {
+            core.actions
+                .invoke(GotoPageAction::new(PageType::Clock), core.clone());
+        }));
 
         // Update time label
         let time_tick = move || {
@@ -113,13 +105,10 @@ impl Header {
             container.pack_end(&power_label, false, false, 0);
 
             // Go to power page on click
-            let closure_core = core.clone();
-            power_label.connect_clicked(move |_| {
-                // TODO: handle result
-                let _ = closure_core
-                    .actions
-                    .invoke(GotoPageAction::new(PageType::Power), closure_core.clone());
-            });
+            power_label.connect_clicked(clone!(@weak core => move |_| {
+                core.actions
+                    .invoke(GotoPageAction::new(PageType::Power), core.clone());
+            }));
 
             // Update label on power events
             let (tx, rx) = glib::MainContext::channel(glib::PRIORITY_DEFAULT_IDLE);

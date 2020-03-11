@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use glib::clone;
 use pokoebox_audio::volume::Manager as VolumeManager;
 #[cfg(feature = "bluetooth")]
 use pokoebox_bluetooth::manager::Manager as BluetoothManager;
@@ -122,10 +123,10 @@ impl Core {
     #[cfg(feature = "rpi")]
     fn setup_buttons(core: Arc<Core>) -> std::result::Result<(), pokoebox_rpi::button::Error> {
         // Set up buttons
-        let closure_core = core.clone();
-        core.buttons
-            .setup_button(ButtonConfig::Push(17), move |_| {
-                if let Err(err) = closure_core
+        core.buttons.setup_button(
+            ButtonConfig::Push(17),
+            clone!(@weak core => move |_| {
+                if let Err(err) = core
                     .mpris
                     .send_cmd(pokoebox_media::mpris::Cmd::PlayPause)
                 {
@@ -134,93 +135,95 @@ impl Core {
                         err
                     );
                 }
-            })?;
+            }),
+        )?;
 
-        let closure_core = core.clone();
-        core.buttons
-            .setup_button(ButtonConfig::Push(27), move |_| {
-                if let Err(err) = closure_core
+        core.buttons.setup_button(
+            ButtonConfig::Push(27),
+            clone!(@weak core => move |_| {
+                if let Err(err) = core
                     .mpris
                     .send_cmd(pokoebox_media::mpris::Cmd::Next)
                 {
                     error!("Failed to send next signal to MPRIS player: {:?}", err);
                 }
-            })?;
+            }),
+        )?;
 
-        let closure_core = core.clone();
-        core.buttons.setup_button(ButtonConfig::Push(5), move |_| {
-            closure_core.actions.invoke(
-                GotoPageAction::new(PageType::Launchpad),
-                closure_core.clone(),
-            );
-        })?;
+        core.buttons.setup_button(
+            ButtonConfig::Push(5),
+            clone!(@weak core => move |_| {
+                core.actions.invoke(
+                    GotoPageAction::new(PageType::Launchpad),
+                    core.clone(),
+                );
+            }),
+        )?;
 
         #[cfg(feature = "bluetooth")]
         {
-            let closure_core = core.clone();
-            core.buttons.setup_button(ButtonConfig::Push(6), move |_| {
-                closure_core.actions.invoke(
-                    GotoPageAction::new(PageType::Bluetooth),
-                    closure_core.clone(),
-                );
-            })?;
+            core.buttons.setup_button(
+                ButtonConfig::Push(6),
+                clone!(@weak core => move |_| {
+                    core.actions.invoke(
+                        GotoPageAction::new(PageType::Bluetooth),
+                        core.clone(),
+                    );
+                }),
+            )?;
 
-            let closure_core = core.clone();
-            core.buttons
-                .setup_button(ButtonConfig::Push(13), move |_| {
-                    if let Err(err) = closure_core.bluetooth.set_discoverable(true) {
+            core.buttons.setup_button(
+                ButtonConfig::Push(13),
+                clone!(@weak core => move |_| {
+                    if let Err(err) = core.bluetooth.set_discoverable(true) {
                         error!("Failed to send bluetooth discover command: {:?}", err);
                     }
-                })?;
+                }),
+            )?;
         }
 
-        let closure_core = core.clone();
-        core.buttons
-            .setup_button(ButtonConfig::Rotary(23, 24), move |event| {
+        core.buttons.setup_button(
+            ButtonConfig::Rotary(23, 24),
+            clone!(@weak core => move |event| {
                 let action = match event {
                     ButtonEvent::Up => AdjustVolume::up(),
                     ButtonEvent::Down => AdjustVolume::down(),
                     _ => return,
                 };
-                closure_core.actions.invoke(action, closure_core.clone());
-            })?;
+                core.actions.invoke(action, core.clone());
+            }),
+        )?;
 
         // TODO: move somewhere else
         #[cfg(feature = "bluetooth")]
         {
-            let closure_core = core.clone();
-            closure_core
-                .clone()
-                .bluetooth
+            core.bluetooth
                 .events
-                .register_callback(move |event| {
+                .register_callback(clone!(@weak core => move |event| {
                     if let pokoebox_bluetooth::manager::Event::Discoverable(status) = event {
-                        if let Err(err) = closure_core.leds.led_set(Led::Action4, status) {
+                        if let Err(err) = core.leds.led_set(Led::Action4, status) {
                             error!("Failed to set bluetooth status LED: {:?}", err);
                         }
-                        if let Err(err) = closure_core.leds.led_set(Led::PowerButton, status) {
+                        if let Err(err) = core.leds.led_set(Led::PowerButton, status) {
                             error!("Failed to set bluetooth status LED: {:?}", err);
                         }
                     }
-                });
+                }));
         }
 
         // TODO: move somewhere else
         #[cfg(feature = "bluetooth")]
-        core.clone()
-            .bluetooth
-            .events
-            .register_callback(move |event| {
-                use pokoebox_bluetooth::manager::Event;
-                if let Event::DeviceConnected(_, _) | Event::DeviceDisconnected(_, _) = event {
-                    if let Err(err) = core
-                        .mpris
-                        .send_cmd(pokoebox_media::mpris::Cmd::FindPlayers)
-                    {
-                        error!("Failed to send command to MPRIS manager to find available players: {:?}", err);
-                    }
+        core.bluetooth.events.register_callback(clone!(@weak core => move |event| {
+            use pokoebox_bluetooth::manager::Event;
+            if let Event::DeviceConnected(_, _) | Event::DeviceDisconnected(_, _) = event {
+                if let Err(err) = core.mpris.send_cmd(pokoebox_media::mpris::Cmd::FindPlayers) {
+                    error!(
+                        "Failed to send command to MPRIS manager to find available players: {:?}",
+                        err
+                    );
                 }
-            });
+            }
+        }));
 
         Ok(())
     }
