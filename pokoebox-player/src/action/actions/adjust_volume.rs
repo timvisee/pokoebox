@@ -4,6 +4,7 @@ use pokoebox_audio::volume::Cmd as VolumeCmd;
 
 use crate::action::prelude::*;
 use crate::app::Core;
+use crate::error::Error;
 use crate::result::Result;
 
 /// Name of this action.
@@ -38,12 +39,10 @@ impl Action for AdjustVolume {
         // Get master control
         let control = core.volume.get_master_control().0.clone();
 
-        // Adjust volume
-        // TODO: propagate errors here!
+        // Adjust volume, report errors
         core.volume
             .send_cmd(VolumeCmd::AdjustVolume(control, self.0))
-            .expect("Failed to adjust volume");
-
-        Ok(true)
+            .map(|_| true)
+            .map_err(|err| Error::new(format!("Failed to adjust volume: {:?}", err,)))
     }
 }
