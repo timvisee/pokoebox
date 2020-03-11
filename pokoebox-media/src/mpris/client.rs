@@ -8,6 +8,7 @@ use pokoebox_common::pipe::Pipe;
 
 use super::{
     player::{Player, PlayerHandle},
+    tracked::TrackedPlayer,
     util, Cmd, Event,
 };
 
@@ -48,7 +49,7 @@ struct InnerClient {
     finder: PlayerFinder,
 
     /// List of players, with internal MPRIS players.
-    mpris_players: HashMap<PlayerHandle, mpris::Player<'static>>,
+    mpris_players: HashMap<PlayerHandle, TrackedPlayer>,
 
     /// List of players, with external player state.
     players: HashMap<PlayerHandle, Player>,
@@ -152,11 +153,15 @@ impl InnerClient {
 
                 // Update list, emit change events
                 for handle in add {
+                    // Get MPRIS player, set up and remember external player
                     let mpris_player = players.remove(&handle).unwrap();
                     let player = Player::from(&mpris_player)
                         .expect("Failed to abstract player from MPRIS player");
-                    self.mpris_players.insert(handle.clone(), mpris_player);
                     self.players.insert(handle.clone(), player.clone());
+
+                    // Set up and store tracked MPRIS player, we want to handle events
+                    let tracked = TrackedPlayer::new(mpris_player);
+                    self.mpris_players.insert(handle.clone(), tracked);
 
                     if let Err(err) = self.events.send(Event::AddPlayer(handle.clone(), player)) {
                         error!("Failed to send AddPlayer event: {:?}", err);
@@ -184,35 +189,35 @@ impl InnerClient {
             }
             Cmd::Play => {
                 if let Some((_handle, player)) = self.mpris_players.iter().next() {
-                    if let Err(err) = player.play() {
+                    if let Err(err) = player.player.play() {
                         error!("Failed send play signal to MPRIS player: {:?}", err);
                     }
                 }
             }
             Cmd::Pause => {
                 if let Some((_handle, player)) = self.mpris_players.iter().next() {
-                    if let Err(err) = player.pause() {
+                    if let Err(err) = player.player.pause() {
                         error!("Failed send pause signal to MPRIS player: {:?}", err);
                     }
                 }
             }
             Cmd::PlayPause => {
                 if let Some((_handle, player)) = self.mpris_players.iter().next() {
-                    if let Err(err) = player.play_pause() {
+                    if let Err(err) = player.player.play_pause() {
                         error!("Failed send play/pause signal to MPRIS player: {:?}", err);
                     }
                 }
             }
             Cmd::Next => {
                 if let Some((_handle, player)) = self.mpris_players.iter().next() {
-                    if let Err(err) = player.next() {
+                    if let Err(err) = player.player.next() {
                         error!("Failed send next signal to MPRIS player: {:?}", err);
                     }
                 }
             }
             Cmd::Previous => {
                 if let Some((_handle, player)) = self.mpris_players.iter().next() {
-                    if let Err(err) = player.previous() {
+                    if let Err(err) = player.player.previous() {
                         error!("Failed send previous signal to MPRIS player: {:?}", err);
                     }
                 }
@@ -220,21 +225,25 @@ impl InnerClient {
         }
     }
 
-    fn handle_mpris_progress(&self) {
+    fn handle_mpris_progress(&mut self) {
         // Update progress of MPRIS players
-        for (_handle, player) in self.mpris_players.iter() {
-            // Get tracker
-            // TODO: crashes on some incomplete players
-            match player.track_progress(0) {
-                Ok(mut tracker) => {
-                    dbg!(tracker.tick());
+        for (_handle, player) in self.mpris_players.iter_mut() {
+            // Tick the progress tracker
+            if let Some(tick) = player.tick() {
+                // TODO: remove after testing
+                info!(".");
+                if tick.player_quit {
+                    info!(">>> PLAYER QUIT");
                 }
-                Err(err) => {
-                    error!("Failed to get progress tracker: {:?}", err);
+                if tick.progress_changed {
+                    info!(">>> PROG CHANGED");
                 }
-            }
+                if tick.track_list_changed {
+                    info!(">>> TRACK CHANGED");
+                }
 
-            // TODO: do something with tick data
+                // TODO: do something with tick data
+            }
         }
     }
 }

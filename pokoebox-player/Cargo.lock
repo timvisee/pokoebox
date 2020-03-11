@@ -1014,7 +1014,7 @@ dependencies = [
 [[package]]
 name = "mpris"
 version = "2.0.0-rc2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
+source = "git+https://github.com/timvisee/mpris-rs.git?branch=progress-tracker-noblock#dac94381720b89fefad73b73915ab88b170d5c9e"
 dependencies = [
  "dbus 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "derive_is_enum_variant 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1183,7 +1183,7 @@ name = "pokoebox-media"
 version = "0.1.0"
 dependencies = [
  "log 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "mpris 2.0.0-rc2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "mpris 2.0.0-rc2 (git+https://github.com/timvisee/mpris-rs.git?branch=progress-tracker-noblock)",
  "pokoebox-common 0.1.0",
 ]
 
@@ -1719,7 +1719,7 @@ dependencies = [
 "checksum mio 0.6.21 (registry+https://github.com/rust-lang/crates.io-index)" = "302dec22bcf6bae6dfb69c647187f4b4d0fb6f535521f7bc022430ce8e12008f"
 "checksum mio-uds 0.6.7 (registry+https://github.com/rust-lang/crates.io-index)" = "966257a94e196b11bb43aca423754d87429960a768de9414f3691d6957abf125"
 "checksum miow 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "8c1f2f3b1cf331de6896aabf6e9d55dca90356cc9960cca7eaaf408a355ae919"
-"checksum mpris 2.0.0-rc2 (registry+https://github.com/rust-lang/crates.io-index)" = "195e67e2b467af5146f517b0d988b5894e425a77c52a9bb5a065513ef3c2e711"
+"checksum mpris 2.0.0-rc2 (git+https://github.com/timvisee/mpris-rs.git?branch=progress-tracker-noblock)" = "<none>"
 "checksum net2 0.2.33 (registry+https://github.com/rust-lang/crates.io-index)" = "42550d9fb7b6684a6d404d9fa7250c2eb2646df731d1c06afc06dcee9e1bcf88"
 "checksum nix 0.14.1 (registry+https://github.com/rust-lang/crates.io-index)" = "6c722bee1037d430d0f8e687bbdbf222f27cc6e4e68d5caf630857bb2b6dbdce"
 "checksum nom 4.2.3 (registry+https://github.com/rust-lang/crates.io-index)" = "2ad2a91a8e869eeb30b9cb3119ae87773a8f4ae617f41b1eb9c154b2905f7bd6"

@@ -6,5 +6,5 @@ edition = "2018"
 
 [dependencies]
 log = "0.4"
-mpris = "2.0.0-rc2"
+mpris = { git = "https://github.com/timvisee/mpris-rs.git", branch = "progress-tracker-noblock" }
 pokoebox-common = { version = "*", path = "../pokoebox-common" }

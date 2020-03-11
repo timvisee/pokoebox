@@ -1,6 +1,7 @@
 mod client;
 mod manager;
 mod player;
+mod tracked;
 mod util;
 
 // Re-export
