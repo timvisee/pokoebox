@@ -23,11 +23,16 @@ where
     /// Returns number of receivers this was passed onto.
     pub fn send(&self, item: T) -> Result<usize, Error> {
         // Send through channels and callbacks
-        let receivers = self.send_channels(item.clone())? + self.send_callbacks(item)?;
+        let receivers = self.send_channels(item.clone())? + self.send_callbacks(item.clone())?;
 
-        // Show warning when sending through pipe with no receivers
+        // Queue item if there was no receiver
         if receivers == 0 {
-            warn!("Sending through pipe, but there is no receiver");
+            warn!("Sending through pipe, but there is no receiver, queueing now...");
+            self.inner
+                .queue
+                .lock()
+                .expect("failed to obtain pipe queue lock")
+                .push(item);
         }
 
         Ok(receivers)
@@ -72,12 +77,30 @@ where
 
     /// Allocate new listener.
     pub fn listen(&self) -> Receiver<T> {
+        // Allocate channel, add to receivers
         let (tx, rx) = mpsc::channel();
-        self.inner
+        let mut receivers = self
+            .inner
             .receivers
             .lock()
-            .expect("failed to obtain pipe lock")
-            .push(tx);
+            .expect("failed to obtain pipe receivers lock");
+
+        // Send pending queue items over new channel
+        if receivers.is_empty() {
+            self.inner
+                .queue
+                .lock()
+                .expect("failed to obtain pipe queue lock")
+                .drain(..)
+                .for_each(|item| {
+                    if let Err(err) = tx.send(item) {
+                        error!("Failed to send pending queue item to receiver: {:?}", err);
+                    }
+                });
+        }
+
+        // Remember new channel
+        receivers.push(tx);
 
         // TODO: remove after debugging
         debug!("Connected new pipe listener!");
@@ -86,15 +109,29 @@ where
     }
 
     /// Register a callback.
-    pub fn register_callback<C>(&self, callback: C)
+    pub fn register_callback<C>(&self, mut callback: C)
     where
         C: FnMut(T) + Send + 'static,
     {
-        self.inner
+        // Obtain callbacks list lock
+        let mut callbacks = self
+            .inner
             .callbacks
             .lock()
-            .expect("failed to obtain pipe lock")
-            .push(Box::new(callback));
+            .expect("failed to obtain pipe callbacks lock");
+
+        // Send pending queue items over new callback
+        if callbacks.is_empty() {
+            self.inner
+                .queue
+                .lock()
+                .expect("failed to obtain pipe queue lock")
+                .drain(..)
+                .for_each(|item| callback(item));
+        }
+
+        // Remember new callback
+        callbacks.push(Box::new(callback));
     }
 }
 
@@ -120,6 +157,9 @@ where
 
     /// Callbacks.
     callbacks: Mutex<Vec<Box<dyn FnMut(T) + Send>>>,
+
+    /// Queued items not yet processed.
+    queue: Mutex<Vec<T>>,
 }
 
 impl<T> Default for InnerPipe<T>
@@ -131,6 +171,7 @@ where
         Self {
             receivers: Mutex::new(Vec::new()),
             callbacks: Mutex::new(Vec::new()),
+            queue: Mutex::new(Vec::new()),
         }
     }
 }
