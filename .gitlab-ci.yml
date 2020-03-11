@@ -68,6 +68,9 @@ build-x86_64-linux-gnu:
     - mv pokoebox-player/target/$RUST_TARGET/release/pokoebox-player ./pokoebox-player-$RUST_TARGET
     - ls -lah ./pokoebox-player-$RUST_TARGET
     - strip -g ./pokoebox-player-$RUST_TARGET
+
+    # Assign required capabilities
+    - setcap CAP_NET_RAW,CAP_NET_ADMIN=ep ./pokoebox-player-$RUST_TARGET
   artifacts:
     name: pokoebox-player-x86_64-linux-gnu
     paths:
@@ -93,6 +96,9 @@ build-x86_64-linux-gnu:
 #     - mv pokoebox-player/target/$RUST_TARGET/release/pokoebox-player ./pokoebox-player-$RUST_TARGET
 #     - ls -lah ./pokoebox-player-$RUST_TARGET
 #     - strip -g ./pokoebox-player-$RUST_TARGET
+
+#     # Assign required capabilities
+#     - setcap CAP_NET_RAW,CAP_NET_ADMIN=ep ./pokoebox-player-$RUST_TARGET
 #   artifacts:
 #     name: pokoebox-player-x86_64-linux-musl
 #     paths:
@@ -121,6 +127,9 @@ build-armv7-linux-gnueabihf:
     # Prepare the release artifact
     - mv pokoebox-player/target/$RUST_TARGET/release/pokoebox-player ./pokoebox-player-$RUST_TARGET
     - ls -lah ./pokoebox-player-$RUST_TARGET
+
+    # Assign required capabilities
+    - setcap CAP_NET_RAW,CAP_NET_ADMIN=ep ./pokoebox-player-$RUST_TARGET
   artifacts:
     name: pokoebox-player-armv7-linux-gnueabihf
     paths:
