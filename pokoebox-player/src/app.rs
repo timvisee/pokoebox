@@ -149,30 +149,20 @@ impl Core {
 
         let closure_core = core.clone();
         core.buttons.setup_button(ButtonConfig::Push(5), move |_| {
-            if let Err(err) = closure_core.actions.invoke(
+            closure_core.actions.invoke(
                 GotoPageAction::new(PageType::Launchpad),
                 closure_core.clone(),
-            ) {
-                error!(
-                    "Failed to goto launchpad page after button press: {:?}",
-                    err
-                );
-            }
+            );
         })?;
 
         #[cfg(feature = "bluetooth")]
         {
             let closure_core = core.clone();
             core.buttons.setup_button(ButtonConfig::Push(6), move |_| {
-                if let Err(err) = closure_core.actions.invoke(
+                closure_core.actions.invoke(
                     GotoPageAction::new(PageType::Bluetooth),
                     closure_core.clone(),
-                ) {
-                    error!(
-                        "Failed to goto bluetooth page after button press: {:?}",
-                        err
-                    );
-                }
+                );
             })?;
 
             let closure_core = core.clone();
@@ -192,9 +182,7 @@ impl Core {
                     ButtonEvent::Down => AdjustVolume::down(),
                     _ => return,
                 };
-                if let Err(err) = closure_core.actions.invoke(action, closure_core.clone()) {
-                    error!("Failed to change volume: {:?}", err);
-                }
+                closure_core.actions.invoke(action, closure_core.clone());
             })?;
 
         // TODO: move somewhere else
