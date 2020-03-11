@@ -51,6 +51,7 @@ impl PageManager {
         let page: Box<dyn Page> = match page {
             #[cfg(feature = "bluetooth")]
             PageType::Bluetooth => Box::new(pages::Bluetooth::new(core)),
+            PageType::Clock => Box::new(pages::Clock::new(core)),
             PageType::Launchpad => Box::new(pages::Launchpad::new(core)),
             PageType::Player => Box::new(pages::Player::new(core)),
             PageType::Power => Box::new(pages::Power::new(core)),

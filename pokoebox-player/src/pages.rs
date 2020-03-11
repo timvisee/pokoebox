@@ -11,6 +11,7 @@ pub enum PageType {
     Bluetooth,
     Soundboard,
     Power,
+    Clock,
     Test,
 }
 

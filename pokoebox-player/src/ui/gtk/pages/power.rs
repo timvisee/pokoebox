@@ -53,7 +53,7 @@ impl Page for Power {
         grid.set_column_spacing(LABEL_SPACING);
         self.container.add(&grid);
 
-        // Pgae header
+        // Page header
         let header = gtk::LabelBuilder::new()
             .label("<b>Power stats:</b>")
             .use_markup(true)

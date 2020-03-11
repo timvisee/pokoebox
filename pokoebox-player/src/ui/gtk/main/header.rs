@@ -58,10 +58,24 @@ impl Header {
         container.pack_end(&volume, false, false, 10);
 
         // Create a time label
-        let time_label = gtk::Label::new(None);
-        container.pack_end(&time_label, false, false, 10);
+        let time_label = gtk::ButtonBuilder::new()
+            .relief(gtk::ReliefStyle::None)
+            .build();
+        container.pack_end(&time_label, false, false, 0);
+
+        // Go to clock page on click
+        let closure_core = core.clone();
+        time_label.connect_clicked(move |_| {
+            // TODO: handle result
+            let _ = closure_core
+                .actions
+                .invoke(GotoPageAction::new(PageType::Clock), closure_core.clone());
+        });
+
+        // Update time label
         let time_tick = move || {
-            time_label.set_text(&format!("{}", chrono::Local::now().format("%H:%M:%S")));
+            // TODO: show seconds in header?
+            time_label.set_label(&format!("{}", chrono::Local::now().format("%H:%M:%S")));
             gtk::prelude::Continue(true)
         };
         time_tick();
@@ -74,7 +88,7 @@ impl Header {
                 .label("Power: ?")
                 .relief(gtk::ReliefStyle::None)
                 .build();
-            container.pack_end(&power_label, false, false, 10);
+            container.pack_end(&power_label, false, false, 0);
 
             // Go to power page on click
             let closure_core = core.clone();

@@ -1195,6 +1195,7 @@ dependencies = [
  "glib 0.9.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "gtk 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pango 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "pokoebox-audio 0.1.0",
  "pokoebox-bluetooth 0.1.0",
  "pokoebox-media 0.1.0",
