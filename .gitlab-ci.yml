@@ -23,7 +23,7 @@ cache:
 before_script:
   - apt-get update
   - apt-get upgrade -yqq
-  - apt-get install -y --no-install-recommends libgtk-3-dev libasound2-dev
+  - apt-get install -y --no-install-recommends libgtk-3-dev libasound2-dev libcap2-bin
   - |
     rustup install $RUST_VERSION
     rustup default $RUST_VERSION
