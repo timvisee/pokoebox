@@ -7,7 +7,7 @@ use crate::pages::PageType;
 use crate::result::Result;
 
 /// Name of this action.
-pub const ACTION_NAME: &str = "Goto page action";
+pub const ACTION_NAME: &str = "Goto page";
 
 /// Go to page action.
 pub struct GotoPageAction(PageType);

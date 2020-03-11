@@ -96,11 +96,11 @@ impl Header {
         // Update time label
         let time_tick = move || {
             // TODO: show seconds in header?
-            time_label.set_label(&format!("{}", chrono::Local::now().format("%H:%M:%S")));
+            time_label.set_label(&format!("{}", chrono::Local::now().format("%H:%M")));
             gtk::prelude::Continue(true)
         };
         time_tick();
-        gtk::timeout_add_seconds(1, time_tick);
+        gtk::timeout_add_seconds(2, time_tick);
 
         // Create a power label
         #[cfg(feature = "rpi")]
