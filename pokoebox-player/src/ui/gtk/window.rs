@@ -8,7 +8,7 @@ const HEIGHT: i32 = 600;
 
 /// The main window.
 pub struct Window {
-    window: gtk::Window,
+    pub window: gtk::Window,
 }
 
 impl Window {
