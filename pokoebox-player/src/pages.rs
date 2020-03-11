@@ -10,6 +10,7 @@ pub enum PageType {
     #[cfg(feature = "bluetooth")]
     Bluetooth,
     Soundboard,
+    Power,
     Test,
 }
 
