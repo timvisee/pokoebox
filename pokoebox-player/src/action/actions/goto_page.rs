@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use crate::action::prelude::*;
 use crate::app::Core;
+use crate::error::Error;
 use crate::pages::PageType;
 use crate::result::Result;
 
@@ -27,8 +28,9 @@ impl Action for GotoPageAction {
     }
 
     fn invoke(&self, core: Arc<Core>) -> Result<bool> {
-        // TODO: propagate errors here!
-        core.pages.goto_page(self.0).expect("failed to goto page");
-        Ok(true)
+        core.pages
+            .goto_page(self.0)
+            .map(|_| true)
+            .map_err(|_err| Error::new("Selecting requested page through page manager failed."))
     }
 }
