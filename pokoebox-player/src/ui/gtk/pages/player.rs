@@ -58,6 +58,10 @@ impl Page for Player {
         let source_label = gtk::Label::new(Some("Source: ?"));
         container.add(&source_label);
 
+        // Add track info label
+        let track_info = gtk::Label::new(Some("Track: ?"));
+        container.add(&track_info);
+
         // Create a button grid
         let btns = gtk::Grid::new();
         btns.set_row_spacing(BUTTON_SPACING);
@@ -123,12 +127,20 @@ impl Page for Player {
             }
         });
         rx.attach(None, move |event| {
-            if let pokoebox_media::mpris::Event::Players(players) = event {
-                if !players.is_empty() {
-                    source_label.set_label(&format!("Source: {}", players[0].name));
-                } else {
-                    source_label.set_label("Source: ?");
+            use pokoebox_media::mpris::Event;
+
+            match event {
+                Event::Players(players) => {
+                    if !players.is_empty() {
+                        source_label.set_label(&format!("Source: {}", players[0].name));
+                    } else {
+                        source_label.set_label("Source: ?");
+                    }
                 }
+                Event::TrackInfo(info) => {
+                    track_info.set_label(&info);
+                }
+                _ => {}
             }
             glib::Continue(true)
         });

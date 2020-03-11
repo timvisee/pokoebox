@@ -18,6 +18,10 @@ pub enum Event {
     /// A MPRIS player has been removed.
     RemovePlayer(PlayerHandle),
 
+    /// Track info.
+    // TODO: remove this temporary event
+    TrackInfo(String),
+
     /// A list of all currently available MPRIS players.
     Players(Vec<Player>),
 }

@@ -242,6 +242,25 @@ impl InnerClient {
                     info!(">>> TRACK CHANGED");
                 }
 
+                // Emit track info on progress change
+                if tick.progress_changed {
+                    let mut parts = Vec::new();
+                    let meta = tick.progress.metadata();
+                    if let Some(title) = meta.title() {
+                        parts.push(title.to_owned());
+                    }
+                    if let Some(album_artists) = meta.album_artists() {
+                        parts.push(album_artists.join(", "));
+                    }
+                    if let Some(album_name) = meta.album_name() {
+                        parts.push(album_name.to_owned());
+                    }
+
+                    if let Err(err) = self.events.send(Event::TrackInfo(parts.join(" - "))) {
+                        error!("Failed to emit event for track info: {:?}", err);
+                    }
+                }
+
                 // TODO: do something with tick data
             }
         }
