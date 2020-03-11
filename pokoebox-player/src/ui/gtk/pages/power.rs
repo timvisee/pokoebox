@@ -59,15 +59,14 @@ impl Page for Power {
             .use_markup(true)
             .halign(gtk::Align::Start)
             .build();
-        grid.attach(&header, 0, -1, 2, 1);
+        grid.attach(&header, 0, 0, 2, 1);
 
         // State header
         let header_state = gtk::LabelBuilder::new()
             .label("State:")
-            .use_markup(true)
             .halign(gtk::Align::Start)
             .build();
-        grid.attach(&header_state, 0, 0, 1, 1);
+        grid.attach(&header_state, 0, 1, 1, 1);
 
         // State label
         let label_state = gtk::LabelBuilder::new()
@@ -75,15 +74,14 @@ impl Page for Power {
             .use_markup(true)
             .halign(gtk::Align::Start)
             .build();
-        grid.attach(&label_state, 1, 0, 1, 1);
+        grid.attach(&label_state, 1, 1, 1, 1);
 
         // Voltage header
         let header_voltage = gtk::LabelBuilder::new()
             .label("Voltage:")
-            .use_markup(true)
             .halign(gtk::Align::Start)
             .build();
-        grid.attach(&header_voltage, 0, 1, 1, 1);
+        grid.attach(&header_voltage, 0, 2, 1, 1);
 
         // Voltage label
         let label_voltage = gtk::LabelBuilder::new()
@@ -91,15 +89,14 @@ impl Page for Power {
             .use_markup(true)
             .halign(gtk::Align::Start)
             .build();
-        grid.attach(&label_voltage, 1, 1, 1, 1);
+        grid.attach(&label_voltage, 1, 2, 1, 1);
 
         // Power header
         let header_power = gtk::LabelBuilder::new()
             .label("Power:")
-            .use_markup(true)
             .halign(gtk::Align::Start)
             .build();
-        grid.attach(&header_power, 0, 2, 1, 1);
+        grid.attach(&header_power, 0, 3, 1, 1);
 
         // Power label
         let label_power = gtk::LabelBuilder::new()
@@ -107,15 +104,14 @@ impl Page for Power {
             .use_markup(true)
             .halign(gtk::Align::Start)
             .build();
-        grid.attach(&label_power, 1, 2, 1, 1);
+        grid.attach(&label_power, 1, 3, 1, 1);
 
         // Current header
         let header_current = gtk::LabelBuilder::new()
             .label("Current:")
-            .use_markup(true)
             .halign(gtk::Align::Start)
             .build();
-        grid.attach(&header_current, 0, 3, 1, 1);
+        grid.attach(&header_current, 0, 4, 1, 1);
 
         // Current label
         let label_current = gtk::LabelBuilder::new()
@@ -123,7 +119,7 @@ impl Page for Power {
             .use_markup(true)
             .halign(gtk::Align::Start)
             .build();
-        grid.attach(&label_current, 1, 3, 1, 1);
+        grid.attach(&label_current, 1, 4, 1, 1);
 
         // Update labels on power events
         #[cfg(feature = "rpi")]

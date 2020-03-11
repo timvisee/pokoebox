@@ -39,6 +39,26 @@ impl Header {
 
     /// Build and add header controls.
     fn build_ui_controls(core: Arc<Core>, container: &gtk::Box) {
+        // Create header label
+        let header_btn = gtk::ButtonBuilder::new()
+            .relief(gtk::ReliefStyle::None)
+            .build();
+        let header_lbl = gtk::LabelBuilder::new()
+            .label("<b>PokoeBox</b>")
+            .use_markup(true)
+            .build();
+        header_btn.add(&header_lbl);
+        container.set_center_widget(Some(&header_btn));
+
+        // Go to about page on click
+        let closure_core = core.clone();
+        header_btn.connect_clicked(move |_| {
+            // TODO: handle result
+            let _ = closure_core
+                .actions
+                .invoke(GotoPageAction::new(PageType::About), closure_core.clone());
+        });
+
         // Create a home button
         let home_button =
             gtk::Button::new_from_icon_name(Some("view-grid"), IconSize::LargeToolbar);
@@ -125,13 +145,6 @@ impl Header {
             power_poll();
             gtk::timeout_add_seconds(2, power_poll);
         }
-
-        // Create header label
-        let label_header = gtk::LabelBuilder::new()
-            .label("<b>PokoeBox</b>")
-            .use_markup(true)
-            .build();
-        container.set_center_widget(Some(&label_header));
     }
 
     /// Get the GTK widget for this header.

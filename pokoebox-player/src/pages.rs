@@ -5,14 +5,15 @@ use std::sync::Mutex;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PageType {
     Launchpad,
-    Player,
-    Volume,
+    About,
     #[cfg(feature = "bluetooth")]
     Bluetooth,
-    Soundboard,
-    Power,
     Clock,
+    Player,
+    Power,
+    Soundboard,
     Test,
+    Volume,
 }
 
 pub struct PageController {

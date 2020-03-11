@@ -49,6 +49,7 @@ impl PageManager {
     fn new_page(&self, core: Arc<Core>, page: PageType) {
         // Initialize new page
         let page: Box<dyn Page> = match page {
+            PageType::About => Box::new(pages::About::new(core)),
             #[cfg(feature = "bluetooth")]
             PageType::Bluetooth => Box::new(pages::Bluetooth::new(core)),
             PageType::Clock => Box::new(pages::Clock::new(core)),

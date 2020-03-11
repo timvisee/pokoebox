@@ -1,3 +1,4 @@
+pub mod about;
 #[cfg(feature = "bluetooth")]
 pub mod bluetooth;
 pub mod clock;
@@ -10,6 +11,7 @@ pub mod volume;
 
 pub use super::page;
 
+pub use about::About;
 #[cfg(feature = "bluetooth")]
 pub use bluetooth::Bluetooth;
 pub use clock::Clock;
