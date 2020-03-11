@@ -27,6 +27,9 @@ chmod a+x $DL_DIR/pokoebox-player
 echo "Installing..."
 mv -f $DL_DIR/pokoebox-player ./pokoebox-player
 
+# Set capabilities
+sudo setcap cap_net_raw,cap_net_admin=ep ./pokoebox-player
+
 # Delete temp dir
 rm -rf $DL_DIR
 
