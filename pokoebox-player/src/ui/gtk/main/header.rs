@@ -80,7 +80,12 @@ impl Header {
             });
             rx.attach(None, move |event| {
                 let pokoebox_rpi::power::Event::Power(current, voltage, power) = event;
-                power_label.set_text(&format!("{:.2}A {:.2}V {:.2}W", current, voltage, power));
+                power_label.set_text(&format!(
+                    "{}A {}V {}W",
+                    format_num_sig(current, 3),
+                    format_num_sig(voltage, 3),
+                    format_num_sig(power, 3)
+                ));
 
                 gtk::prelude::Continue(true)
             });
@@ -110,4 +115,13 @@ impl Header {
     pub fn gtk_widget(&self) -> &gtk::Box {
         &self.container
     }
+}
+
+/// Format number to show `sig` number of significant numbers.
+fn format_num_sig(n: f32, sig: usize) -> String {
+    format!(
+        "{:.*}",
+        (sig as f32 - n.log10() - 0.0000001).max(0.0) as usize,
+        n
+    )
 }
