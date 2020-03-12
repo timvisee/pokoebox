@@ -243,7 +243,7 @@ impl Core {
                         core.player.sources.lock().expect("failed to obtain lock on player sources").add(source);
                     }
                     Event::RemovePlayer(handle) => {
-                        core.player.sources.lock().expect("failed to obtain lock on player sources").remove_remote_handle(&pokoebox_media::player::SourceRemoteHandle::Mpris(handle));
+                        core.player.sources.lock().expect("failed to obtain lock on player sources").remove_remote_handle(&pokoebox_media::player::RemoteHandle::Mpris(handle));
                     }
                     Event::Players(_) | Event::TrackInfo(_) => {}
                }

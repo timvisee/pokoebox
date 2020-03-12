@@ -6,9 +6,9 @@ lazy_static! {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct SourceHandle(usize);
+pub struct Handle(usize);
 
-impl SourceHandle {
+impl Handle {
     /// Allocate a new unique source handle.
     pub fn unique() -> Self {
         Self(SOURCE_HANDLE_COUNTER.fetch_add(1, Ordering::SeqCst))
@@ -16,7 +16,7 @@ impl SourceHandle {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum SourceRemoteHandle {
+pub enum RemoteHandle {
     None,
     Mpris(crate::mpris::PlayerHandle),
 }

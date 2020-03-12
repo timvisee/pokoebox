@@ -1,7 +1,7 @@
 pub mod mpris;
 pub mod traits;
 
-use super::{SourceHandle, SourceRemoteHandle, SourceState};
+use super::{Handle, RemoteHandle, State};
 
 // Re-export
 pub use self::mpris::MprisSource;

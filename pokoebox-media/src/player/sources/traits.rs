@@ -1,13 +1,13 @@
-use super::{SourceHandle, SourceRemoteHandle, SourceState};
+use super::{Handle, RemoteHandle, State};
 
 /// Generic source trait.
 pub trait Source: Send + Sync {
     /// An unique handle to this source instance.
-    fn handle(&self) -> SourceHandle;
+    fn handle(&self) -> Handle;
 
     /// An unique handle to the remote/external source component.
     // TODO: change this?
-    fn remote_handle(&self) -> SourceRemoteHandle;
+    fn remote_handle(&self) -> RemoteHandle;
 
     /// A source name, typically the device name.
     fn name(&self) -> &str;
@@ -22,7 +22,7 @@ pub trait Source: Send + Sync {
     fn has_operation(&self, op: Operation) -> bool;
 
     /// Get the source state.
-    fn state(&self) -> &SourceState;
+    fn state(&self) -> &State;
 }
 
 /// List of supported source operations.

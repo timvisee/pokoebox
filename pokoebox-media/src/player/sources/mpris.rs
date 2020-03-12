@@ -1,12 +1,11 @@
 use super::prelude::*;
-use super::{SourceHandle, SourceRemoteHandle};
-
-use super::SourceState;
+use super::State;
+use super::{Handle, RemoteHandle};
 use crate::mpris::{Player, PlayerHandle};
 
 pub struct MprisSource {
     /// Unique source handle.
-    handle: SourceHandle,
+    handle: Handle,
 
     /// MPRIS player handle.
     player_handle: PlayerHandle,
@@ -15,28 +14,28 @@ pub struct MprisSource {
     player: Player,
 
     /// The last source state snapshot.
-    state: SourceState,
+    state: State,
 }
 
 impl MprisSource {
     pub fn from(player_handle: PlayerHandle, player: Player) -> Self {
         Self {
-            handle: SourceHandle::unique(),
+            handle: Handle::unique(),
             player_handle,
             player,
-            state: SourceState::default(),
+            state: State::default(),
         }
     }
 }
 
 /// Generic source trait.
 impl Source for MprisSource {
-    fn handle(&self) -> SourceHandle {
+    fn handle(&self) -> Handle {
         self.handle
     }
 
-    fn remote_handle(&self) -> SourceRemoteHandle {
-        SourceRemoteHandle::Mpris(self.player_handle.clone())
+    fn remote_handle(&self) -> RemoteHandle {
+        RemoteHandle::Mpris(self.player_handle.clone())
     }
 
     fn name(&self) -> &str {
@@ -66,7 +65,7 @@ impl Source for MprisSource {
         }
     }
 
-    fn state(&self) -> &SourceState {
+    fn state(&self) -> &State {
         &self.state
     }
 }

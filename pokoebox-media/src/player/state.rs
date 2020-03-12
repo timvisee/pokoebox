@@ -2,7 +2,7 @@ use super::Metadata;
 
 // TODO: describe this is not up-to-date, and uses snapshots
 #[derive(Debug, Clone)]
-pub struct SourceState {
+pub struct State {
     /// Whether this is playing.
     playing: bool,
 
@@ -10,14 +10,14 @@ pub struct SourceState {
     metadata: Metadata,
 }
 
-impl SourceState {
+impl State {
     /// Take a snapshot of this state. Same as `clone()`.
     pub fn snapshot(&self) -> Self {
         self.clone()
     }
 }
 
-impl Default for SourceState {
+impl Default for State {
     fn default() -> Self {
         Self {
             playing: false,
