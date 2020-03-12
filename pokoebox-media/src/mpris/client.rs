@@ -230,16 +230,9 @@ impl InnerClient {
         for (_handle, player) in self.mpris_players.iter_mut() {
             // Tick the progress tracker
             if let Some(tick) = player.tick() {
-                // TODO: remove after testing
-                info!(".");
+                // TODO: do something with tick data
                 if tick.player_quit {
-                    info!(">>> PLAYER QUIT");
-                }
-                if tick.progress_changed {
-                    info!(">>> PROG CHANGED");
-                }
-                if tick.track_list_changed {
-                    info!(">>> TRACK CHANGED");
+                    // TODO: remove player from list
                 }
 
                 // Emit track info on progress change
@@ -260,8 +253,6 @@ impl InnerClient {
                         error!("Failed to emit event for track info: {:?}", err);
                     }
                 }
-
-                // TODO: do something with tick data
             }
         }
     }

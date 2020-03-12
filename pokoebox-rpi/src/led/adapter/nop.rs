@@ -5,7 +5,7 @@ pub struct Adapter;
 
 impl super::Adapter for Adapter {
     fn send_cmd(&self, cmd: LedCmd) -> Result<(), Error> {
-        debug!("NOP adapter sends: {:?}", cmd);
+        trace!("NOP adapter sends: {:?}", cmd);
         Ok(())
     }
 }

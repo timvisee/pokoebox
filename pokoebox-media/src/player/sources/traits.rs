@@ -1,5 +1,17 @@
+use super::{SourceHandle, SourceRemoteHandle, SourceState};
+
 /// Generic source trait.
 pub trait Source: Send + Sync {
+    /// An unique handle to this source instance.
+    fn handle(&self) -> SourceHandle;
+
+    /// An unique handle to the remote/external source component.
+    // TODO: change this?
+    fn remote_handle(&self) -> SourceRemoteHandle;
+
+    /// A source name, typically the device name.
+    fn name(&self) -> &str;
+
     /// Check whether this source is currently playing.
     fn is_playing(&self) -> bool;
 
@@ -7,7 +19,10 @@ pub trait Source: Send + Sync {
     fn do_operation(&self, op: Operation) -> bool;
 
     /// Check whether this source supports the given operation.
-    fn has_operation(op: Operation) -> bool;
+    fn has_operation(&self, op: Operation) -> bool;
+
+    /// Get the source state.
+    fn state(&self) -> &SourceState;
 }
 
 /// List of supported source operations.

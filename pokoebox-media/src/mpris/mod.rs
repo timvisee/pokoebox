@@ -6,8 +6,7 @@ mod util;
 
 // Re-export
 pub use manager::Manager;
-
-use player::{Player, PlayerHandle};
+pub use player::{Player, PlayerHandle};
 
 /// MPRIS manager events.
 #[derive(Debug, Clone)]

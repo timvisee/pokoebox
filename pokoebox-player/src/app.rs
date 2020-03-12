@@ -5,7 +5,7 @@ use pokoebox_audio::volume::Manager as VolumeManager;
 #[cfg(feature = "bluetooth")]
 use pokoebox_bluetooth::manager::Manager as BluetoothManager;
 use pokoebox_common::pipe::Pipe;
-use pokoebox_media::mpris::Manager as MprisManager;
+use pokoebox_media::{mpris::Manager as MprisManager, player::Player};
 #[cfg(feature = "rpi")]
 use pokoebox_rpi::{
     button::{ButtonConfig, Event as ButtonEvent, Interface as ButtonInterface},
@@ -62,6 +62,9 @@ pub struct Core {
     /// Action manager
     pub actions: ActionRuntime,
 
+    /// Player controller.
+    pub player: Player,
+
     /// Volume manager.
     pub volume: VolumeManager,
 
@@ -100,6 +103,7 @@ impl Core {
         Ok(Self {
             messages: Pipe::default(),
             actions: ActionRuntime::default(),
+            player: Player::default(),
             volume: VolumeManager::new(),
             mpris: MprisManager::new(),
             // TODO: propagate error
@@ -224,6 +228,26 @@ impl Core {
                 }
             }
         }));
+
+        // Add new source on new MPRIS player
+        core.mpris
+            .events()
+            .register_callback(clone!(@weak core => move |event| {
+                use pokoebox_media::mpris::Event;
+                match event {
+                    Event::AddPlayer(handle, player) => {
+                        // TODO: create new source
+
+                        let source = Box::new(pokoebox_media::player::sources::MprisSource::from(handle, player));
+
+                        core.player.sources.lock().expect("failed to obtain lock on player sources").add(source);
+                    }
+                    Event::RemovePlayer(handle) => {
+                        core.player.sources.lock().expect("failed to obtain lock on player sources").remove_remote_handle(&pokoebox_media::player::SourceRemoteHandle::Mpris(handle));
+                    }
+                    Event::Players(_) | Event::TrackInfo(_) => {}
+               }
+            }));
 
         Ok(())
     }
