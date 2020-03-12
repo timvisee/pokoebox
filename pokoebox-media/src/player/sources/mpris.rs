@@ -19,11 +19,13 @@ pub struct MprisSource {
 
 impl MprisSource {
     pub fn from(player_handle: PlayerHandle, player: Player) -> Self {
+        let state = State::new(player.name.clone());
+
         Self {
             handle: Handle::unique(),
             player_handle,
             player,
-            state: State::default(),
+            state,
         }
     }
 }
@@ -44,7 +46,8 @@ impl Source for MprisSource {
 
     fn is_playing(&self) -> bool {
         // TODO: return proper value here
-        todo!()
+        // todo!()
+        false
     }
 
     fn do_operation(&self, _op: Operation) -> bool {

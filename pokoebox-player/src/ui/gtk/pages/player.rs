@@ -170,7 +170,12 @@ impl Page for Player {
             match event {
                 Event::Source(event) => match event {
                     SourceEvent::States(states) => {
-                        player_label.set_label(&format!("Sources: {}", states.len()));
+                        let names = states
+                            .iter()
+                            .map(|s| s.1.name.to_owned())
+                            .collect::<Vec<_>>()
+                            .join(", ");
+                        player_label.set_label(&format!("Sources: {}", names));
                     }
                     SourceEvent::Add(_, _) | SourceEvent::Remove(_) => {}
                 },
