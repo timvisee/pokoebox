@@ -54,6 +54,9 @@ impl Page for Player {
         let container = gtk::Box::new(gtk::Orientation::Vertical, BUTTON_SPACING as i32);
         self.container.add(&container);
 
+        let player_label = gtk::Label::new(Some("Sources: ?"));
+        container.add(&player_label);
+
         // Add source label
         let source_label = gtk::Label::new(Some("Source: ?"));
         container.add(&source_label);
@@ -151,6 +154,38 @@ impl Page for Player {
                 "Failed to invoke command to find available MPRIS players: {:?}",
                 err
             );
+        }
+
+        // Handle player events
+        let (tx, rx) = glib::MainContext::channel(glib::PRIORITY_DEFAULT_IDLE);
+        core.player.events.register_callback(move |event| {
+            if let Err(err) = tx.send(event) {
+                error!("Failed to send player event to Glib: {:?}", err);
+            }
+        });
+        rx.attach(None, move |event| {
+            use pokoebox_media::player::player::Event;
+            use pokoebox_media::player::source::Event as SourceEvent;
+
+            match event {
+                Event::Source(event) => match event {
+                    SourceEvent::States(states) => {
+                        player_label.set_label(&format!("Sources: {}", states.len()));
+                    }
+                    SourceEvent::Add(_, _) | SourceEvent::Remove(_) => {}
+                },
+            }
+
+            glib::Continue(true)
+        });
+
+        // Emit last source states
+        match core.player.sources.lock() {
+            Ok(sources) => sources.emit_states(),
+            Err(err) => error!(
+                "Failed to request player to emit states event, ignoring: {:?}",
+                err
+            ),
         }
     }
 

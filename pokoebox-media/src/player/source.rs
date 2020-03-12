@@ -40,7 +40,7 @@ impl Sources {
         if let Err(err) = self.events.send(Event::Add(handle, state)) {
             error!("Failed to emit player sources event: {:?}", err);
         }
-        self.emit_sources();
+        self.emit_states();
     }
 
     pub fn remove(&mut self, handle: Handle) -> bool {
@@ -57,7 +57,7 @@ impl Sources {
         if let Err(err) = self.events.send(Event::Remove(handle)) {
             error!("Failed to emit player sources event: {:?}", err);
         }
-        self.emit_sources();
+        self.emit_states();
 
         true
     }
@@ -76,7 +76,7 @@ impl Sources {
     }
 
     /// Emit an event for all current source states.
-    fn emit_sources(&self) {
+    pub fn emit_states(&self) {
         let sources = self
             .sources
             .iter()

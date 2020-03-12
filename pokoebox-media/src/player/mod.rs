@@ -1,7 +1,7 @@
 mod handle;
 mod metadata;
-mod player;
-mod source;
+pub mod player;
+pub mod source;
 pub mod sources;
 mod state;
 
