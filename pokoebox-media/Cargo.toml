@@ -7,6 +7,6 @@ edition = "2018"
 [dependencies]
 lazy_static = "1.4"
 log = "0.4"
-# mpris = { git = "https://github.com/timvisee/mpris-rs.git", branch = "progress-tracker-noblock" }
-mpris = { path = "../../mpris-rs" }
+mpris = { git = "https://github.com/timvisee/mpris-rs.git", branch = "progress-tracker-noblock" }
+# mpris = { path = "../../mpris-rs" }
 pokoebox-common = { version = "*", path = "../pokoebox-common" }
