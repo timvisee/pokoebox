@@ -16,6 +16,7 @@ const PAGE_TYPE: PageType = PageType::Player;
 const PAGE_NAME: &str = "Player";
 const BUTTON_SPACING: u32 = 16;
 const BUTTON_SIZE: (i32, i32) = (80, 80);
+const BUTTON_SIZE_SMALL: (i32, i32) = (40, 40);
 
 /// Player page.
 pub struct Player {
@@ -48,7 +49,7 @@ impl Player {
             .build();
 
         let player_label = gtk::Label::new(Some("Sources: ?"));
-        controls.add(&player_label);
+        // controls.add(&player_label);
 
         // Add source label
         let source_label = gtk::Label::new(Some("Source: ?"));
@@ -284,7 +285,6 @@ impl SourceList {
         // Source list
         let list = gtk::ListBoxBuilder::new()
             .expand(true)
-            .border_width(40)
             .selection_mode(gtk::SelectionMode::None)
             .build();
 
@@ -308,6 +308,7 @@ impl SourceList {
 
     /// Update the list of sources.
     pub fn update_sources(&self, states: Vec<(Handle, State)>) {
+        // TODO: do not remove all items, nicely update existing model
         self.model.remove_all();
         for (handle, state) in states {
             self.model
@@ -328,7 +329,7 @@ impl Source {
         let container = gtk::BoxBuilder::new()
             .orientation(gtk::Orientation::Horizontal)
             .hexpand(true)
-            .halign(gtk::Align::Start)
+            // .halign(gtk::Align::Start)
             .spacing(8)
             .margin(4)
             .build();
@@ -354,19 +355,21 @@ impl Source {
             .build();
         labels.add(&source_lbl);
 
-        let track_lbl = gtk::Label::new(Some("TODO: track info"));
+        let track_lbl = gtk::Label::new(Some("Track: ?"));
         labels.add(&track_lbl);
 
         let btn_play = gtk::Button::new_from_icon_name(
             Some("media-playback-start"),
             gtk::IconSize::LargeToolbar,
         );
+        btn_play.set_size_request(BUTTON_SIZE_SMALL.0, BUTTON_SIZE_SMALL.1);
         btn_play.set_sensitive(false);
         container.add(&btn_play);
         let btn_stop = gtk::Button::new_from_icon_name(
             Some("media-playback-stop"),
             gtk::IconSize::LargeToolbar,
         );
+        btn_stop.set_size_request(BUTTON_SIZE_SMALL.0, BUTTON_SIZE_SMALL.1);
         btn_stop.set_sensitive(false);
         container.add(&btn_stop);
 
