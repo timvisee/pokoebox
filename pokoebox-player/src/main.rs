@@ -1,4 +1,6 @@
 #[macro_use]
+extern crate glib;
+#[macro_use]
 extern crate log;
 
 pub mod action;

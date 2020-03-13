@@ -1,5 +1,6 @@
-use std::sync::{Arc, Mutex, MutexGuard};
+use std::sync::Arc;
 
+use gio::prelude::*;
 use glib::clone;
 use gtk::prelude::*;
 use pokoebox_media::mpris::Cmd;
@@ -262,11 +263,12 @@ struct SourceList {
     /// The container.
     pub container: gtk::ScrolledWindow,
 
-    /// The list box.
-    list: gtk::ListBox,
+    model: gio::ListStore,
+    // /// The list box.
+    // list: gtk::ListBox,
 
-    /// List of sources
-    sources: Mutex<Vec<Source>>,
+    // /// List of sources
+    // sources: Mutex<Vec<Source>>,
 }
 
 impl SourceList {
@@ -277,65 +279,40 @@ impl SourceList {
             .shadow_type(gtk::ShadowType::EtchedIn)
             .build();
 
+        let model = gio::ListStore::new(RowData::static_type());
+
         // Source list
         let list = gtk::ListBoxBuilder::new()
-            // .spacing(4)
-            // .orientation(gtk::Orientation::Vertical)
             .expand(true)
-            // .halign(gtk::Align::Start)
-            // .valign(gtk::Align::Start)
             .border_width(40)
+            .selection_mode(gtk::SelectionMode::None)
             .build();
-        container.add(&list);
 
-        Self {
-            container,
-            list,
-            sources: Mutex::new(Vec::new()),
-        }
-    }
+        list.bind_model(Some(&model), |item| {
+            let item = item
+                .downcast_ref::<RowData>()
+                .expect("Row data is of wrong type");
 
-    pub fn update_sources(&self, states: Vec<(Handle, State)>) {
-        // Lock sources list
-        let mut sources = self.sources.lock().expect("Failed to lock sources list");
+            // TODO: dummy handle, replace with proper data
+            let handle = Handle::from(1);
+            let source = Source::build(handle, item);
 
-        // Add new sources, remove old sources
-        // TODO: update changed sources
-        states.iter().for_each(|(handle, _state)| {
-            if !sources.iter().any(|s| &s.handle == handle) {
-                self.add_source(&mut sources, *handle);
-            }
+            source.row.show_all();
+            source.row.upcast::<gtk::Widget>()
         });
 
-        sources
-            .iter()
-            .filter(|source| !states.iter().any(|(handle, _)| &source.handle == handle))
-            .map(|source| source.handle)
-            .collect::<Vec<Handle>>()
-            .iter()
-            .for_each(|h| {
-                if !states.iter().any(|(handle, _)| h == handle) {
-                    self.remove_source(&mut sources, *h);
-                }
-            });
+        container.add(&list);
 
-        // Update view
-        self.list.show_all();
+        Self { container, model }
     }
 
-    fn add_source<'a>(&self, sources: &mut MutexGuard<'a, Vec<Source>>, handle: Handle) {
-        let source = Source::build(handle);
-        self.list.insert(&source.row, -1);
-        sources.push(source);
-    }
-
-    fn remove_source<'a>(&self, sources: &mut MutexGuard<'a, Vec<Source>>, handle: Handle) {
-        let source = match sources.iter().find(|s| s.handle == handle) {
-            Some(source) => source,
-            None => return,
-        };
-
-        self.list.remove(&source.container);
+    /// Update the list of sources.
+    pub fn update_sources(&self, states: Vec<(Handle, State)>) {
+        self.model.remove_all();
+        for (handle, state) in states {
+            self.model
+                .append(&RowData::new(handle, &state.name, handle.0 as u32));
+        }
     }
 }
 
@@ -346,33 +323,229 @@ struct Source {
 }
 
 impl Source {
-    fn build(handle: Handle) -> Self {
+    fn build(handle: Handle, item: &RowData) -> Self {
         // Build container
         let container = gtk::BoxBuilder::new()
-            .orientation(gtk::Orientation::Vertical)
-            // .margin(4)
+            .orientation(gtk::Orientation::Horizontal)
             .hexpand(true)
             .halign(gtk::Align::Start)
-            .spacing(4)
+            .spacing(8)
             .margin(4)
             .build();
 
+        let labels = gtk::BoxBuilder::new()
+            .orientation(gtk::Orientation::Vertical)
+            .spacing(4)
+            .build();
+        container.add(&labels);
+
         // Add labels
         let source_lbl = gtk::LabelBuilder::new()
-            .label(&format!("<b>Source: {:?}</b>", handle))
+            // .label(&format!("<b>Source: {:?}</b>", handle))
             .use_markup(true)
             .build();
-        container.add(&source_lbl);
+        item.bind_property("name", &source_lbl, "label")
+            .flags(
+                // TODO: update flags
+                glib::BindingFlags::DEFAULT
+                    | glib::BindingFlags::SYNC_CREATE
+                    | glib::BindingFlags::BIDIRECTIONAL,
+            )
+            .build();
+        labels.add(&source_lbl);
 
-        let track_lbl = gtk::Label::new(Some("Track"));
-        container.add(&track_lbl);
+        let track_lbl = gtk::Label::new(Some("TODO: track info"));
+        labels.add(&track_lbl);
 
-        let row = gtk::ListBoxRowBuilder::new().child(&container).build();
+        let btn_play = gtk::Button::new_from_icon_name(
+            Some("media-playback-start"),
+            gtk::IconSize::LargeToolbar,
+        );
+        btn_play.set_sensitive(false);
+        container.add(&btn_play);
+        let btn_stop = gtk::Button::new_from_icon_name(
+            Some("media-playback-stop"),
+            gtk::IconSize::LargeToolbar,
+        );
+        btn_stop.set_sensitive(false);
+        container.add(&btn_stop);
+
+        let row = gtk::ListBoxRowBuilder::new()
+            .child(&container)
+            .can_focus(false)
+            .build();
 
         Self {
             row,
             container,
             handle,
+        }
+    }
+}
+
+use row_data::RowData;
+
+// Our GObject subclass for carrying a name and count for the ListBox model
+//
+// Both name and count are stored in a RefCell to allow for interior mutability
+// and are exposed via normal GObject properties. This allows us to use property
+// bindings below to bind the values with what widgets display in the UI
+mod row_data {
+    use super::*;
+
+    use glib::subclass;
+    use glib::subclass::prelude::*;
+    use glib::translate::*;
+
+    // Implementation sub-module of the GObject
+    mod imp {
+        use super::*;
+        use std::cell::RefCell;
+
+        // The actual data structure that stores our values. This is not accessible
+        // directly from the outside.
+        pub struct RowData {
+            handle: RefCell<u64>,
+            name: RefCell<Option<String>>,
+            count: RefCell<u32>,
+        }
+
+        // GObject property definitions for our two values
+        static PROPERTIES: [subclass::Property; 3] = [
+            subclass::Property("handle", |name| {
+                glib::ParamSpec::uint64(
+                    name,
+                    "Handle",
+                    "Handle",
+                    0,
+                    std::u64::MAX,
+                    0,
+                    glib::ParamFlags::READWRITE,
+                )
+            }),
+            subclass::Property("name", |name| {
+                glib::ParamSpec::string(
+                    name,
+                    "Name",
+                    "Name",
+                    None, // Default value
+                    glib::ParamFlags::READWRITE,
+                )
+            }),
+            subclass::Property("count", |name| {
+                glib::ParamSpec::uint(
+                    name,
+                    "Count",
+                    "Count",
+                    0,
+                    100,
+                    0, // Allowed range and default value
+                    glib::ParamFlags::READWRITE,
+                )
+            }),
+        ];
+
+        // Basic declaration of our type for the GObject type system
+        impl ObjectSubclass for RowData {
+            const NAME: &'static str = "RowData";
+            type ParentType = glib::Object;
+            type Instance = subclass::simple::InstanceStruct<Self>;
+            type Class = subclass::simple::ClassStruct<Self>;
+
+            glib_object_subclass!();
+
+            // Called exactly once before the first instantiation of an instance. This
+            // sets up any type-specific things, in this specific case it installs the
+            // properties so that GObject knows about their existence and they can be
+            // used on instances of our type
+            fn class_init(klass: &mut Self::Class) {
+                klass.install_properties(&PROPERTIES);
+            }
+
+            // Called once at the very beginning of instantiation of each instance and
+            // creates the data structure that contains all our state
+            fn new() -> Self {
+                Self {
+                    handle: RefCell::new(0),
+                    name: RefCell::new(None),
+                    count: RefCell::new(0),
+                }
+            }
+        }
+
+        // The ObjectImpl trait provides the setters/getters for GObject properties.
+        // Here we need to provide the values that are internally stored back to the
+        // caller, or store whatever new value the caller is providing.
+        //
+        // This maps between the GObject properties and our internal storage of the
+        // corresponding values of the properties.
+        impl ObjectImpl for RowData {
+            glib_object_impl!();
+
+            fn set_property(&self, _obj: &glib::Object, id: usize, value: &glib::Value) {
+                let prop = &PROPERTIES[id];
+
+                match *prop {
+                    subclass::Property("handle", ..) => {
+                        let handle = value
+                            .get_some()
+                            .expect("type conformity checked by `Object::set_property`");
+                        self.handle.replace(handle);
+                    }
+                    subclass::Property("name", ..) => {
+                        let name = value
+                            .get()
+                            .expect("type conformity checked by `Object::set_property`");
+                        self.name.replace(name);
+                    }
+                    subclass::Property("count", ..) => {
+                        let count = value
+                            .get_some()
+                            .expect("type conformity checked by `Object::set_property`");
+                        self.count.replace(count);
+                    }
+                    _ => unimplemented!(),
+                }
+            }
+
+            fn get_property(&self, _obj: &glib::Object, id: usize) -> Result<glib::Value, ()> {
+                let prop = &PROPERTIES[id];
+
+                match *prop {
+                    subclass::Property("handle", ..) => Ok(self.handle.borrow().to_value()),
+                    subclass::Property("name", ..) => Ok(self.name.borrow().to_value()),
+                    subclass::Property("count", ..) => Ok(self.count.borrow().to_value()),
+                    _ => unimplemented!(),
+                }
+            }
+        }
+    }
+
+    // Public part of the RowData type. This behaves like a normal gtk-rs-style GObject
+    // binding
+    glib_wrapper! {
+        pub struct RowData(Object<subclass::simple::InstanceStruct<imp::RowData>, subclass::simple::ClassStruct<imp::RowData>, RowDataClass>);
+
+        match fn {
+            get_type => || imp::RowData::get_type().to_glib(),
+        }
+    }
+
+    // Constructor for new instances. This simply calls glib::Object::new() with
+    // initial values for our two properties and then returns the new instance
+    impl RowData {
+        pub fn new(handle: Handle, name: &str, count: u32) -> RowData {
+            glib::Object::new(
+                Self::static_type(),
+                &[
+                    ("handle", &(handle.0 as u64)),
+                    ("name", &name),
+                    ("count", &count),
+                ],
+            )
+            .expect("Failed to create row data")
+            .downcast()
+            .expect("Created row data is of wrong type")
         }
     }
 }

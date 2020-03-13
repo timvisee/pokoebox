@@ -25,6 +25,7 @@ simple_logger = "1.0"
 version-compare = "0.0.10"
 
 # GTK
+gio  = { version = "0.8", features = ["v2_44"] }
 glib = { version = "0.9", features = ["v2_44"] }
 gtk = { version = "0.8", features = ["v3_16"] }
 pango = { version = "0.8" }

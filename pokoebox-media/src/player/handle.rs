@@ -5,8 +5,15 @@ lazy_static! {
     static ref SOURCE_HANDLE_COUNTER: AtomicUsize = AtomicUsize::new(0);
 }
 
+// TODO: do not make this pub
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Handle(usize);
+pub struct Handle(pub usize);
+
+impl From<usize> for Handle {
+    fn from(handle: usize) -> Self {
+        Handle(handle)
+    }
+}
 
 impl Handle {
     /// Allocate a new unique source handle.
